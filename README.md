@@ -158,3 +158,11 @@
 
 ```text
 Số sinh viên đăng ký < Số sinh viên tối thiểu
+
+## 👥 Nhóm thực hiện (Authors)
+| STT | Họ và tên | Mã sinh viên | Vai trò |
+| :--- | :--- | :--- | :--- |
+| 1 | **Ngô Quang Thọ** | N24DECE043 | Trưởng nhóm |
+| 2 | **Bùi Ngọc An** | N24DECE001 | Thành viên |
+| 3 | **Lê Thành Long** | N24DECE028 | Thành viên |
+
