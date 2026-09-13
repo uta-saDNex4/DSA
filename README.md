@@ -158,7 +158,7 @@
 
 ```text
 Số sinh viên đăng ký < Số sinh viên tối thiểu
-
+```
 ## 👥 Nhóm thực hiện (Authors)
 | STT | Họ và tên | Mã sinh viên | Vai trò |
 | :--- | :--- | :--- | :--- |
