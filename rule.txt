@@ -1,0 +1,8 @@
+rule:
+#đây là project làm bằng C/C++#
+!thiên về C hơn hạn chế sử sụng các hàm, thuật thức,... có sẵn của C++!
+1.mọi đoạn code minh họa đều phải dùng C/C++
+2.luôn xác nhận lại trước khi làm
+3.luôn phân tích và tối ưu độ phức tạp thuật toán  bằng bigO trước khi viết code
+4.luôn  kiểm tra và xử lý các Edge cases
+5.code phải rõ ràng, đặt tên biến/ hàm đúng chức năng và có chú thích ngắn gọn cho và chỉ cho các đoạn phức tạp không chú thích tràn lan
