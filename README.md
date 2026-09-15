@@ -10,6 +10,8 @@
 * **Tối ưu**: Phân tích độ phức tạp thuật toán (Big-O) trước khi viết code.
 * **Edge cases**: Kiểm tra và xử lý đầy đủ các trường hợp biên.
 * **Clean Code**: Đặt tên biến/hàm đúng chức năng, chú thích ngắn gọn cho các đoạn xử lý phức tạp.
+* **Bám sát đề**: Luôn kiểm tra kỹ và bám sát theo đề bài, chỉ khi đề không đề cập mới tối ưu tùy ý.
+* **Lưu file**: Lưu file dạng text đọc được, tối ưu tốc độ truy cập/tìm kiếm, dữ liệu chia ra tối đa.
 
 ---
 
