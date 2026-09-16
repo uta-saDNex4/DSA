@@ -45,6 +45,11 @@ struct nodeMonHoc {
 };
 typedef nodeMonHoc *TreeMonHoc;
 
+struct DS_MonHoc {
+    TreeMonHoc root = nullptr;
+    int n = 0; // Số lượng môn học trong cây
+};
+
 // === 3. DANH SÁCH ĐĂNG KÝ (DSLK ĐƠN) ===
 struct DangKy {
     char MASV[16];
