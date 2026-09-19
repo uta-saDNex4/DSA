@@ -14,7 +14,6 @@
   - `STCTH`: Số tín chỉ thực hành (số nguyên)
 
 ### 2. Danh sách Lớp
-
 - **Cấu trúc**: Danh sách tuyến tính, tối đa 10000 lớp
 - **Thuộc tính**:
   - `MALOP`
