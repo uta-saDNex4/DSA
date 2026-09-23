@@ -32,12 +32,14 @@ void InsertOrderSV(PTRSV &First, SinhVien sv) {
     p->sv = sv;
     p->next = nullptr;
     
+    // Danh sách rỗng hoặc chèn vào đầu
     if (First == nullptr || SoSanhTen(First->sv, p->sv) > 0) {
         p->next = First;
         First = p;
         return;
     }
     
+    // Tìm vị trí chèn ở giữa hoặc cuối
     PTRSV curr = First;
     while (curr->next != nullptr && SoSanhTen(curr->next->sv, p->sv) < 0) {
         curr = curr->next;
@@ -50,13 +52,13 @@ void InsertOrderSV(PTRSV &First, SinhVien sv) {
 void NhapDanhSachSV(PTRSV &First) {
     SinhVien sv;
     while (true) {
-        cout << "Nhap Ma SV (de trong de thoat): ";
+        cout << "\nNhap Ma SV (de trong de thoat): ";
         cin.getline(sv.MASV, 16);
         ChuanHoaMa(sv.MASV);
         if (KiemTraRong(sv.MASV)) break;
         
         if (TimSV(First, sv.MASV) != nullptr) {
-            cout << "Loi: Ma sinh vien da ton tai!\n";
+            cout << "[!] Loi: Ma sinh vien '" << sv.MASV << "' da ton tai!\n";
             continue;
         }
         
@@ -64,47 +66,46 @@ void NhapDanhSachSV(PTRSV &First) {
             cout << "Nhap Ho: ";
             cin.getline(sv.HO, 51);
             ChuanHoaTen(sv.HO);
-            if (KiemTraRong(sv.HO)) cout << "Loi: Ho khong duoc de trong!\n";
+            if (KiemTraRong(sv.HO)) cout << "[!] Loi: Ho khong duoc de trong!\n";
         } while (KiemTraRong(sv.HO));
         
         do {
             cout << "Nhap Ten: ";
             cin.getline(sv.TEN, 16);
             ChuanHoaTen(sv.TEN);
-            if (KiemTraRong(sv.TEN)) cout << "Loi: Ten khong duoc de trong!\n";
+            if (KiemTraRong(sv.TEN)) cout << "[!] Loi: Ten khong duoc de trong!\n";
         } while (KiemTraRong(sv.TEN));
         
         do {
             cout << "Nhap Phai (NAM/NU): ";
             cin.getline(sv.PHAI, 4);
-            ChuanHoaMa(sv.PHAI); // Chuyển thành chữ hoa hết cho sạch
+            ChuanHoaMa(sv.PHAI);
             if (strcmp(sv.PHAI, "NAM") != 0 && strcmp(sv.PHAI, "NU") != 0) {
-                cout << "Loi: Phai chi duoc nhap NAM hoac NU!\n";
+                cout << "[!] Loi: Phai chi duoc nhap NAM hoac NU!\n";
             }
         } while (strcmp(sv.PHAI, "NAM") != 0 && strcmp(sv.PHAI, "NU") != 0);
         
-        cout << "Nhap So DT: ";
-        cin.getline(sv.SODT, 16);
-        ChuanHoaMa(sv.SODT); // Xóa khoảng trắng thừa
+        do {
+            cout << "Nhap So DT: ";
+            cin.getline(sv.SODT, 16);
+            ChuanHoaMa(sv.SODT);
+            if (KiemTraRong(sv.SODT)) cout << "[!] Loi: So dien thoai khong duoc de trong!\n";
+        } while (KiemTraRong(sv.SODT));
         
         InsertOrderSV(First, sv);
-        cout << "=> Da them sinh vien thanh cong!\n\n";
+        cout << "[OK] Da them sinh vien '" << sv.MASV << "' thanh cong!\n";
     }
 }
 
-void XoaSV(PTRSV &First, char MASV[]) {
-    ChuanHoaMa(MASV);
-    if (First == nullptr) {
-        cout << "Loi: Danh sach rong!\n";
-        return;
-    }
+// Xóa không in thông báo (dùng nội bộ khi SuaSV cần tách node rồi chèn lại)
+bool XoaSVNoiB(PTRSV &First, char MASV[]) {
+    if (First == nullptr) return false;
     
     if (strcmp(First->sv.MASV, MASV) == 0) {
         PTRSV p = First;
         First = First->next;
         delete p;
-        cout << "=> Da xoa sinh vien thanh cong!\n";
-        return;
+        return true;
     }
     
     PTRSV curr = First;
@@ -116,9 +117,22 @@ void XoaSV(PTRSV &First, char MASV[]) {
         PTRSV p = curr->next;
         curr->next = p->next;
         delete p;
-        cout << "=> Da xoa sinh vien thanh cong!\n";
+        return true;
+    }
+    return false;
+}
+
+void XoaSV(PTRSV &First, char MASV[]) {
+    ChuanHoaMa(MASV);
+    if (First == nullptr) {
+        cout << "[!] Loi: Danh sach sinh vien rong, khong co gi de xoa!\n";
+        return;
+    }
+    
+    if (XoaSVNoiB(First, MASV)) {
+        cout << "[OK] Da xoa sinh vien '" << MASV << "' thanh cong!\n";
     } else {
-        cout << "Loi: Khong tim thay ma sinh vien!\n";
+        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << MASV << "'!\n";
     }
 }
 
@@ -126,7 +140,7 @@ void SuaSV(PTRSV &First, char MASV[]) {
     ChuanHoaMa(MASV);
     PTRSV p = TimSV(First, MASV);
     if (p == nullptr) {
-        cout << "Loi: Khong tim thay ma sinh vien!\n";
+        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << MASV << "'!\n";
         return;
     }
     
@@ -141,15 +155,19 @@ void SuaSV(PTRSV &First, char MASV[]) {
     if (!KiemTraRong(input)) strcpy(temp.HO, input);
     
     cout << "Ten moi (" << temp.TEN << "): ";
-    cin.getline(input, 16);
+    cin.getline(input, 51);
     ChuanHoaTen(input);
     if (!KiemTraRong(input)) strcpy(temp.TEN, input);
     
     cout << "Phai moi (" << temp.PHAI << "): ";
     cin.getline(input, 4);
     ChuanHoaMa(input);
-    if (!KiemTraRong(input) && (strcmp(input, "NAM") == 0 || strcmp(input, "NU") == 0)) {
-        strcpy(temp.PHAI, input);
+    if (!KiemTraRong(input)) {
+        if (strcmp(input, "NAM") == 0 || strcmp(input, "NU") == 0) {
+            strcpy(temp.PHAI, input);
+        } else {
+            cout << "[!] Phai khong hop le, giu nguyen gia tri cu.\n";
+        }
     }
     
     cout << "So DT moi (" << temp.SODT << "): ";
@@ -157,27 +175,30 @@ void SuaSV(PTRSV &First, char MASV[]) {
     ChuanHoaMa(input);
     if (!KiemTraRong(input)) strcpy(temp.SODT, input);
     
+    // Nếu Tên hoặc Họ thay đổi → vị trí trong SLL sai thứ tự → tách ra rồi chèn lại
     if (stricmp(temp.TEN, p->sv.TEN) != 0 || stricmp(temp.HO, p->sv.HO) != 0) {
-        XoaSV(First, MASV);
+        XoaSVNoiB(First, MASV); // Xóa im lặng, không in thông báo
         InsertOrderSV(First, temp);
     } else {
         p->sv = temp;
     }
-    cout << "=> Da cap nhat sinh vien thanh cong!\n";
+    cout << "[OK] Da cap nhat sinh vien '" << MASV << "' thanh cong!\n";
 }
 
 void XuatDanhSachSinhVien(PTRSV First) {
     if (First == nullptr) {
-        cout << "Danh sach sinh vien rong!\n";
+        cout << "[!] Danh sach sinh vien rong!\n";
         return;
     }
     
+    int stt = 1;
     cout << "\n--- DANH SACH SINH VIEN (SAP XEP TANG DAN THEO TEN) ---\n";
-    cout << setw(15) << left << "MASV" 
+    cout << setw(5) << left << "STT"
+         << setw(15) << left << "MASV" 
          << setw(35) << left << "HO VA TEN"
          << setw(10) << left << "PHAI"
          << setw(15) << left << "SO DT" << endl;
-    cout << "------------------------------------------------------------------------\n";
+    cout << "-------------------------------------------------------------------------------\n";
     
     for (PTRSV p = First; p != nullptr; p = p->next) {
         char hoten[67];
@@ -185,15 +206,21 @@ void XuatDanhSachSinhVien(PTRSV First) {
         strcat(hoten, " ");
         strcat(hoten, p->sv.TEN);
         
-        cout << setw(15) << left << p->sv.MASV 
+        cout << setw(5) << left << stt++
+             << setw(15) << left << p->sv.MASV 
              << setw(35) << left << hoten
              << setw(10) << left << p->sv.PHAI
              << setw(15) << left << p->sv.SODT << endl;
     }
+    cout << "=> Tong cong: " << (stt - 1) << " sinh vien.\n";
 }
 
 void QuickSortSV(PTRSV* arr, int low, int high) {
     if (low < high) {
+        // Chọn pivot giữa để tránh worst case O(N^2) khi data đã sắp xếp
+        int mid = low + (high - low) / 2;
+        PTRSV t = arr[mid]; arr[mid] = arr[high]; arr[high] = t;
+        
         char* pivot = arr[high]->sv.MASV;
         int i = (low - 1);
         for (int j = low; j <= high - 1; j++) {
@@ -216,31 +243,29 @@ void QuickSortSV(PTRSV* arr, int low, int high) {
 
 void InDSSVTheoMa(PTRSV First) {
     if (First == nullptr) {
-        cout << "Danh sach sinh vien rong!\n";
+        cout << "[!] Danh sach sinh vien rong!\n";
         return;
     }
     
-    // 1. Đếm
     int count = 0;
     for (PTRSV p = First; p != nullptr; p = p->next) count++;
     
-    // 2. Tạo mảng con trỏ tạm
     PTRSV* arr = new PTRSV[count];
     int i = 0;
     for (PTRSV p = First; p != nullptr; p = p->next) {
         arr[i++] = p;
     }
     
-    // 3. Sắp xếp mảng tạm theo MASV bằng Quick Sort O(N log N)
-    QuickSortSV(arr, 0, count - 1);
+    if (count > 1) QuickSortSV(arr, 0, count - 1);
     
-    // 4. In kết quả
+    int stt = 1;
     cout << "\n--- DANH SACH SINH VIEN (SAP XEP TANG DAN THEO MA SV) ---\n";
-    cout << setw(15) << left << "MASV" 
+    cout << setw(5) << left << "STT"
+         << setw(15) << left << "MASV" 
          << setw(35) << left << "HO VA TEN"
          << setw(10) << left << "PHAI"
          << setw(15) << left << "SO DT" << endl;
-    cout << "------------------------------------------------------------------------\n";
+    cout << "-------------------------------------------------------------------------------\n";
     
     for (int k = 0; k < count; k++) {
         char hoten[67];
@@ -248,12 +273,27 @@ void InDSSVTheoMa(PTRSV First) {
         strcat(hoten, " ");
         strcat(hoten, arr[k]->sv.TEN);
         
-        cout << setw(15) << left << arr[k]->sv.MASV 
+        cout << setw(5) << left << stt++
+             << setw(15) << left << arr[k]->sv.MASV 
              << setw(35) << left << hoten
              << setw(10) << left << arr[k]->sv.PHAI
              << setw(15) << left << arr[k]->sv.SODT << endl;
     }
+    cout << "=> Tong cong: " << count << " sinh vien.\n";
     
-    // 5. Giải phóng mảng
     delete[] arr;
+}
+
+int DemSV(PTRSV First) {
+    int count = 0;
+    for (PTRSV p = First; p != nullptr; p = p->next) count++;
+    return count;
+}
+
+void GiaiPhongDSSV(PTRSV &First) {
+    while (First != nullptr) {
+        PTRSV p = First;
+        First = First->next;
+        delete p;
+    }
 }

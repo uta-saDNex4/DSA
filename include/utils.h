@@ -10,4 +10,7 @@ void ChuanHoaMa(char str[]);
 // Kiểm tra xem chuỗi có rỗng hoặc chỉ toàn khoảng trắng không
 bool KiemTraRong(const char str[]);
 
+// Nhập số nguyên an toàn (chặn nhập chữ, ký tự đặc biệt)
+int NhapSoNguyen(const char thongBao[]);
+
 #endif
