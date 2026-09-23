@@ -134,6 +134,28 @@ void InOrderTraversal(TreeMonHoc root, TreeMonHoc* arr, int &idx) {
     }
 }
 
+void QuickSortMH(TreeMonHoc* arr, int low, int high) {
+    if (low < high) {
+        char* pivot = arr[high]->mh.TENMH;
+        int i = (low - 1);
+        for (int j = low; j <= high - 1; j++) {
+            if (stricmp(arr[j]->mh.TENMH, pivot) < 0) {
+                i++;
+                TreeMonHoc temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        TreeMonHoc temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        
+        int pi = i + 1;
+        QuickSortMH(arr, low, pi - 1);
+        QuickSortMH(arr, pi + 1, high);
+    }
+}
+
 void InDanhSachMonHoc(TreeMonHoc root, int n) {
     if (root == nullptr || n == 0) {
         cout << "Danh sach mon hoc rong!\n";
@@ -147,16 +169,8 @@ void InDanhSachMonHoc(TreeMonHoc root, int n) {
     // Đổ cây vào mảng
     InOrderTraversal(root, arr, idx);
     
-    // Sắp xếp mảng theo tên môn học (Selection Sort)
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = i + 1; j < n; j++) {
-            if (stricmp(arr[i]->mh.TENMH, arr[j]->mh.TENMH) > 0) {
-                TreeMonHoc temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
-    }
+    // Sắp xếp mảng theo tên môn học (Quick Sort O(N log N))
+    QuickSortMH(arr, 0, n - 1);
     
     // In danh sách
     cout << "\n--- DANH SACH MON HOC (SAP XEP TANG DAN THEO TEN) ---\n";

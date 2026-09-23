@@ -174,6 +174,28 @@ void XuatDanhSachSinhVien(PTRSV First) {
     }
 }
 
+void QuickSortSV(PTRSV* arr, int low, int high) {
+    if (low < high) {
+        char* pivot = arr[high]->sv.MASV;
+        int i = (low - 1);
+        for (int j = low; j <= high - 1; j++) {
+            if (stricmp(arr[j]->sv.MASV, pivot) < 0) {
+                i++;
+                PTRSV temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        PTRSV temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        
+        int pi = i + 1;
+        QuickSortSV(arr, low, pi - 1);
+        QuickSortSV(arr, pi + 1, high);
+    }
+}
+
 void InDSSVTheoMa(PTRSV First) {
     if (First == nullptr) {
         cout << "Danh sach sinh vien rong!\n";
@@ -191,16 +213,8 @@ void InDSSVTheoMa(PTRSV First) {
         arr[i++] = p;
     }
     
-    // 3. Sắp xếp mảng tạm theo MASV (Selection Sort)
-    for (int idx1 = 0; idx1 < count - 1; idx1++) {
-        for (int idx2 = idx1 + 1; idx2 < count; idx2++) {
-            if (stricmp(arr[idx1]->sv.MASV, arr[idx2]->sv.MASV) > 0) {
-                PTRSV temp = arr[idx1];
-                arr[idx1] = arr[idx2];
-                arr[idx2] = temp;
-            }
-        }
-    }
+    // 3. Sắp xếp mảng tạm theo MASV bằng Quick Sort O(N log N)
+    QuickSortSV(arr, 0, count - 1);
     
     // 4. In kết quả
     cout << "\n--- DANH SACH SINH VIEN (SAP XEP TANG DAN THEO MA SV) ---\n";
