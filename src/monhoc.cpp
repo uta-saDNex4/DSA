@@ -1,4 +1,5 @@
 #include "monhoc.h"
+#include "utils.h"
 #include <iostream>
 #include <string.h>
 #include <iomanip>
@@ -42,20 +43,31 @@ void NhapMonHoc(DS_MonHoc &ds) {
     while (true) {
         cout << "Nhap Ma Mon Hoc (de trong de thoat): ";
         cin.getline(mh.MAMH, 11);
-        if (strlen(mh.MAMH) == 0) break;
+        ChuanHoaMa(mh.MAMH);
+        if (KiemTraRong(mh.MAMH)) break;
         
         if (TimMonHoc(ds.root, mh.MAMH) != nullptr) {
             cout << "Loi: Ma mon hoc da ton tai!\n";
             continue;
         }
         
-        cout << "Nhap Ten Mon Hoc: ";
-        cin.getline(mh.TENMH, 51);
+        do {
+            cout << "Nhap Ten Mon Hoc: ";
+            cin.getline(mh.TENMH, 51);
+            ChuanHoaTen(mh.TENMH);
+            if (KiemTraRong(mh.TENMH)) cout << "Loi: Ten mon hoc khong duoc de trong!\n";
+        } while (KiemTraRong(mh.TENMH));
         
-        cout << "Nhap So TC Ly Thuyet: ";
-        cin >> mh.STCLT;
-        cout << "Nhap So TC Thuc Hanh: ";
-        cin >> mh.STCTH;
+        do {
+            cout << "Nhap So TC Ly Thuyet (>= 0): ";
+            cin >> mh.STCLT;
+        } while (mh.STCLT < 0);
+        
+        do {
+            cout << "Nhap So TC Thuc Hanh (>= 0): ";
+            cin >> mh.STCTH;
+        } while (mh.STCTH < 0);
+        
         cin.ignore(); // Xóa bộ đệm sau khi nhập số
         
         ThemMonHoc(ds.root, mh, ds.n);
@@ -64,6 +76,7 @@ void NhapMonHoc(DS_MonHoc &ds) {
 }
 
 void SuaMonHoc(TreeMonHoc root, char MAMH[]) {
+    ChuanHoaMa(MAMH);
     TreeMonHoc p = TimMonHoc(root, MAMH);
     if (p == nullptr) {
         cout << "Loi: Khong tim thay ma mon hoc!\n";
@@ -75,15 +88,18 @@ void SuaMonHoc(TreeMonHoc root, char MAMH[]) {
     
     cout << "Ten mon moi (" << p->mh.TENMH << "): ";
     cin.getline(input, 51);
-    if (strlen(input) > 0) strcpy(p->mh.TENMH, input);
+    ChuanHoaTen(input);
+    if (!KiemTraRong(input)) strcpy(p->mh.TENMH, input);
     
     cout << "So TC Ly Thuyet moi (" << p->mh.STCLT << "): ";
     cin.getline(input, 51);
-    if (strlen(input) > 0) p->mh.STCLT = atoi(input);
+    ChuanHoaMa(input); // xóa khoảng trắng
+    if (!KiemTraRong(input)) p->mh.STCLT = atoi(input);
     
     cout << "So TC Thuc Hanh moi (" << p->mh.STCTH << "): ";
     cin.getline(input, 51);
-    if (strlen(input) > 0) p->mh.STCTH = atoi(input);
+    ChuanHoaMa(input);
+    if (!KiemTraRong(input)) p->mh.STCTH = atoi(input);
     
     cout << "=> Da cap nhat mon hoc thanh cong!\n";
 }

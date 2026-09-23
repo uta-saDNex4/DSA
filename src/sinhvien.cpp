@@ -1,10 +1,8 @@
 #include "sinhvien.h"
+#include "utils.h"
 #include <iostream>
 #include <string.h>
 #include <iomanip>
-
-// Nếu compiler báo lỗi stricmp, đổi thành _stricmp (trên MSVC) hoặc tự định nghĩa.
-// Đối với MinGW/GCC thường hỗ trợ stricmp.
 
 using namespace std;
 
@@ -22,13 +20,10 @@ PTRSV TimSV(PTRSV First, char MASV[]) {
 }
 
 int SoSanhTen(SinhVien a, SinhVien b) {
-    // So sánh Tên
     int cmpTen = stricmp(a.TEN, b.TEN);
     if (cmpTen != 0) return cmpTen;
-    // Nếu trùng Tên, so sánh Họ
     int cmpHo = stricmp(a.HO, b.HO);
     if (cmpHo != 0) return cmpHo;
-    // Nếu trùng Họ, so sánh Mã SV
     return stricmp(a.MASV, b.MASV);
 }
 
@@ -37,7 +32,6 @@ void InsertOrderSV(PTRSV &First, SinhVien sv) {
     p->sv = sv;
     p->next = nullptr;
     
-    // Nếu danh sách rỗng hoặc sinh viên mới nhỏ hơn sinh viên đứng đầu
     if (First == nullptr || SoSanhTen(First->sv, p->sv) > 0) {
         p->next = First;
         First = p;
@@ -45,12 +39,10 @@ void InsertOrderSV(PTRSV &First, SinhVien sv) {
     }
     
     PTRSV curr = First;
-    // Tìm vị trí chèn
     while (curr->next != nullptr && SoSanhTen(curr->next->sv, p->sv) < 0) {
         curr = curr->next;
     }
     
-    // Chèn p vào sau curr
     p->next = curr->next;
     curr->next = p;
 }
@@ -60,21 +52,40 @@ void NhapDanhSachSV(PTRSV &First) {
     while (true) {
         cout << "Nhap Ma SV (de trong de thoat): ";
         cin.getline(sv.MASV, 16);
-        if (strlen(sv.MASV) == 0) break;
+        ChuanHoaMa(sv.MASV);
+        if (KiemTraRong(sv.MASV)) break;
         
         if (TimSV(First, sv.MASV) != nullptr) {
             cout << "Loi: Ma sinh vien da ton tai!\n";
             continue;
         }
         
-        cout << "Nhap Ho: ";
-        cin.getline(sv.HO, 51);
-        cout << "Nhap Ten: ";
-        cin.getline(sv.TEN, 16);
-        cout << "Nhap Phai (NAM/NU): ";
-        cin.getline(sv.PHAI, 4);
+        do {
+            cout << "Nhap Ho: ";
+            cin.getline(sv.HO, 51);
+            ChuanHoaTen(sv.HO);
+            if (KiemTraRong(sv.HO)) cout << "Loi: Ho khong duoc de trong!\n";
+        } while (KiemTraRong(sv.HO));
+        
+        do {
+            cout << "Nhap Ten: ";
+            cin.getline(sv.TEN, 16);
+            ChuanHoaTen(sv.TEN);
+            if (KiemTraRong(sv.TEN)) cout << "Loi: Ten khong duoc de trong!\n";
+        } while (KiemTraRong(sv.TEN));
+        
+        do {
+            cout << "Nhap Phai (NAM/NU): ";
+            cin.getline(sv.PHAI, 4);
+            ChuanHoaMa(sv.PHAI); // Chuyển thành chữ hoa hết cho sạch
+            if (strcmp(sv.PHAI, "NAM") != 0 && strcmp(sv.PHAI, "NU") != 0) {
+                cout << "Loi: Phai chi duoc nhap NAM hoac NU!\n";
+            }
+        } while (strcmp(sv.PHAI, "NAM") != 0 && strcmp(sv.PHAI, "NU") != 0);
+        
         cout << "Nhap So DT: ";
         cin.getline(sv.SODT, 16);
+        ChuanHoaMa(sv.SODT); // Xóa khoảng trắng thừa
         
         InsertOrderSV(First, sv);
         cout << "=> Da them sinh vien thanh cong!\n\n";
@@ -82,6 +93,7 @@ void NhapDanhSachSV(PTRSV &First) {
 }
 
 void XoaSV(PTRSV &First, char MASV[]) {
+    ChuanHoaMa(MASV);
     if (First == nullptr) {
         cout << "Loi: Danh sach rong!\n";
         return;
@@ -111,6 +123,7 @@ void XoaSV(PTRSV &First, char MASV[]) {
 }
 
 void SuaSV(PTRSV &First, char MASV[]) {
+    ChuanHoaMa(MASV);
     PTRSV p = TimSV(First, MASV);
     if (p == nullptr) {
         cout << "Loi: Khong tim thay ma sinh vien!\n";
@@ -124,21 +137,26 @@ void SuaSV(PTRSV &First, char MASV[]) {
     
     cout << "Ho moi (" << temp.HO << "): ";
     cin.getline(input, 51);
-    if (strlen(input) > 0) strcpy(temp.HO, input);
+    ChuanHoaTen(input);
+    if (!KiemTraRong(input)) strcpy(temp.HO, input);
     
     cout << "Ten moi (" << temp.TEN << "): ";
     cin.getline(input, 16);
-    if (strlen(input) > 0) strcpy(temp.TEN, input);
+    ChuanHoaTen(input);
+    if (!KiemTraRong(input)) strcpy(temp.TEN, input);
     
     cout << "Phai moi (" << temp.PHAI << "): ";
     cin.getline(input, 4);
-    if (strlen(input) > 0) strcpy(temp.PHAI, input);
+    ChuanHoaMa(input);
+    if (!KiemTraRong(input) && (strcmp(input, "NAM") == 0 || strcmp(input, "NU") == 0)) {
+        strcpy(temp.PHAI, input);
+    }
     
     cout << "So DT moi (" << temp.SODT << "): ";
     cin.getline(input, 16);
-    if (strlen(input) > 0) strcpy(temp.SODT, input);
+    ChuanHoaMa(input);
+    if (!KiemTraRong(input)) strcpy(temp.SODT, input);
     
-    // Nếu tên hoặc họ thay đổi, vị trí trong SLL thay đổi -> Xóa node cũ rồi chèn lại
     if (stricmp(temp.TEN, p->sv.TEN) != 0 || stricmp(temp.HO, p->sv.HO) != 0) {
         XoaSV(First, MASV);
         InsertOrderSV(First, temp);

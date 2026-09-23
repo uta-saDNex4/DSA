@@ -1,4 +1,5 @@
 #include "lop.h"
+#include "utils.h"
 #include <iostream>
 #include <string.h>
 #include <iomanip>
@@ -27,6 +28,14 @@ bool ThemLop(DS_LOPSV &ds, LOPSV lop) {
         return false;
     }
     
+    ChuanHoaMa(lop.MALOP);
+    ChuanHoaTen(lop.TENLOP);
+    
+    if (KiemTraRong(lop.MALOP) || KiemTraRong(lop.TENLOP)) {
+        cout << "Loi: Ma lop va Ten lop khong duoc de trong!\n";
+        return false;
+    }
+    
     if (TimLop(ds, lop.MALOP) != -1) {
         cout << "Loi: Ma lop da ton tai!\n";
         return false;
@@ -43,9 +52,16 @@ bool ThemLop(DS_LOPSV &ds, LOPSV lop) {
 }
 
 bool SuaLop(DS_LOPSV &ds, char MALOP[], char TENLOP_MOI[]) {
+    ChuanHoaMa(MALOP);
     int idx = TimLop(ds, MALOP);
     if (idx == -1) {
         cout << "Loi: Khong tim thay ma lop!\n";
+        return false;
+    }
+    
+    ChuanHoaTen(TENLOP_MOI);
+    if (KiemTraRong(TENLOP_MOI)) {
+        cout << "Loi: Ten lop khong duoc de trong!\n";
         return false;
     }
     
