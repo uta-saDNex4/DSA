@@ -21,7 +21,7 @@ PTRSV TimSV(PTRSV First, char MASV[]) {
     return nullptr;
 }
 
-int CompareName(SinhVien a, SinhVien b) {
+int SoSanhTen(SinhVien a, SinhVien b) {
     // So sánh Tên
     int cmpTen = stricmp(a.TEN, b.TEN);
     if (cmpTen != 0) return cmpTen;
@@ -32,13 +32,13 @@ int CompareName(SinhVien a, SinhVien b) {
     return stricmp(a.MASV, b.MASV);
 }
 
-void InsertSortedSV(PTRSV &First, SinhVien sv) {
+void ChenSinhVienCoThuTu(PTRSV &First, SinhVien sv) {
     PTRSV p = new nodeSV;
     p->sv = sv;
     p->next = nullptr;
     
     // Nếu danh sách rỗng hoặc sinh viên mới nhỏ hơn sinh viên đứng đầu
-    if (First == nullptr || CompareName(First->sv, p->sv) > 0) {
+    if (First == nullptr || SoSanhTen(First->sv, p->sv) > 0) {
         p->next = First;
         First = p;
         return;
@@ -46,7 +46,7 @@ void InsertSortedSV(PTRSV &First, SinhVien sv) {
     
     PTRSV curr = First;
     // Tìm vị trí chèn
-    while (curr->next != nullptr && CompareName(curr->next->sv, p->sv) < 0) {
+    while (curr->next != nullptr && SoSanhTen(curr->next->sv, p->sv) < 0) {
         curr = curr->next;
     }
     
@@ -76,7 +76,7 @@ void NhapDanhSachSV(PTRSV &First) {
         cout << "Nhap So DT: ";
         cin.getline(sv.SODT, 16);
         
-        InsertSortedSV(First, sv);
+        ChenSinhVienCoThuTu(First, sv);
         cout << "=> Da them sinh vien thanh cong!\n\n";
     }
 }
@@ -141,7 +141,7 @@ void SuaSV(PTRSV &First, char MASV[]) {
     // Nếu tên hoặc họ thay đổi, vị trí trong SLL thay đổi -> Xóa node cũ rồi chèn lại
     if (stricmp(temp.TEN, p->sv.TEN) != 0 || stricmp(temp.HO, p->sv.HO) != 0) {
         XoaSV(First, MASV);
-        InsertSortedSV(First, temp);
+        ChenSinhVienCoThuTu(First, temp);
     } else {
         p->sv = temp;
     }

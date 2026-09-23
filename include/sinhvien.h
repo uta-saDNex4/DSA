@@ -8,10 +8,10 @@ void KhoiTaoDanhSachSV(PTRSV &First);
 PTRSV TimSV(PTRSV First, char MASV[]);
 
 // Hàm phụ trợ so sánh tên
-int CompareName(SinhVien a, SinhVien b);
+int SoSanhTen(SinhVien a, SinhVien b);
 
 // Chèn sinh viên có thứ tự (theo Tên -> Họ -> Mã SV)
-void InsertSortedSV(PTRSV &First, SinhVien sv);
+void ChenSinhVienCoThuTu(PTRSV &First, SinhVien sv);
 
 // Nhập danh sách sinh viên mới (dừng khi mã SV rỗng)
 void NhapDanhSachSV(PTRSV &First);

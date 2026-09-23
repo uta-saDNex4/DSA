@@ -10,26 +10,26 @@ using namespace std;
 // --- FILE I/O CHO MÔN HỌC ---
 
 // Đổ cây vào file theo Duyệt LNR
-void WriteTreeToFile(TreeMonHoc root, ofstream &outFile) {
+void GhiCayRaFile(TreeMonHoc root, ofstream &outFile) {
     if (root != nullptr) {
-        WriteTreeToFile(root->left, outFile);
+        GhiCayRaFile(root->left, outFile);
         outFile << root->mh.MAMH << ","
                 << root->mh.TENMH << ","
                 << root->mh.STCLT << ","
                 << root->mh.STCTH << endl;
-        WriteTreeToFile(root->right, outFile);
+        GhiCayRaFile(root->right, outFile);
     }
 }
 
-bool SaveMonHocToFile(TreeMonHoc root, const char* filename) {
+bool GhiFileMonHoc(TreeMonHoc root, const char* filename) {
     ofstream outFile(filename);
     if (!outFile.is_open()) return false;
-    WriteTreeToFile(root, outFile);
+    GhiCayRaFile(root, outFile);
     outFile.close();
     return true;
 }
 
-bool LoadMonHocFromFile(DS_MonHoc &ds, const char* filename) {
+bool DocFileMonHoc(DS_MonHoc &ds, const char* filename) {
     ifstream inFile(filename);
     if (!inFile.is_open()) return false;
     
@@ -62,7 +62,7 @@ bool LoadMonHocFromFile(DS_MonHoc &ds, const char* filename) {
 
 // --- FILE I/O CHO LỚP VÀ SINH VIÊN ---
 
-bool SaveLopVaSinhVienToFile(DS_LOPSV ds, const char* filename) {
+bool GhiFileLopVaSinhVien(DS_LOPSV ds, const char* filename) {
     ofstream outFile(filename);
     if (!outFile.is_open()) return false;
     
@@ -86,7 +86,7 @@ bool SaveLopVaSinhVienToFile(DS_LOPSV ds, const char* filename) {
     return true;
 }
 
-bool LoadLopVaSinhVienFromFile(DS_LOPSV &ds, const char* filename) {
+bool DocFileLopVaSinhVien(DS_LOPSV &ds, const char* filename) {
     ifstream inFile(filename);
     if (!inFile.is_open()) return false;
     
@@ -127,7 +127,7 @@ bool LoadLopVaSinhVienFromFile(DS_LOPSV &ds, const char* filename) {
             token = strtok(NULL, ",");
             if (token) strcpy(sv.SODT, token);
             
-            InsertSortedSV(ds.nodes[i]->FirstSV, sv);
+            ChenSinhVienCoThuTu(ds.nodes[i]->FirstSV, sv);
         }
         ds.n++;
     }
