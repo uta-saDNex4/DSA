@@ -9,16 +9,18 @@ void ThemMonHoc(TreeMonHoc &root, MonHoc mh, int &n);
 
 void NhapMonHoc(DS_MonHoc &ds);
 
-bool XoaMonHoc(TreeMonHoc &root, char MAMH[], int &n);
+// Xóa môn học CÓ kiểm tra ràng buộc (cần DS_LopTC)
+bool XoaMonHoc(TreeMonHoc &root, char MAMH[], int &n, DS_LopTC dsltc);
+
+// Xóa môn học KHÔNG kiểm tra ràng buộc (dùng nội bộ / giải phóng)
+bool XoaMonHocNoiB(TreeMonHoc &root, char MAMH[], int &n);
 
 void SuaMonHoc(TreeMonHoc root, char MAMH[]);
 
 TreeMonHoc TimMonHoc(TreeMonHoc root, char MAMH[]);
 
-// In danh sách môn học tăng dần theo Tên môn học (Câu F)
 void InDanhSachMonHoc(TreeMonHoc root, int n);
 
-// Giải phóng toàn bộ cây BST
 void GiaiPhongCay(TreeMonHoc &root);
 
 #endif

@@ -1,5 +1,6 @@
 #include "monhoc.h"
 #include "utils.h"
+#include "rang_buoc.h"
 #include <iostream>
 #include <string.h>
 #include <iomanip>
@@ -132,29 +133,54 @@ void NodeTheMang(TreeMonHoc &p, TreeMonHoc &rightMost) {
     }
 }
 
-bool XoaMonHoc(TreeMonHoc &root, char MAMH[], int &n) {
-    ChuanHoaMa(MAMH);
+bool XoaMonHocNoiB(TreeMonHoc &root, char MAMH[], int &n) {
     if (root == nullptr) return false;
     
     int cmp = stricmp(MAMH, root->mh.MAMH);
     if (cmp < 0) {
-        return XoaMonHoc(root->left, MAMH, n);
+        return XoaMonHocNoiB(root->left, MAMH, n);
     } else if (cmp > 0) {
-        return XoaMonHoc(root->right, MAMH, n);
+        return XoaMonHocNoiB(root->right, MAMH, n);
     } else {
         TreeMonHoc p = root;
         
         if (root->left == nullptr) {
-            root = root->right;        // Node lá hoặc chỉ có con phải
+            root = root->right;        
         } else if (root->right == nullptr) {
-            root = root->left;         // Chỉ có con trái
+            root = root->left;         
         } else {
-            NodeTheMang(p, root->left); // Node 2 con
+            NodeTheMang(p, root->left); 
         }
         delete p;
         n--;
         return true;
     }
+}
+
+bool XoaMonHoc(TreeMonHoc &root, char MAMH[], int &n, DS_LopTC dsltc) {
+    ChuanHoaMa(MAMH);
+    if (root == nullptr) {
+        cout << "[!] Loi: Danh sach mon hoc rong!\n";
+        return false;
+    }
+    
+    if (TimMonHoc(root, MAMH) == nullptr) {
+        cout << "[!] Loi: Khong tim thay mon hoc co ma '" << MAMH << "'!\n";
+        return false;
+    }
+    
+    int soLopTC = DemLopTCByMAMH(dsltc, MAMH);
+    if (soLopTC > 0) {
+        cout << "[!] Khong the xoa! Mon hoc '" << MAMH << "' dang duoc su dung boi " << soLopTC << " lop tin chi.\n";
+        InRangBuocMonHoc(dsltc, MAMH);
+        return false;
+    }
+    
+    if (XoaMonHocNoiB(root, MAMH, n)) {
+        cout << "[OK] Da xoa mon hoc '" << MAMH << "' thanh cong!\n";
+        return true;
+    }
+    return false;
 }
 
 void InOrderTraversal(TreeMonHoc root, TreeMonHoc* arr, int &idx) {

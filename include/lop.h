@@ -9,6 +9,8 @@ int TimLop(DS_LOPSV ds, char MALOP[]);
 
 bool ThemLop(DS_LOPSV &ds, LOPSV lop);
 
+bool XoaLop(DS_LOPSV &ds, char MALOP[], DS_LopTC dsltc);
+
 bool SuaLop(DS_LOPSV &ds, char MALOP[], char TENLOP_MOI[]);
 
 void InDanhSachLop(DS_LOPSV ds);

@@ -1,5 +1,6 @@
 #include "sinhvien.h"
 #include "utils.h"
+#include "rang_buoc.h"
 #include <iostream>
 #include <string.h>
 #include <iomanip>
@@ -122,17 +123,37 @@ bool XoaSVNoiB(PTRSV &First, char MASV[]) {
     return false;
 }
 
-void XoaSV(PTRSV &First, char MASV[]) {
+void XoaSV(PTRSV &First, char MASV[], DS_LopTC dsltc) {
     ChuanHoaMa(MASV);
     if (First == nullptr) {
-        cout << "[!] Loi: Danh sach sinh vien rong, khong co gi de xoa!\n";
+        cout << "[!] Loi: Danh sach sinh vien rong!\n";
         return;
     }
     
+    // 1. Kiểm tra MASV có tồn tại không
+    if (TimSV(First, MASV) == nullptr) {
+        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << MASV << "'!\n";
+        return;
+    }
+    
+    // 2. Kiểm tra SV có đang đăng ký lớp tín chỉ nào không
+    int soDK = DemDangKyByMASV(dsltc, MASV);
+    if (soDK > 0) {
+        cout << "[!] Khong the xoa! Sinh vien '" << MASV << "' dang dang ky " << soDK << " lop tin chi.\n";
+        InRangBuocSV(dsltc, MASV);
+        
+        // Kiểm tra thêm: đã có điểm chưa
+        if (SVDaCoHiem(dsltc, MASV)) {
+            cout << "[!] Sinh vien da co diem thi. Hay huy dang ky truoc khi xoa.\n";
+        } else {
+            cout << "[!] Hay huy cac dang ky cua sinh vien truoc khi xoa.\n";
+        }
+        return;
+    }
+    
+    // 3. Không có ràng buộc → cho xóa
     if (XoaSVNoiB(First, MASV)) {
         cout << "[OK] Da xoa sinh vien '" << MASV << "' thanh cong!\n";
-    } else {
-        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << MASV << "'!\n";
     }
 }
 

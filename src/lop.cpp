@@ -1,6 +1,7 @@
 #include "lop.h"
 #include "sinhvien.h"
 #include "utils.h"
+#include "rang_buoc.h"
 #include <iostream>
 #include <string.h>
 #include <iomanip>
@@ -108,4 +109,43 @@ void GiaiPhongDSLop(DS_LOPSV &ds) {
         }
     }
     ds.n = 0;
+}
+
+bool XoaLop(DS_LOPSV &ds, char MALOP[], DS_LopTC dsltc) {
+    ChuanHoaMa(MALOP);
+    int idx = TimLop(ds, MALOP);
+    if (idx == -1) {
+        cout << "[!] Loi: Khong tim thay lop co ma '" << MALOP << "'!\n";
+        return false;
+    }
+    
+    // Ràng buộc 1: Lớp còn sinh viên không?
+    if (ds.nodes[idx]->FirstSV != nullptr) {
+        int soSV = DemSV(ds.nodes[idx]->FirstSV);
+        cout << "[!] Khong the xoa! Lop '" << MALOP << "' dang co " << soSV << " sinh vien.\n";
+        cout << "[!] Vui long xoa het sinh vien cua lop truoc khi xoa lop.\n";
+        return false;
+    }
+    
+    // Ràng buộc 2: Sinh viên trong lớp có đang đăng ký tín chỉ không (dù sinh viên đã bị xóa nhưng vẫn còn node đăng ký mồ côi? Theo lý thuyết sinh viên đã xóa thì đk cũng phải xóa, nhưng check cho an toàn).
+    int soDK = DemDangKyByLop(dsltc, ds.nodes[idx]->FirstSV);
+    if (soDK > 0) {
+        cout << "[!] Khong the xoa! Co " << soDK << " dang ky tin chi lien quan den sinh vien lop nay.\n";
+        InRangBuocLop(dsltc, ds.nodes[idx]->FirstSV);
+        return false;
+    }
+    
+    // Xóa lớp
+    GiaiPhongDSSV(ds.nodes[idx]->FirstSV); // An toàn
+    delete ds.nodes[idx];
+    
+    // Dịch các phần tử mảng con trỏ
+    for (int i = idx; i < ds.n - 1; i++) {
+        ds.nodes[i] = ds.nodes[i + 1];
+    }
+    ds.nodes[ds.n - 1] = nullptr;
+    ds.n--;
+    
+    cout << "[OK] Da xoa lop '" << MALOP << "' thanh cong!\n";
+    return true;
 }
