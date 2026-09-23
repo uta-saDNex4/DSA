@@ -1,17 +1,31 @@
+#ifndef SINHVIEN_H
+#define SINHVIEN_H
+
 #include "struct.h"
 
 void KhoiTaoDanhSachSV(PTRSV &First);
 
-void ThemSV(PTRSV &First);
+PTRSV TimSV(PTRSV First, char MASV[]);
 
-void XoaSV(PTRSV &First);
+// Hàm phụ trợ so sánh tên
+int CompareName(SinhVien a, SinhVien b);
 
-void SuaSV(PTRSV First);
+// Chèn sinh viên có thứ tự (theo Tên -> Họ -> Mã SV)
+void InsertSortedSV(PTRSV &First, SinhVien sv);
 
-// void ChenSinhVien(PTRSV &First);
+// Nhập danh sách sinh viên mới (dừng khi mã SV rỗng)
+void NhapDanhSachSV(PTRSV &First);
 
+// Xóa sinh viên theo mã
+void XoaSV(PTRSV &First, char MASV[]);
+
+// Hiệu chỉnh sinh viên
+void SuaSV(PTRSV &First, char MASV[]);
+
+// In danh sách gốc (theo thứ tự tên)
 void XuatDanhSachSinhVien(PTRSV First);
 
-// bool CheckMASV(PTRSV First, char MASV[]);
+// In danh sách theo thứ tự alphabet của Mã SV (Câu D)
+void InDSSVTheoMa(PTRSV First);
 
-PTRSV TimSV(PTRSV First, char MASV[]);
+#endif

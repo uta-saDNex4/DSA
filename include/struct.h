@@ -14,7 +14,6 @@ struct nodeSV{
 };
 
 typedef nodeSV *PTRSV;
-PTRSV First = nullptr;
 
 struct LOPSV{
     char MALOP[16];
