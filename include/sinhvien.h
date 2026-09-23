@@ -11,7 +11,7 @@ PTRSV TimSV(PTRSV First, char MASV[]);
 int SoSanhTen(SinhVien a, SinhVien b);
 
 // Chèn sinh viên có thứ tự (theo Tên -> Họ -> Mã SV)
-void ChenSinhVienCoThuTu(PTRSV &First, SinhVien sv);
+void InsertOrderSV(PTRSV &First, SinhVien sv);
 
 // Nhập danh sách sinh viên mới (dừng khi mã SV rỗng)
 void NhapDanhSachSV(PTRSV &First);

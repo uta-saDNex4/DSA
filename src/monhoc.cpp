@@ -126,11 +126,11 @@ bool XoaMonHoc(TreeMonHoc &root, char MAMH[], int &n) {
 }
 
 // Hàm duyệt LNR (In-order) nạp các node vào mảng
-void DoCayRaMang(TreeMonHoc root, TreeMonHoc* arr, int &idx) {
+void InOrderTraversal(TreeMonHoc root, TreeMonHoc* arr, int &idx) {
     if (root != nullptr) {
-        DoCayRaMang(root->left, arr, idx);
+        InOrderTraversal(root->left, arr, idx);
         arr[idx++] = root;
-        DoCayRaMang(root->right, arr, idx);
+        InOrderTraversal(root->right, arr, idx);
     }
 }
 
@@ -145,7 +145,7 @@ void InDanhSachMonHoc(TreeMonHoc root, int n) {
     int idx = 0;
     
     // Đổ cây vào mảng
-    DoCayRaMang(root, arr, idx);
+    InOrderTraversal(root, arr, idx);
     
     // Sắp xếp mảng theo tên môn học (Selection Sort)
     for (int i = 0; i < n - 1; i++) {

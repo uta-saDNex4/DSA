@@ -127,7 +127,7 @@ bool DocFileLopVaSinhVien(DS_LOPSV &ds, const char* filename) {
             token = strtok(NULL, ",");
             if (token) strcpy(sv.SODT, token);
             
-            ChenSinhVienCoThuTu(ds.nodes[i]->FirstSV, sv);
+            InsertOrderSV(ds.nodes[i]->FirstSV, sv);
         }
         ds.n++;
     }

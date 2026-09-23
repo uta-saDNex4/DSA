@@ -32,7 +32,7 @@ int SoSanhTen(SinhVien a, SinhVien b) {
     return stricmp(a.MASV, b.MASV);
 }
 
-void ChenSinhVienCoThuTu(PTRSV &First, SinhVien sv) {
+void InsertOrderSV(PTRSV &First, SinhVien sv) {
     PTRSV p = new nodeSV;
     p->sv = sv;
     p->next = nullptr;
@@ -76,7 +76,7 @@ void NhapDanhSachSV(PTRSV &First) {
         cout << "Nhap So DT: ";
         cin.getline(sv.SODT, 16);
         
-        ChenSinhVienCoThuTu(First, sv);
+        InsertOrderSV(First, sv);
         cout << "=> Da them sinh vien thanh cong!\n\n";
     }
 }
@@ -141,7 +141,7 @@ void SuaSV(PTRSV &First, char MASV[]) {
     // Nếu tên hoặc họ thay đổi, vị trí trong SLL thay đổi -> Xóa node cũ rồi chèn lại
     if (stricmp(temp.TEN, p->sv.TEN) != 0 || stricmp(temp.HO, p->sv.HO) != 0) {
         XoaSV(First, MASV);
-        ChenSinhVienCoThuTu(First, temp);
+        InsertOrderSV(First, temp);
     } else {
         p->sv = temp;
     }
