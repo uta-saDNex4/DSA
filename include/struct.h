@@ -53,8 +53,8 @@ struct DS_MonHoc {
 // === 3. DANH SÁCH ĐĂNG KÝ (DSLK ĐƠN) ===
 struct DangKy {
     char MASV[16];
-    float DIEM;
-    bool HuyDangKy;
+    float DIEM = -1;        // -1 = chưa có điểm
+    bool HuyDangKy = false; // false = đang hoạt động
 };
 
 struct nodeDangKy {
