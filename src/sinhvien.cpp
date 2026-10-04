@@ -11,10 +11,10 @@ void KhoiTaoDanhSachSV(PTRSV &First) {
     First = nullptr;
 }
 
-PTRSV TimSV(PTRSV First, char MASV[]) {
+PTRSV TimSV(PTRSV First, const char MASV[]) {
     PTRSV p = First;
     while (p != nullptr) {
-        if (strcmp(p->sv.MASV, MASV) == 0) return p;
+        if (stricmp(p->sv.MASV, MASV) == 0) return p;
         p = p->next;
     }
     return nullptr;
@@ -99,10 +99,10 @@ void NhapDanhSachSV(PTRSV &First) {
 }
 
 // Xóa không in thông báo (dùng nội bộ khi SuaSV cần tách node rồi chèn lại)
-bool XoaSVNoiB(PTRSV &First, char MASV[]) {
+bool XoaSVNoiB(PTRSV &First, const char MASV[]) {
     if (First == nullptr) return false;
     
-    if (strcmp(First->sv.MASV, MASV) == 0) {
+    if (stricmp(First->sv.MASV, MASV) == 0) {
         PTRSV p = First;
         First = First->next;
         delete p;
@@ -110,7 +110,7 @@ bool XoaSVNoiB(PTRSV &First, char MASV[]) {
     }
     
     PTRSV curr = First;
-    while (curr->next != nullptr && strcmp(curr->next->sv.MASV, MASV) != 0) {
+    while (curr->next != nullptr && stricmp(curr->next->sv.MASV, MASV) != 0) {
         curr = curr->next;
     }
     
@@ -123,50 +123,51 @@ bool XoaSVNoiB(PTRSV &First, char MASV[]) {
     return false;
 }
 
-void XoaSV(PTRSV &First, char MASV[], DS_LopTC dsltc) {
-    ChuanHoaMa(MASV);
+void XoaSV(PTRSV &First, const char MASV[], const DS_LopTC &dsltc) {
+    char ma[16];
+    strcpy(ma, MASV);
+    ChuanHoaMa(ma);
     if (First == nullptr) {
         cout << "[!] Loi: Danh sach sinh vien rong!\n";
         return;
     }
     
     // 1. Kiểm tra MASV có tồn tại không
-    if (TimSV(First, MASV) == nullptr) {
-        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << MASV << "'!\n";
+    if (TimSV(First, ma) == nullptr) {
+        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << ma << "'!\n";
         return;
     }
     
-    // 2. Kiểm tra SV có đang đăng ký lớp tín chỉ nào không
-    int soDK = DemDangKyByMASV(dsltc, MASV);
-    if (soDK > 0) {
-        cout << "[!] Khong the xoa! Sinh vien '" << MASV << "' dang dang ky " << soDK << " lop tin chi.\n";
-        InRangBuocSV(dsltc, MASV);
-        
-        // Kiểm tra thêm: đã có điểm chưa
-        if (SVDaCoHiem(dsltc, MASV)) {
-            cout << "[!] Sinh vien da co diem thi. Hay huy dang ky truoc khi xoa.\n";
-        } else {
-            cout << "[!] Hay huy cac dang ky cua sinh vien truoc khi xoa.\n";
-        }
+    // 2. Kiểm tra SV có đang đăng ký lớp tín chỉ HOẶC đã có điểm thi không
+    int soDK = DemDangKyByMASV(dsltc, ma);
+    bool coDiem = SVDaCoDiem(dsltc, ma);
+    if (soDK > 0 || coDiem) {
+        cout << "[!] Khong the xoa! Sinh vien '" << ma << "'";
+        if (soDK > 0) cout << " dang dang ky " << soDK << " lop tin chi.";
+        if (coDiem) cout << " da co diem thi trong he thong.";
+        cout << "\n";
+        InRangBuocSV(dsltc, ma);
         return;
     }
     
     // 3. Không có ràng buộc → cho xóa
-    if (XoaSVNoiB(First, MASV)) {
-        cout << "[OK] Da xoa sinh vien '" << MASV << "' thanh cong!\n";
+    if (XoaSVNoiB(First, ma)) {
+        cout << "[OK] Da xoa sinh vien '" << ma << "' thanh cong!\n";
     }
 }
 
-void SuaSV(PTRSV &First, char MASV[]) {
-    ChuanHoaMa(MASV);
-    PTRSV p = TimSV(First, MASV);
+void SuaSV(PTRSV &First, const char MASV[]) {
+    char ma[16];
+    strcpy(ma, MASV);
+    ChuanHoaMa(ma);
+    PTRSV p = TimSV(First, ma);
     if (p == nullptr) {
-        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << MASV << "'!\n";
+        cout << "[!] Loi: Khong tim thay sinh vien co ma '" << ma << "'!\n";
         return;
     }
     
     SinhVien temp = p->sv;
-    cout << "Sua thong tin sinh vien " << MASV << " (Nhan Enter de giu nguyen)\n";
+    cout << "Sua thong tin sinh vien " << ma << " (Nhan Enter de giu nguyen)\n";
     
     char input[51];
     
@@ -309,6 +310,20 @@ int DemSV(PTRSV First) {
     int count = 0;
     for (PTRSV p = First; p != nullptr; p = p->next) count++;
     return count;
+}
+
+PTRSV TimSVToanTruong(const DS_LOPSV &dsLop, const char MASV[], LOPSV* &lopChuaSV) {
+    lopChuaSV = nullptr;
+    for (int i = 0; i < dsLop.n; i++) {
+        if (dsLop.nodes[i] == nullptr) continue;
+        for (PTRSV p = dsLop.nodes[i]->FirstSV; p != nullptr; p = p->next) {
+            if (stricmp(p->sv.MASV, MASV) == 0) {
+                lopChuaSV = dsLop.nodes[i];
+                return p;
+            }
+        }
+    }
+    return nullptr;
 }
 
 void GiaiPhongDSSV(PTRSV &First) {

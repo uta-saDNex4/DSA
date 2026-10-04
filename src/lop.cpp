@@ -15,7 +15,7 @@ void KhoiTaoDanhSachLop(DS_LOPSV &ds) {
     }
 }
 
-int TimLop(DS_LOPSV ds, char MALOP[]) {
+int TimLop(const DS_LOPSV &ds, const char MALOP[]) {
     for (int i = 0; i < ds.n; i++) {
         if (ds.nodes[i] != nullptr && stricmp(ds.nodes[i]->MALOP, MALOP) == 0) {
             return i;
@@ -57,26 +57,30 @@ bool ThemLop(DS_LOPSV &ds, LOPSV lop) {
     return true;
 }
 
-bool SuaLop(DS_LOPSV &ds, char MALOP[], char TENLOP_MOI[]) {
-    ChuanHoaMa(MALOP);
-    int idx = TimLop(ds, MALOP);
+bool SuaLop(DS_LOPSV &ds, const char MALOP[], const char TENLOP_MOI[]) {
+    char ma[16];
+    strcpy(ma, MALOP);
+    ChuanHoaMa(ma);
+    int idx = TimLop(ds, ma);
     if (idx == -1) {
-        cout << "[!] Loi: Khong tim thay lop co ma '" << MALOP << "'!\n";
+        cout << "[!] Loi: Khong tim thay lop co ma '" << ma << "'!\n";
         return false;
     }
     
-    ChuanHoaTen(TENLOP_MOI);
-    if (KiemTraRong(TENLOP_MOI)) {
+    char tenMoi[51];
+    strcpy(tenMoi, TENLOP_MOI);
+    ChuanHoaTen(tenMoi);
+    if (KiemTraRong(tenMoi)) {
         cout << "[!] Loi: Ten lop khong duoc de trong!\n";
         return false;
     }
     
-    strcpy(ds.nodes[idx]->TENLOP, TENLOP_MOI);
-    cout << "[OK] Da cap nhat ten lop '" << MALOP << "' thanh cong!\n";
+    strcpy(ds.nodes[idx]->TENLOP, tenMoi);
+    cout << "[OK] Da cap nhat ten lop '" << ma << "' thanh cong!\n";
     return true;
 }
 
-void InDanhSachLop(DS_LOPSV ds) {
+void InDanhSachLop(const DS_LOPSV &ds) {
     if (ds.n == 0) {
         cout << "[!] Danh sach lop rong!\n";
         return;
@@ -99,7 +103,6 @@ void InDanhSachLop(DS_LOPSV ds) {
     cout << "=> Tong cong: " << ds.n << " lop.\n";
 }
 
-// Giải phóng toàn bộ danh sách lớp (kèm DSSV bên trong mỗi lớp)
 void GiaiPhongDSLop(DS_LOPSV &ds) {
     for (int i = 0; i < ds.n; i++) {
         if (ds.nodes[i] != nullptr) {
@@ -111,23 +114,25 @@ void GiaiPhongDSLop(DS_LOPSV &ds) {
     ds.n = 0;
 }
 
-bool XoaLop(DS_LOPSV &ds, char MALOP[], DS_LopTC dsltc) {
-    ChuanHoaMa(MALOP);
-    int idx = TimLop(ds, MALOP);
+bool XoaLop(DS_LOPSV &ds, const char MALOP[], const DS_LopTC &dsltc) {
+    char ma[16];
+    strcpy(ma, MALOP);
+    ChuanHoaMa(ma);
+    int idx = TimLop(ds, ma);
     if (idx == -1) {
-        cout << "[!] Loi: Khong tim thay lop co ma '" << MALOP << "'!\n";
+        cout << "[!] Loi: Khong tim thay lop co ma '" << ma << "'!\n";
         return false;
     }
     
     // Ràng buộc 1: Lớp còn sinh viên không?
     if (ds.nodes[idx]->FirstSV != nullptr) {
         int soSV = DemSV(ds.nodes[idx]->FirstSV);
-        cout << "[!] Khong the xoa! Lop '" << MALOP << "' dang co " << soSV << " sinh vien.\n";
+        cout << "[!] Khong the xoa! Lop '" << ma << "' dang co " << soSV << " sinh vien.\n";
         cout << "[!] Vui long xoa het sinh vien cua lop truoc khi xoa lop.\n";
         return false;
     }
     
-    // Ràng buộc 2: Sinh viên trong lớp có đang đăng ký tín chỉ không (dù sinh viên đã bị xóa nhưng vẫn còn node đăng ký mồ côi? Theo lý thuyết sinh viên đã xóa thì đk cũng phải xóa, nhưng check cho an toàn).
+    // Ràng buộc 2: Sinh viên trong lớp có đang đăng ký tín chỉ không
     int soDK = DemDangKyByLop(dsltc, ds.nodes[idx]->FirstSV);
     if (soDK > 0) {
         cout << "[!] Khong the xoa! Co " << soDK << " dang ky tin chi lien quan den sinh vien lop nay.\n";
@@ -136,7 +141,7 @@ bool XoaLop(DS_LOPSV &ds, char MALOP[], DS_LopTC dsltc) {
     }
     
     // Xóa lớp
-    GiaiPhongDSSV(ds.nodes[idx]->FirstSV); // An toàn
+    GiaiPhongDSSV(ds.nodes[idx]->FirstSV);
     delete ds.nodes[idx];
     
     // Dịch các phần tử mảng con trỏ
@@ -146,6 +151,6 @@ bool XoaLop(DS_LOPSV &ds, char MALOP[], DS_LopTC dsltc) {
     ds.nodes[ds.n - 1] = nullptr;
     ds.n--;
     
-    cout << "[OK] Da xoa lop '" << MALOP << "' thanh cong!\n";
+    cout << "[OK] Da xoa lop '" << ma << "' thanh cong!\n";
     return true;
 }

@@ -11,13 +11,13 @@ void ChuanHoaTen(char str[]) {
     if (n == 0) return;
     
     int i = 0;
-    while (str[i] == ' ') i++;
+    while (i < n && isspace((unsigned char)str[i])) i++;
     
     int j = 0;
     bool spaceFound = false;
     
     while (i < n) {
-        if (str[i] != ' ') {
+        if (!isspace((unsigned char)str[i])) {
             if (spaceFound && j > 0) {
                 str[j++] = ' ';
             }
@@ -42,7 +42,7 @@ void ChuanHoaMa(char str[]) {
     
     int j = 0;
     for (int i = 0; i < n; i++) {
-        if (str[i] != ' ') {
+        if (!isspace((unsigned char)str[i])) {
             str[j++] = toupper((unsigned char)str[i]);
         }
     }
@@ -54,7 +54,7 @@ bool KiemTraRong(const char str[]) {
     int n = strlen(str);
     if (n == 0) return true;
     for (int i = 0; i < n; i++) {
-        if (str[i] != ' ') return false;
+        if (!isspace((unsigned char)str[i])) return false;
     }
     return true;
 }
@@ -87,4 +87,23 @@ int NhapSoNguyen(const char thongBao[]) {
         break;
     }
     return val;
+}
+
+bool KiemTraNienKhoaHopLe(const char nk[]) {
+    if (nk == nullptr) return false;
+    if (strlen(nk) != 9) return false;
+    if (nk[4] != '-') return false;
+    
+    for (int i = 0; i < 9; i++) {
+        if (i == 4) continue;
+        if (!isdigit((unsigned char)nk[i])) return false;
+    }
+    
+    int y1 = (nk[0] - '0') * 1000 + (nk[1] - '0') * 100 + (nk[2] - '0') * 10 + (nk[3] - '0');
+    int y2 = (nk[5] - '0') * 1000 + (nk[6] - '0') * 100 + (nk[7] - '0') * 10 + (nk[8] - '0');
+    
+    if (y1 < 1900 || y1 > 2100) return false;
+    if (y2 != y1 + 1) return false;
+    
+    return true;
 }

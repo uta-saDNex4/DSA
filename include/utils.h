@@ -13,4 +13,7 @@ bool KiemTraRong(const char str[]);
 // Nhập số nguyên an toàn (chặn nhập chữ, ký tự đặc biệt)
 int NhapSoNguyen(const char thongBao[]);
 
+// Kiểm tra định dạng Niên khóa hợp lệ (dạng YYYY-YYYY với năm sau = năm trước + 1)
+bool KiemTraNienKhoaHopLe(const char nk[]);
+
 #endif
