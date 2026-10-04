@@ -11,7 +11,7 @@ void KhoiTaoCayMonHoc(TreeMonHoc &root) {
     root = nullptr;
 }
 
-TreeMonHoc TimMonHoc(TreeMonHoc root, char MAMH[]) {
+TreeMonHoc TimMonHoc(TreeMonHoc root, const char MAMH[]) {
     if (root == nullptr) return nullptr;
     int cmp = stricmp(MAMH, root->mh.MAMH);
     if (cmp == 0) return root;
@@ -79,15 +79,17 @@ void NhapMonHoc(DS_MonHoc &ds) {
     }
 }
 
-void SuaMonHoc(TreeMonHoc root, char MAMH[]) {
-    ChuanHoaMa(MAMH);
-    TreeMonHoc p = TimMonHoc(root, MAMH);
+void SuaMonHoc(TreeMonHoc root, const char MAMH[]) {
+    char ma[11];
+    strcpy(ma, MAMH);
+    ChuanHoaMa(ma);
+    TreeMonHoc p = TimMonHoc(root, ma);
     if (p == nullptr) {
-        cout << "[!] Loi: Khong tim thay mon hoc co ma '" << MAMH << "'!\n";
+        cout << "[!] Loi: Khong tim thay mon hoc co ma '" << ma << "'!\n";
         return;
     }
     
-    cout << "Sua thong tin mon hoc " << MAMH << " (Nhan Enter de giu nguyen)\n";
+    cout << "Sua thong tin mon hoc " << ma << " (Nhan Enter de giu nguyen)\n";
     char input[51];
     
     cout << "Ten mon moi (" << p->mh.TENMH << "): ";
@@ -95,13 +97,16 @@ void SuaMonHoc(TreeMonHoc root, char MAMH[]) {
     ChuanHoaTen(input);
     if (!KiemTraRong(input)) strcpy(p->mh.TENMH, input);
     
+    int stclt_moi = p->mh.STCLT;
+    int stcth_moi = p->mh.STCTH;
+
     cout << "So TC Ly Thuyet moi (" << p->mh.STCLT << "): ";
     cin.getline(input, 51);
     ChuanHoaMa(input);
     if (!KiemTraRong(input)) {
         int val = atoi(input);
         if (val >= 0) {
-            p->mh.STCLT = val;
+            stclt_moi = val;
         } else {
             cout << "[!] Gia tri khong hop le, giu nguyen.\n";
         }
@@ -113,13 +118,20 @@ void SuaMonHoc(TreeMonHoc root, char MAMH[]) {
     if (!KiemTraRong(input)) {
         int val = atoi(input);
         if (val >= 0) {
-            p->mh.STCTH = val;
+            stcth_moi = val;
         } else {
             cout << "[!] Gia tri khong hop le, giu nguyen.\n";
         }
     }
+
+    if (stclt_moi + stcth_moi == 0) {
+        cout << "[!] Loi: Tong so tin chi (LT + TH) phai lon hon 0! Khong the cap nhat tin chi bang 0.\n";
+    } else {
+        p->mh.STCLT = stclt_moi;
+        p->mh.STCTH = stcth_moi;
+    }
     
-    cout << "[OK] Da cap nhat mon hoc '" << MAMH << "' thanh cong!\n";
+    cout << "[OK] Da cap nhat mon hoc '" << ma << "' thanh cong!\n";
 }
 
 // Hàm phụ trợ tìm node thế mạng (node phải nhất của cây con trái)
@@ -133,7 +145,7 @@ void NodeTheMang(TreeMonHoc &p, TreeMonHoc &rightMost) {
     }
 }
 
-bool XoaMonHocNoiB(TreeMonHoc &root, char MAMH[], int &n) {
+bool XoaMonHocNoiB(TreeMonHoc &root, const char MAMH[], int &n) {
     if (root == nullptr) return false;
     
     int cmp = stricmp(MAMH, root->mh.MAMH);
@@ -157,27 +169,29 @@ bool XoaMonHocNoiB(TreeMonHoc &root, char MAMH[], int &n) {
     }
 }
 
-bool XoaMonHoc(TreeMonHoc &root, char MAMH[], int &n, DS_LopTC dsltc) {
-    ChuanHoaMa(MAMH);
+bool XoaMonHoc(TreeMonHoc &root, const char MAMH[], int &n, const DS_LopTC &dsltc) {
+    char ma[11];
+    strcpy(ma, MAMH);
+    ChuanHoaMa(ma);
     if (root == nullptr) {
         cout << "[!] Loi: Danh sach mon hoc rong!\n";
         return false;
     }
     
-    if (TimMonHoc(root, MAMH) == nullptr) {
-        cout << "[!] Loi: Khong tim thay mon hoc co ma '" << MAMH << "'!\n";
+    if (TimMonHoc(root, ma) == nullptr) {
+        cout << "[!] Loi: Khong tim thay mon hoc co ma '" << ma << "'!\n";
         return false;
     }
     
-    int soLopTC = DemLopTCByMAMH(dsltc, MAMH);
+    int soLopTC = DemLopTCByMAMH(dsltc, ma);
     if (soLopTC > 0) {
-        cout << "[!] Khong the xoa! Mon hoc '" << MAMH << "' dang duoc su dung boi " << soLopTC << " lop tin chi.\n";
-        InRangBuocMonHoc(dsltc, MAMH);
+        cout << "[!] Khong the xoa! Mon hoc '" << ma << "' dang duoc su dung boi " << soLopTC << " lop tin chi.\n";
+        InRangBuocMonHoc(dsltc, ma);
         return false;
     }
     
-    if (XoaMonHocNoiB(root, MAMH, n)) {
-        cout << "[OK] Da xoa mon hoc '" << MAMH << "' thanh cong!\n";
+    if (XoaMonHocNoiB(root, ma, n)) {
+        cout << "[OK] Da xoa mon hoc '" << ma << "' thanh cong!\n";
         return true;
     }
     return false;

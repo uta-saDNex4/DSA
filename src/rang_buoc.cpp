@@ -4,15 +4,15 @@
 
 using namespace std;
 
-int DemDangKyByMASV(DS_LopTC dsltc, char MASV[]) {
+int DemDangKyByMASV(const DS_LopTC &dsltc, const char MASV[]) {
     int count = 0;
     for (int i = 0; i < dsltc.n; i++) {
         if (dsltc.nodes[i] == nullptr || dsltc.nodes[i]->HuyLop) continue;
         PTR_DangKy p = dsltc.nodes[i]->FirstDK;
         while (p != nullptr) {
-            if (strcmp(p->dk.MASV, MASV) == 0 && !p->dk.HuyDangKy) {
+            if (stricmp(p->dk.MASV, MASV) == 0 && !p->dk.HuyDangKy) {
                 count++;
-                break; // Đã tìm thấy trong lớp này, sang lớp kế
+                break;
             }
             p = p->next;
         }
@@ -20,12 +20,12 @@ int DemDangKyByMASV(DS_LopTC dsltc, char MASV[]) {
     return count;
 }
 
-bool SVDaCoHiem(DS_LopTC dsltc, char MASV[]) {
+bool SVDaCoDiem(const DS_LopTC &dsltc, const char MASV[]) {
     for (int i = 0; i < dsltc.n; i++) {
         if (dsltc.nodes[i] == nullptr) continue;
         PTR_DangKy p = dsltc.nodes[i]->FirstDK;
         while (p != nullptr) {
-            if (strcmp(p->dk.MASV, MASV) == 0 && p->dk.DIEM >= 0) {
+            if (stricmp(p->dk.MASV, MASV) == 0 && p->dk.DIEM >= 0) {
                 return true;
             }
             p = p->next;
@@ -34,7 +34,7 @@ bool SVDaCoHiem(DS_LopTC dsltc, char MASV[]) {
     return false;
 }
 
-int DemLopTCByMAMH(DS_LopTC dsltc, char MAMH[]) {
+int DemLopTCByMAMH(const DS_LopTC &dsltc, const char MAMH[]) {
     int count = 0;
     for (int i = 0; i < dsltc.n; i++) {
         if (dsltc.nodes[i] == nullptr) continue;
@@ -45,7 +45,7 @@ int DemLopTCByMAMH(DS_LopTC dsltc, char MAMH[]) {
     return count;
 }
 
-int DemDangKyByLop(DS_LopTC dsltc, PTRSV FirstSV) {
+int DemDangKyByLop(const DS_LopTC &dsltc, PTRSV FirstSV) {
     int count = 0;
     for (PTRSV p = FirstSV; p != nullptr; p = p->next) {
         count += DemDangKyByMASV(dsltc, p->sv.MASV);
@@ -53,21 +53,23 @@ int DemDangKyByLop(DS_LopTC dsltc, PTRSV FirstSV) {
     return count;
 }
 
-void InRangBuocSV(DS_LopTC dsltc, char MASV[]) {
+void InRangBuocSV(const DS_LopTC &dsltc, const char MASV[]) {
     cout << "  Cac rang buoc cua sinh vien '" << MASV << "':\n";
     bool coRangBuoc = false;
     for (int i = 0; i < dsltc.n; i++) {
         if (dsltc.nodes[i] == nullptr) continue;
         PTR_DangKy p = dsltc.nodes[i]->FirstDK;
         while (p != nullptr) {
-            if (strcmp(p->dk.MASV, MASV) == 0 && !p->dk.HuyDangKy) {
-                cout << "  - Dang ky lop TC ma " << dsltc.nodes[i]->MALOPTC
-                     << " (Mon: " << dsltc.nodes[i]->MAMH << ")";
-                if (p->dk.DIEM >= 0) {
-                    cout << " [DA CO DIEM: " << p->dk.DIEM << "]";
+            if (stricmp(p->dk.MASV, MASV) == 0) {
+                if (!p->dk.HuyDangKy || p->dk.DIEM >= 0) {
+                    cout << "  - Lop TC ma " << dsltc.nodes[i]->MALOPTC
+                         << " (Mon: " << dsltc.nodes[i]->MAMH << ")";
+                    if (!p->dk.HuyDangKy) cout << " [DANG DANG KY]";
+                    if (p->dk.DIEM >= 0) cout << " [DA CO DIEM: " << p->dk.DIEM << "]";
+                    if (dsltc.nodes[i]->HuyLop) cout << " [LOP BI HUY]";
+                    cout << "\n";
+                    coRangBuoc = true;
                 }
-                cout << "\n";
-                coRangBuoc = true;
             }
             p = p->next;
         }
@@ -77,13 +79,12 @@ void InRangBuocSV(DS_LopTC dsltc, char MASV[]) {
     }
 }
 
-void InRangBuocMonHoc(DS_LopTC dsltc, char MAMH[]) {
+void InRangBuocMonHoc(const DS_LopTC &dsltc, const char MAMH[]) {
     cout << "  Cac rang buoc cua mon hoc '" << MAMH << "':\n";
     bool coRangBuoc = false;
     for (int i = 0; i < dsltc.n; i++) {
         if (dsltc.nodes[i] == nullptr) continue;
         if (stricmp(dsltc.nodes[i]->MAMH, MAMH) == 0) {
-            // Đếm số SV đăng ký
             int soSVDK = 0;
             PTR_DangKy p = dsltc.nodes[i]->FirstDK;
             while (p != nullptr) {
@@ -105,7 +106,7 @@ void InRangBuocMonHoc(DS_LopTC dsltc, char MAMH[]) {
     }
 }
 
-void InRangBuocLop(DS_LopTC dsltc, PTRSV FirstSV) {
+void InRangBuocLop(const DS_LopTC &dsltc, PTRSV FirstSV) {
     cout << "  Cac sinh vien trong lop dang co dang ky:\n";
     bool coRangBuoc = false;
     for (PTRSV sv = FirstSV; sv != nullptr; sv = sv->next) {
