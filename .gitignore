@@ -1,0 +1,34 @@
+# ===== C/C++ / CMake =====
+build/
+cmake-build-*/
+*.obj
+*.o
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.lib
+CMakeCache.txt
+CMakeFiles/
+
+# ===== Visual Studio =====
+.vs/
+*.vcxproj.user
+*.sln.docstates
+
+# ===== Node / Next.js =====
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# ===== Env / secrets =====
+.env
+.env.local
+.env*.local
+
+# ===== OS / editor =====
+Thumbs.db
+Desktop.ini
+.DS_Store
