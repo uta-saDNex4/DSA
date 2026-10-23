@@ -9,12 +9,14 @@
 #include <iostream>
 #include <iomanip>
 #include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 using namespace std;
 
 // ====================================================================
 // THUẬT TOÁN SẮP XẾP NỘI BỘ (KHÔNG DÙNG STL SORT THEO RULE 1 & 7)
-// Sử dụng Insertion Sort (ổn định, tối ưu cho mảng kích thước <= 1000)
+// Sử dụng Insertion Sort (ổn định, tối ưu cho mảng kích thước nhỏ/vừa)
 // Big-O: Tốt nhất O(N), Xấu nhất O(N^2), Bộ nhớ phụ O(1)
 // ====================================================================
 
@@ -83,10 +85,11 @@ static void SapXepSinhVienDiemTB(SinhVienDiemTB ds[], int n) {
 }
 
 // Sắp xếp danh sách mã môn học theo alphabet tăng dần
-static void SapXepMaMonHoc(char dsMAMH[][11], char dsTENMH[][51], int n) {
+static void SapXepMaMonHoc(char dsMAMH[][11], char dsTENMH[][51], int dsSTC[], int n) {
     for (int i = 1; i < n; i++) {
         char keyMa[11];
         char keyTen[51];
+        int keySTC = dsSTC[i];
         strcpy(keyMa, dsMAMH[i]);
         strcpy(keyTen, dsTENMH[i]);
 
@@ -94,11 +97,32 @@ static void SapXepMaMonHoc(char dsMAMH[][11], char dsTENMH[][51], int n) {
         while (j >= 0 && stricmp(dsMAMH[j], keyMa) > 0) {
             strcpy(dsMAMH[j + 1], dsMAMH[j]);
             strcpy(dsTENMH[j + 1], dsTENMH[j]);
+            dsSTC[j + 1] = dsSTC[j];
             j--;
         }
         strcpy(dsMAMH[j + 1], keyMa);
         strcpy(dsTENMH[j + 1], keyTen);
+        dsSTC[j + 1] = keySTC;
     }
+}
+
+// Hàm nội bộ cắt bỏ khoảng trắng 2 đầu chuỗi
+static void CatKhoangTrang(char str[]) {
+    if (str == nullptr) return;
+    int len = strlen(str);
+    if (len == 0) return;
+
+    int start = 0;
+    while (start < len && isspace((unsigned char)str[start])) start++;
+
+    int end = len - 1;
+    while (end >= start && isspace((unsigned char)str[end])) end--;
+
+    int idx = 0;
+    for (int i = start; i <= end; i++) {
+        str[idx++] = str[i];
+    }
+    str[idx] = '\0';
 }
 
 
@@ -163,10 +187,10 @@ int LayDSSVDangKyLTCTheoThongTin(const DS_LopTC &dsltc, const DS_LOPSV &dslop,
     return LayDSSVDangKyLTC(dsltc, dslop, maLopTCTimThay, dsSV, maxSV);
 }
 
-// Cập nhật điểm cho 1 sinh viên trong lớp tín chỉ
+// Cập nhật điểm cho 1 sinh viên trong lớp tín chỉ (cho phép điểm 0.0 - 10.0 hoặc -1.0 để hủy điểm)
 // Big-O: O(K_DK)
 bool CapNhatDiemSinhVien(DS_LopTC &dsltc, int maLopTC, const char maSV[], float diemMoi) {
-    if (diemMoi < 0.0f || diemMoi > 10.0f) {
+    if ((diemMoi < 0.0f && diemMoi != -1.0f) || diemMoi > 10.0f) {
         return false;
     }
 
@@ -185,9 +209,9 @@ bool CapNhatDiemSinhVien(DS_LopTC &dsltc, int maLopTC, const char maSV[], float 
 
 // Giao diện nhập điểm trực tiếp trên Console (Câu i)
 void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc rootMH) {
-    cout << "\n=======================================================\n";
-    cout << "             NHAP DIEM LOP TIN CHI (CAU I)             \n";
-    cout << "=======================================================\n";
+    cout << "\n=================================================================================\n";
+    cout << "                    NHAP / CHINH SUA DIEM LOP TIN CHI (CAU I)                    \n";
+    cout << "=================================================================================\n";
 
     char nienKhoa[15];
     int hocKy = 0;
@@ -198,13 +222,13 @@ void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc root
     cin.getline(nienKhoa, sizeof(nienKhoa));
     ChuanHoaMa(nienKhoa);
     if (!KiemTraNienKhoaHopLe(nienKhoa)) {
-        cout << "[!] Nien khoa khong hop le (Dinh dang YYYY-YYYY)!\n";
+        cout << "[!] Nien khoa khong hop le (Dinh dang YYYY-YYYY, nam sau = nam truoc + 1)!\n";
         return;
     }
 
     hocKy = NhapSoNguyen("Nhap Hoc ky (1..3): ");
     if (hocKy < 1 || hocKy > 3) {
-        cout << "[!] Hoc ky khong hop le!\n";
+        cout << "[!] Hoc ky khong hop le (chi tu 1 den 3)!\n";
         return;
     }
 
@@ -233,7 +257,7 @@ void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc root
         return;
     }
     if (soLuong == -2) {
-        cout << "[!] Lop tin chi nay da bi huy, khong the nhap diem!\n";
+        cout << "[!] Lop tin chi nay da bi huy (HuyLop = true), khong the nhap diem!\n";
         return;
     }
     if (soLuong == 0) {
@@ -244,7 +268,7 @@ void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc root
     cout << "\n---------------------------------------------------------------------------------\n";
     cout << " LOP TIN CHI: " << maLopTC << " | MON: " << nodeMH->mh.TENMH << " (" << maMH << ")\n";
     cout << " Nien khoa: " << nienKhoa << " | Hoc ky: " << hocKy << " | Nhom: " << nhom << "\n";
-    cout << " Tong so sinh vien: " << soLuong << "\n";
+    cout << " Tong so sinh vien dang ky hop le: " << soLuong << "\n";
     cout << "---------------------------------------------------------------------------------\n";
     cout << left << setw(5)  << "STT"
          << setw(15) << "MASV"
@@ -266,46 +290,60 @@ void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc root
     }
     cout << "---------------------------------------------------------------------------------\n";
 
-    cout << "\n[CHU Y] Nhap diem cho tung sinh vien tu 0.0 den 10.0.\n";
-    cout << "       (Nhan Enter khong nhap gi de GIU NGUYEN diem hien tai; Nhap 'q' de thoat)\n\n";
+    cout << "\n[HUONG DAN NHAP LIEU]:\n";
+    cout << " - Nhap so thuc tu 0.0 den 10.0 de cap nhat diem cho sinh vien.\n";
+    cout << " - Nhan [Enter] de GIU NGUYEN diem hien tai.\n";
+    cout << " - Nhap 'x' hoac '-1' de XOA DIEM (ve trang thai chua thi).\n";
+    cout << " - Nhap 'q' de KET THUC som va luu cac diem da nhap.\n\n";
 
     int soCapNhat = 0;
     for (int i = 0; i < soLuong; i++) {
         while (true) {
             cout << "[" << (i + 1) << "/" << soLuong << "] "
                  << dsSV[i].MASV << " - " << dsSV[i].HO << " " << dsSV[i].TEN
-                 << " (Hien tai: ";
-            if (dsSV[i].DIEM < 0) cout << "Chua co";
+                 << " (Diem hien tai: ";
+            if (dsSV[i].DIEM < 0) cout << "--";
             else cout << fixed << setprecision(1) << dsSV[i].DIEM;
-            cout << ") -> Diem moi: ";
+            cout << ") -> Nhap diem: ";
 
             char buff[50];
             cin.getline(buff, sizeof(buff));
-            ChuanHoaTen(buff);
+            CatKhoangTrang(buff);
 
-            // Bỏ qua nếu nhấn Enter để giữ nguyên
+            // Nhấn Enter giữ nguyên điểm cũ
             if (strlen(buff) == 0) {
                 break;
             }
 
-            // Người dùng muốn dừng nhập giữa chừng
+            // Dừng tiến trình
             if (stricmp(buff, "q") == 0) {
-                cout << "[!] Da dung qua trinh nhap diem.\n";
+                cout << "[*] Dung qua trinh nhap diem theo yeu cau cua nguoi dung.\n";
                 goto KetThucNhap;
             }
 
-            // Chuyển đổi chuỗi thành số float an toàn
+            // Xóa điểm về -1
+            if (stricmp(buff, "x") == 0 || strcmp(buff, "-1") == 0) {
+                if (CapNhatDiemSinhVien(dsltc, maLopTC, dsSV[i].MASV, -1.0f)) {
+                    dsSV[i].DIEM = -1.0f;
+                    soCapNhat++;
+                    cout << "    => Da xoa diem cua sinh vien (ve trang thai chua thi).\n";
+                }
+                break;
+            }
+
+            // Chuyển đổi và kiểm tra giá trị điểm số
             char* endPtr = nullptr;
             float diem = (float)strtod(buff, &endPtr);
             if (endPtr == buff || *endPtr != '\0' || diem < 0.0f || diem > 10.0f) {
-                cout << "    [!] Diem khong hop le! Vui long nhap so thuc tu 0.0 den 10.0.\n";
+                cout << "    [!] Loi: Diem phai la so thuc trong khoang tu 0.0 den 10.0! Vui long nhap lai.\n";
                 continue;
             }
 
-            // Cập nhật vào danh sách lớp tín chỉ
+            // Cập nhật điểm vào danh sách đăng ký
             if (CapNhatDiemSinhVien(dsltc, maLopTC, dsSV[i].MASV, diem)) {
                 dsSV[i].DIEM = diem;
                 soCapNhat++;
+                cout << "    => Cap nhat thanh cong: " << fixed << setprecision(1) << diem << "\n";
             }
             break;
         }
@@ -315,12 +353,12 @@ KetThucNhap:
     if (soCapNhat > 0) {
         // Tự động lưu dữ liệu ra file dangky.txt theo Rule 7
         if (GhiFileDangKy(dsltc)) {
-            cout << "[OK] Da cap nhat va luu thanh cong diem cho " << soCapNhat << " sinh vien vao file!\n";
+            cout << "\n[OK] Da cap nhat va luu thanh cong diem cho " << soCapNhat << " sinh vien vao file!\n";
         } else {
-            cout << "[!] Cap nhat bo nho thanh cong nhung ghi file that bai!\n";
+            cout << "\n[!] Cap nhat bo nho thanh cong nhung ghi file that bai!\n";
         }
     } else {
-        cout << "[i] Khong co diem nao thay doi.\n";
+        cout << "\n[i] Khong co diem nao bi thay doi.\n";
     }
 }
 
@@ -344,7 +382,7 @@ void InBangDiemMonHocLTC_Console(const DS_LopTC &dsltc, const DS_LOPSV &dslop, T
     int soLuong = LayDSSVDangKyLTCTheoThongTin(dsltc, dslop, nkChuan, hocKy, mhChuan, nhom, dsSV, MAX_SV_DANGKY, maLopTC);
 
     if (soLuong == -1) {
-        cout << "[!] Khong tim thay lop tin chi!\n";
+        cout << "[!] Khong tim thay lop tin chi voi thong tin da nhap!\n";
         return;
     }
     if (soLuong == -2) {
@@ -356,7 +394,7 @@ void InBangDiemMonHocLTC_Console(const DS_LopTC &dsltc, const DS_LOPSV &dslop, T
     const char* tenMH = (nodeMH != nullptr) ? nodeMH->mh.TENMH : "(Khong ro ten mon)";
 
     cout << "\n=================================================================================\n";
-    cout << "                           BANG DIEM MON HOC " << tenMH << "\n";
+    cout << "                           BANG DIEM MON HOC: " << tenMH << "\n";
     cout << "             Nien khoa: " << nkChuan << "   Hoc ky: " << hocKy << "   Nhom: " << nhom << "\n";
     cout << "=================================================================================\n";
     cout << left << setw(6)  << "STT"
@@ -369,6 +407,9 @@ void InBangDiemMonHocLTC_Console(const DS_LopTC &dsltc, const DS_LOPSV &dslop, T
     if (soLuong == 0) {
         cout << "   (Lop tin chi chua co sinh vien nao dang ky hop le)\n";
     } else {
+        int soCoDiem = 0;
+        float tongDiem = 0.0f;
+
         for (int i = 0; i < soLuong; i++) {
             cout << left << setw(6)  << (i + 1)
                  << setw(16) << dsSV[i].MASV
@@ -378,8 +419,17 @@ void InBangDiemMonHocLTC_Console(const DS_LopTC &dsltc, const DS_LOPSV &dslop, T
                 cout << setw(8) << "--" << "\n";
             } else {
                 cout << fixed << setprecision(1) << setw(8) << dsSV[i].DIEM << "\n";
+                tongDiem += dsSV[i].DIEM;
+                soCoDiem++;
             }
         }
+        cout << "---------------------------------------------------------------------------------\n";
+        cout << "Tong so SV dang ky: " << soLuong
+             << " | Da co diem: " << soCoDiem;
+        if (soCoDiem > 0) {
+            cout << " | Diem TB lop: " << fixed << setprecision(2) << (tongDiem / soCoDiem);
+        }
+        cout << "\n";
     }
     cout << "=================================================================================\n\n";
 }
@@ -526,6 +576,9 @@ void InDiemTrungBinhKhoaHocLop_Console(const DS_LOPSV &dslop, const DS_LopTC &ds
     if (soLuong == 0) {
         cout << "   (Lop chua co sinh vien nao)\n";
     } else {
+        int soCoDiem = 0;
+        float tongDTBLop = 0.0f;
+
         for (int i = 0; i < soLuong; i++) {
             cout << left << setw(6)  << (i + 1)
                  << setw(16) << dsTB[i].MASV
@@ -535,8 +588,17 @@ void InDiemTrungBinhKhoaHocLop_Console(const DS_LOPSV &dslop, const DS_LopTC &ds
                 cout << setw(10) << "--" << "\n";
             } else {
                 cout << fixed << setprecision(2) << setw(10) << dsTB[i].DIEMTB << "\n";
+                tongDTBLop += dsTB[i].DIEMTB;
+                soCoDiem++;
             }
         }
+        cout << "---------------------------------------------------------------------------------\n";
+        cout << "Si so lop: " << soLuong
+             << " | So SV da tich luy diem: " << soCoDiem;
+        if (soCoDiem > 0) {
+            cout << " | Diem TB chung toan lop: " << fixed << setprecision(2) << (tongDTBLop / soCoDiem);
+        }
+        cout << "\n";
     }
     cout << "=================================================================================\n\n";
 }
@@ -566,14 +628,14 @@ bool LayBangDiemTongKetLop(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMon
     bangDiem.soMon = 0;
     bangDiem.soSV = 0;
 
-    // Bước 1: Thu thập danh sách các môn học duy nhất mà các SV trong lớp đã có điểm thi
+    // Bước 1: Thu thập danh sách các môn học duy nhất mà các SV trong lớp đã đăng ký
     for (PTRSV pSV = lop->FirstSV; pSV != nullptr; pSV = pSV->next) {
         for (int i = 0; i < dsltc.n; i++) {
             LopTinChi* ltc = dsltc.nodes[i];
             if (ltc == nullptr || ltc->HuyLop) continue;
 
             PTR_DangKy pDK = TimDangKy(ltc->FirstDK, pSV->sv.MASV);
-            if (pDK != nullptr && !pDK->dk.HuyDangKy && pDK->dk.DIEM >= 0.0f) {
+            if (pDK != nullptr && !pDK->dk.HuyDangKy) {
                 // Kiểm tra xem mã môn học đã có trong bảng điểm chưa
                 bool daCo = false;
                 for (int m = 0; m < bangDiem.soMon; m++) {
@@ -588,8 +650,10 @@ bool LayBangDiemTongKetLop(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMon
                     TreeMonHoc nodeMH = TimMonHoc(rootMH, ltc->MAMH);
                     if (nodeMH != nullptr) {
                         strcpy(bangDiem.danhSachTENMH[bangDiem.soMon], nodeMH->mh.TENMH);
+                        bangDiem.danhSachSTC[bangDiem.soMon] = nodeMH->mh.STCLT + nodeMH->mh.STCTH;
                     } else {
                         strcpy(bangDiem.danhSachTENMH[bangDiem.soMon], "");
+                        bangDiem.danhSachSTC[bangDiem.soMon] = 0;
                     }
                     bangDiem.soMon++;
                 }
@@ -598,7 +662,7 @@ bool LayBangDiemTongKetLop(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMon
     }
 
     // Sắp xếp các môn học theo thứ tự Mã môn học tăng dần
-    SapXepMaMonHoc(bangDiem.danhSachMAMH, bangDiem.danhSachTENMH, bangDiem.soMon);
+    SapXepMaMonHoc(bangDiem.danhSachMAMH, bangDiem.danhSachTENMH, bangDiem.danhSachSTC, bangDiem.soMon);
 
     // Bước 2: Với mỗi sinh viên, lấy điểm lớn nhất của từng môn trong danhSachMAMH
     for (PTRSV pSV = lop->FirstSV; pSV != nullptr; pSV = pSV->next) {
@@ -638,7 +702,7 @@ bool LayBangDiemTongKetLop(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMon
     return true;
 }
 
-// In bảng điểm tổng kết ra Console (Câu l)
+// In bảng điểm tổng kết ra Console (Câu l) - Hỗ trợ phân trang cột chống vỡ màn hình
 void InBangDiemTongKetLop_Console(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMonHoc rootMH,
                                  const char maLop[]) {
     BangDiemTongKet bangDiem;
@@ -659,49 +723,77 @@ void InBangDiemTongKetLop_Console(const DS_LOPSV &dslop, const DS_LopTC &dsltc, 
     }
 
     if (bangDiem.soMon == 0) {
-        cout << "   (Cac sinh vien thuoc lop nay chua co diem thi cua bat ky mon hoc nao)\n";
+        cout << "   (Cac sinh vien thuoc lop nay chua dang ky mon hoc nao)\n";
         cout << "=================================================================================\n\n";
         return;
     }
 
-    // In tiêu đề các cột
-    cout << left << setw(5)  << "STT"
-         << setw(14) << "Ma SV"
-         << setw(26) << "Ho Ten";
+    // Phân trang môn học: Mỗi trang hiển thị tối đa 6 cột môn để không vượt quá chiều rộng Console
+    const int MON_MOI_TRANG = 6;
+    int tongSoTrang = (bangDiem.soMon + MON_MOI_TRANG - 1) / MON_MOI_TRANG;
 
-    for (int m = 0; m < bangDiem.soMon; m++) {
-        cout << setw(10) << bangDiem.danhSachMAMH[m];
-    }
-    cout << "\n";
+    for (int trang = 0; trang < tongSoTrang; trang++) {
+        int batDau = trang * MON_MOI_TRANG;
+        int ketThuc = batDau + MON_MOI_TRANG;
+        if (ketThuc > bangDiem.soMon) ketThuc = bangDiem.soMon;
 
-    // In đường kẻ phân cách
-    cout << "-----+-------------+-------------------------";
-    for (int m = 0; m < bangDiem.soMon; m++) {
-        cout << "+---------";
-    }
-    cout << "\n";
+        if (tongSoTrang > 1) {
+            cout << "\n>>> PHAN DOAN " << (trang + 1) << "/" << tongSoTrang
+                 << " (Mon " << (batDau + 1) << " den " << ketThuc << " trong tong so " << bangDiem.soMon << " mon):\n";
+        }
 
-    // In từng dòng sinh viên
-    for (int i = 0; i < bangDiem.soSV; i++) {
-        char hoTen[70];
-        strcpy(hoTen, bangDiem.dsSV[i].HO);
-        strcat(hoTen, " ");
-        strcat(hoTen, bangDiem.dsSV[i].TEN);
+        // In tiêu đề các cột
+        cout << left << setw(5)  << "STT"
+             << setw(13) << "Ma SV"
+             << setw(24) << "Ho Ten";
 
-        cout << left << setw(5)  << (i + 1)
-             << setw(14) << bangDiem.dsSV[i].MASV
-             << setw(26) << hoTen;
+        for (int m = batDau; m < ketThuc; m++) {
+            cout << setw(10) << bangDiem.danhSachMAMH[m];
+        }
+        cout << "\n";
 
-        for (int m = 0; m < bangDiem.soMon; m++) {
-            float d = bangDiem.dsSV[i].diemMon[m];
-            if (d < 0.0f) {
-                cout << setw(10) << ""; // Ô trống nếu chưa có điểm
-            } else {
-                cout << fixed << setprecision(1) << setw(10) << d;
+        // In đường kẻ phân cách
+        cout << "----+------------+-----------------------";
+        for (int m = batDau; m < ketThuc; m++) {
+            cout << "+---------";
+        }
+        cout << "\n";
+
+        // In từng dòng sinh viên
+        for (int i = 0; i < bangDiem.soSV; i++) {
+            char hoTen[70];
+            strcpy(hoTen, bangDiem.dsSV[i].HO);
+            strcat(hoTen, " ");
+            strcat(hoTen, bangDiem.dsSV[i].TEN);
+
+            cout << left << setw(5)  << (i + 1)
+                 << setw(13) << bangDiem.dsSV[i].MASV
+                 << setw(24) << hoTen;
+
+            for (int m = batDau; m < ketThuc; m++) {
+                float d = bangDiem.dsSV[i].diemMon[m];
+                if (d < 0.0f) {
+                    cout << setw(10) << ""; // Để trống nếu chưa có điểm
+                } else {
+                    cout << fixed << setprecision(1) << setw(10) << d;
+                }
             }
+            cout << "\n";
+        }
+        cout << "----+------------+-----------------------";
+        for (int m = batDau; m < ketThuc; m++) {
+            cout << "+---------";
         }
         cout << "\n";
     }
 
-    cout << "=================================================================================\n\n";
+    // In bảng chú giải Mã môn học -> Tên môn học & Tín chỉ
+    cout << "\n---------------------------------------------------------------------------------\n";
+    cout << "CHU GIAI MA MON HOC:\n";
+    for (int m = 0; m < bangDiem.soMon; m++) {
+        cout << "  - [" << left << setw(8) << bangDiem.danhSachMAMH[m] << "]: "
+             << setw(35) << bangDiem.danhSachTENMH[m]
+             << " (" << bangDiem.danhSachSTC[m] << " TC)\n";
+    }
+    cout << "---------------------------------------------------------------------------------\n\n";
 }

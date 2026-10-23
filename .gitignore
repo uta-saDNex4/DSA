@@ -3,6 +3,7 @@
 *.exe
 *.tmp
 *.out
+*.gch
 .vscode/
 .idea/
 build/

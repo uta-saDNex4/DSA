@@ -91,6 +91,7 @@ bool DocFileMonHoc(DS_MonHoc &ds, const char* filename) {
     MonHoc mh;
     char buffer[256];
     int dong = 0;
+    (void)dong;
 
     while (inFile.getline(buffer, 256)) {
         if (KiemTraRong(buffer)) continue;
