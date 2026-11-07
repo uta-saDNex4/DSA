@@ -279,7 +279,7 @@ void TabLopTinChi::onMoLopTC() {
     }
 
     QDialog dlg(this);
-    dlg.setWindowTitle("➕ Mở Lớp Tín Chỉ Mới (Câu a)");
+    dlg.setWindowTitle("➕ Mở Lớp Tín Chỉ Mới");
     dlg.setMinimumWidth(450);
 
     QFormLayout *form = new QFormLayout(&dlg);
@@ -515,7 +515,7 @@ void TabLopTinChi::onHuyLopThieuSiSo() {
     int filterHK = cboHocKy->currentData().toInt();
 
     if (filterNK == "-- Tất cả --" || filterHK <= 0) {
-        QMessageBox::information(this, "Hướng dẫn (Câu h)",
+        QMessageBox::information(this, "Hướng dẫn",
                                  "Vui lòng chọn cụ thể Niên khóa và Học kỳ ở thanh lọc phía trên trước khi thực hiện chức năng hủy lớp thiếu sĩ số!");
         return;
     }
@@ -549,7 +549,7 @@ void TabLopTinChi::onHuyLopThieuSiSo() {
         return;
     }
 
-    auto ret = QMessageBox::warning(this, "Xác nhận Hủy Lớp Tín Chỉ (Câu h)",
+    auto ret = QMessageBox::warning(this, "Xác nhận Hủy Lớp Tín Chỉ",
                                     QString("Tìm thấy %1 lớp tín chỉ có số SV đăng ký < Min trong Niên khóa %2, Học kỳ %3:\n\n%4\n"
                                             "Bạn có chắc chắn muốn HỦY TẤT CẢ các lớp tín chỉ trên không?")
                                         .arg(countThieu).arg(filterNK).arg(filterHK).arg(danhSachHuy),
@@ -583,7 +583,7 @@ void TabLopTinChi::onXemDSSVDangKy() {
     QString tenMH = mhNode ? QString::fromUtf8(mhNode->mh.TENMH) : "(Không tìm thấy)";
 
     QDialog dlg(this);
-    dlg.setWindowTitle(QString("📋 [CÂU B] DANH SÁCH SINH VIÊN ĐĂNG KÝ LỚP TÍN CHỈ %1").arg(maLTC));
+    dlg.setWindowTitle(QString("📋 DANH SÁCH SINH VIÊN ĐĂNG KÝ LỚP TÍN CHỈ #%1").arg(maLTC));
     dlg.resize(750, 480);
 
     QVBoxLayout *layout = new QVBoxLayout(&dlg);

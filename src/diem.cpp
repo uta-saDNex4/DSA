@@ -210,7 +210,7 @@ bool CapNhatDiemSinhVien(DS_LopTC &dsltc, int maLopTC, const char maSV[], float 
 // Giao diện nhập điểm trực tiếp trên Console (Câu i)
 void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc rootMH) {
     cout << "\n=================================================================================\n";
-    cout << "                    NHAP / CHINH SUA DIEM LOP TIN CHI (CAU I)                    \n";
+    cout << "                    NHAP / CHINH SUA DIEM LOP TIN CHI                    \n";
     cout << "=================================================================================\n";
 
     char nienKhoa[15];

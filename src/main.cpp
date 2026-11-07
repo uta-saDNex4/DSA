@@ -24,10 +24,10 @@ void MenuMonHoc(DS_MonHoc &dsMH, const DS_LopTC &dsLTC) {
         cout << "\n=======================================================\n";
         cout << "        PHAN HE MON HOC (CAY NHI PHAN TIM KIEM)        \n";
         cout << "=======================================================\n";
-        cout << " 1. [Cau e] Them mon hoc moi vao cay BST\n";
-        cout << " 2. [Cau e] Hieu chinh thong tin mon hoc\n";
-        cout << " 3. [Cau e] Xoa mon hoc (co kiem tra rang buoc LTC)\n";
-        cout << " 4. [Cau f] In danh sach mon hoc (Tang dan theo Ten mon)\n";
+        cout << " 1. Them mon hoc moi\n";
+        cout << " 2. Hieu chinh thong tin mon hoc\n";
+        cout << " 3. Xoa mon hoc\n";
+        cout << " 4. In danh sach mon hoc (tang dan theo ten)\n";
         cout << " 0. Quay lai Menu chinh\n";
         cout << "=======================================================\n";
         int chon = NhapSoNguyen("Chon chuc nang (0..4): ");
@@ -73,10 +73,10 @@ void MenuLopVaSinhVien(DS_LOPSV &dsLop, const DS_LopTC &dsLTC) {
         cout << "=======================================================\n";
         cout << " 1. Them lop sinh vien moi\n";
         cout << " 2. In danh sach tat ca cac lop sinh vien\n";
-        cout << " 3. [Cau c] Nhap / Cap nhat sinh vien cua 1 lop\n";
-        cout << " 4. [Cau c] Hieu chinh thong tin 1 sinh vien\n";
-        cout << " 5. [Cau c] Xoa 1 sinh vien khoi lop\n";
-        cout << " 6. [Cau d] In DSSV cua 1 lop (Alphabet Ma SV)\n";
+        cout << " 3. Nhap / cap nhat sinh vien cua 1 lop\n";
+        cout << " 4. Hieu chinh thong tin 1 sinh vien\n";
+        cout << " 5. Xoa 1 sinh vien khoi lop\n";
+        cout << " 6. In danh sach sinh vien cua 1 lop (theo Ma SV)\n";
         cout << " 0. Quay lai Menu chinh\n";
         cout << "=======================================================\n";
         int chon = NhapSoNguyen("Chon chuc nang (0..6): ");
@@ -170,12 +170,12 @@ void MenuLopTinChi(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc rootMH) {
         cout << "\n=======================================================\n";
         cout << "        PHAN HE QUAN LY LOP TIN CHI (MANG CON TRO)     \n";
         cout << "=======================================================\n";
-        cout << " 1. [Cau a] Mo lop tin chi moi\n";
-        cout << " 2. [Cau a] Hieu chinh thong tin lop tin chi\n";
-        cout << " 3. [Cau a] Xoa lop tin chi\n";
+        cout << " 1. Mo lop tin chi moi\n";
+        cout << " 2. Hieu chinh thong tin lop tin chi\n";
+        cout << " 3. Xoa lop tin chi\n";
         cout << " 4. In danh sach tat ca cac lop tin chi\n";
-        cout << " 5. [Cau b] In danh sach SV da dang ky 1 lop tin chi\n";
-        cout << " 6. [Cau h] Tu dong huy cac lop tin chi < SoSVMin\n";
+        cout << " 5. In danh sach sinh vien da dang ky 1 lop tin chi\n";
+        cout << " 6. Tu dong huy cac lop tin chi khong du dieu kien\n";
         cout << " 0. Quay lai Menu chinh\n";
         cout << "=======================================================\n";
         int chon = NhapSoNguyen("Chon chuc nang (0..6): ");
@@ -271,7 +271,7 @@ void MenuLopTinChi(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc rootMH) {
 // 4. Phân hệ Đăng ký lớp tín chỉ (Câu g)
 void MenuDangKyLTC(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc rootMH) {
     cout << "\n=======================================================\n";
-    cout << "           DANG KY LOP TIN CHI CHO SINH VIEN (CAU G)   \n";
+    cout << "           DANG KY LOP TIN CHI CHO SINH VIEN\n";
     cout << "=======================================================\n";
     char maSV[16];
     cout << "Nhap Ma sinh vien: ";
@@ -294,10 +294,10 @@ void MenuDiemSoVaThongKe(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc root
         cout << "\n=======================================================\n";
         cout << "        PHAN HE DIEM SO & BAO CAO THONG KE             \n";
         cout << "=======================================================\n";
-        cout << " 1. [Cau i] Nhap / Chinh sua diem lop tin chi\n";
-        cout << " 2. [Cau j] In bang diem mon hoc cua 1 lop tin chi\n";
-        cout << " 3. [Cau k] In bang thong ke diem trung binh khoa hoc cua 1 lop\n";
-        cout << " 4. [Cau l] In bang diem tong ket cac mon cua cac SV thuoc 1 lop\n";
+        cout << " 1. Nhap / chinh sua diem lop tin chi\n";
+        cout << " 2. In bang diem mon hoc cua 1 lop tin chi\n";
+        cout << " 3. In bang thong ke diem trung binh khoa hoc cua 1 lop\n";
+        cout << " 4. In bang diem tong ket cac mon cua 1 lop\n";
         cout << " 0. Quay lai Menu chinh\n";
         cout << "=======================================================\n";
         int chon = NhapSoNguyen("Chon chuc nang (0..4): ");
@@ -309,7 +309,7 @@ void MenuDiemSoVaThongKe(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc root
                 break;
             }
             case 2: {
-                cout << "\n--- IN BANG DIEM MON HOC CUA 1 LOP TIN CHI (CAU J) ---\n";
+                cout << "\n--- IN BANG DIEM MON HOC CUA 1 LOP TIN CHI ---\n";
                 char nienKhoa[15], maMH[15];
                 cout << "Nhap Nien khoa (vi du: 2025-2026): ";
                 cin.getline(nienKhoa, sizeof(nienKhoa));
@@ -325,7 +325,7 @@ void MenuDiemSoVaThongKe(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc root
                 break;
             }
             case 3: {
-                cout << "\n--- BANG THONG KE DIEM TRUNG BINH KHOA HOC (CAU K) ---\n";
+                cout << "\n--- BANG THONG KE DIEM TRUNG BINH KHOA HOC ---\n";
                 char maLop[16];
                 cout << "Nhap Ma lop can thong ke: ";
                 cin.getline(maLop, sizeof(maLop));
@@ -334,7 +334,7 @@ void MenuDiemSoVaThongKe(DS_LopTC &dsLTC, const DS_LOPSV &dsLop, TreeMonHoc root
                 break;
             }
             case 4: {
-                cout << "\n--- BANG DIEM TONG KET CAC MON CUA 1 LOP (CAU L) ---\n";
+                cout << "\n--- BANG DIEM TONG KET CAC MON CUA 1 LOP ---\n";
                 char maLop[16];
                 cout << "Nhap Ma lop can xem bang diem: ";
                 cin.getline(maLop, sizeof(maLop));
@@ -355,13 +355,13 @@ void InMenuChinh() {
     cout << "             CHUONG TRINH QUAN LY DIEM SINH VIEN THEO HE TIN CHI                \n";
     cout << "                          (MON CTDL & GT - N24)                                 \n";
     cout << "================================================================================\n";
-    cout << " 1. [MON HOC]      Nhap, Hieu chinh, Xoa, In danh sach mon hoc (Cau e, f)\n";
-    cout << " 2. [LOP & SV]     Nhap sinh vien theo lop, In DSSV theo Ma (Cau c, d)\n";
-    cout << " 3. [LOP TIN CHI]  Mo lop, Hieu chinh, Xoa, In DSSV da DK, Huy lop (Cau a, b, h)\n";
-    cout << " 4. [DANG KY LTC]  Sinh vien dang ky / Huy dang ky lop tin chi (Cau g)\n";
-    cout << " 5. [DIEM SO & TK] Nhap diem, In bang diem, Diem TB, Bang tong ket (Cau i, j, k, l)\n";
-    cout << " 6. [LUU DU LIEU]  Luu toan bo du lieu ra cac file text (thu muc data/)\n";
-    cout << " 7. [NAP DU LIEU]  Nap lai toan bo du lieu tu file text\n";
+    cout << " 1. [MON HOC]      Nhap, hieu chinh, xoa, in danh sach mon hoc\n";
+    cout << " 2. [LOP & SV]     Nhap sinh vien theo lop, in DSSV theo ma\n";
+    cout << " 3. [LOP TIN CHI]  Mo lop, hieu chinh, xoa, in DSSV da DK, huy lop\n";
+    cout << " 4. [DANG KY LTC]  Sinh vien dang ky / huy dang ky lop tin chi\n";
+    cout << " 5. [DIEM SO & TK] Nhap diem, in bang diem, diem TB, bang tong ket\n";
+    cout << " 6. [LUU DU LIEU]  Luu toan bo du lieu he thong\n";
+    cout << " 7. [NAP DU LIEU]  Nap lai toan bo du lieu he thong\n";
     cout << " 0. Thoat chuong trinh (Tu dong luu toan bo du lieu)\n";
     cout << "================================================================================\n";
 }
@@ -378,7 +378,7 @@ int main() {
     KhoiTaoDS_LopTC(dsLTC);
 
     // Đọc toàn bộ dữ liệu từ các file text trong thư mục data/ (Rule 7)
-    cout << "[*] Dang tai du lieu tu thu muc data/...\n";
+    cout << "[*] Dang tai du lieu he thong...\n";
     if (DocToanBoDuLieu(dsMH, dsLop, dsLTC)) {
         cout << "[OK] Tai du lieu thanh cong!\n";
         cout << "   - So mon hoc: " << dsMH.n << "\n";
@@ -416,7 +416,7 @@ int main() {
             }
             case 6: {
                 if (LuuToanBoDuLieu(dsMH.root, dsLop, dsLTC)) {
-                    cout << "[OK] Da luu toan bo du lieu thanh cong vao thu muc data/!\n";
+                    cout << "[OK] Da luu toan bo du lieu thanh cong!\n";
                 } else {
                     cout << "[!] Luu du lieu that bai!\n";
                 }

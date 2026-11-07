@@ -128,7 +128,7 @@ void TabMonHoc::hienThiDanhSach(TreeMonHoc* arr, int count, const QString &keywo
         table->item(row, 5)->setTextAlignment(Qt::AlignCenter);
     }
 
-    statusLabel->setText(QString("Hiển thị %1 / %2 môn học trên cây BST (đã sắp xếp tăng dần theo Tên)").arg(table->rowCount()).arg(count));
+    statusLabel->setText(QString("Hiển thị %1 / %2 môn học (sắp xếp tăng dần theo tên)").arg(table->rowCount()).arg(count));
 }
 
 void TabMonHoc::onSearchChanged(const QString &text) {
@@ -147,7 +147,7 @@ void TabMonHoc::onSearchChanged(const QString &text) {
 
 void TabMonHoc::onThemMonHoc() {
     QDialog dlg(this);
-    dlg.setWindowTitle("Thêm Môn Học Mới (Cây BST)");
+    dlg.setWindowTitle("Thêm Môn Học Mới");
     dlg.resize(420, 260);
 
     QFormLayout *form = new QFormLayout(&dlg);
@@ -222,7 +222,7 @@ void TabMonHoc::onThemMonHoc() {
 
     if (dlg.exec() == QDialog::Accepted) {
         loadData();
-        QMessageBox::information(this, "Thành công", "Đã thêm môn học mới vào cây BST thành công!");
+        QMessageBox::information(this, "Thành công", "Đã thêm môn học mới thành công!");
     }
 }
 
@@ -241,7 +241,7 @@ void TabMonHoc::onSuaMonHoc() {
     DS_MonHoc &ds = AppData::instance().dsMH;
     TreeMonHoc node = TimMonHoc(ds.root, cMa);
     if (!node) {
-        QMessageBox::warning(this, "Lỗi", "Không tìm thấy môn học trên cây BST!");
+        QMessageBox::warning(this, "Lỗi", "Không tìm thấy môn học!");
         return;
     }
 
@@ -338,7 +338,7 @@ void TabMonHoc::onXoaMonHoc() {
             loadData();
             QMessageBox::information(this, "Thành công", QString("Đã xóa môn học '%1' thành công!").arg(maHienTai));
         } else {
-            QMessageBox::warning(this, "Lỗi", "Không tìm thấy môn học trên cây BST để xóa!");
+            QMessageBox::warning(this, "Lỗi", "Không tìm thấy môn học để xóa!");
         }
     }
 }

@@ -25,7 +25,7 @@ void TabDangKy::setupUI() {
     // ==========================================
     // TOP CARD: TRA CỨU SINH VIÊN & HỌC KỲ
     // ==========================================
-    QGroupBox *grpTop = new QGroupBox("🔍 TRA CỨU SINH VIÊN & CHỌN HỌC KỲ ĐĂNG KÝ (CÂU G)", this);
+    QGroupBox *grpTop = new QGroupBox("🔍 TRA CỨU SINH VIÊN & CHỌN HỌC KỲ ĐĂNG KÝ", this);
     grpTop->setStyleSheet("QGroupBox { font-weight: bold; color: #740d18; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; padding-top: 14px; } "
                           "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }");
     QVBoxLayout *grpLayout = new QVBoxLayout(grpTop);

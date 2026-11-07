@@ -242,13 +242,9 @@ void MainWindow::onTabChanged(int index) {
 
 void MainWindow::onSaveAllData() {
     AppData::instance().saveAll();
-    statusMsgLabel->setText("✅ Đã lưu toàn bộ dữ liệu vào các file data/*.txt thành công!");
+    statusMsgLabel->setText("✅ Đã lưu toàn bộ dữ liệu thành công!");
     updateStatusBarStats();
-    QMessageBox::information(this, "Lưu dữ liệu",
-                             "Đã lưu thành công toàn bộ dữ liệu vào hệ thống:\n"
-                             "- data/monhoc.txt (Cây nhị phân tìm kiếm)\n"
-                             "- data/lop.txt & data/sinhvien.txt (Mảng tuyến tính & DSLK đơn)\n"
-                             "- data/loptc.txt & data/dangky.txt (Mảng con trỏ & DSLK đơn)");
+    QMessageBox::information(this, "Thông báo", "Đã lưu toàn bộ dữ liệu thành công!");
 }
 
 void MainWindow::onReloadData() {

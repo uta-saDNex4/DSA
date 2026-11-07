@@ -29,10 +29,10 @@ void TabDiem::setupUI() {
         "QTabBar::tab:selected { background: #be3142; color: white; }"
     );
 
-    subTabs->addTab(createSubTabNhapDiem(), "✍️ Nhập Điểm Thi (Câu i)");
-    subTabs->addTab(createSubTabBangDiemMH(), "📋 Bảng Điểm Môn Học (Câu j)");
-    subTabs->addTab(createSubTabDTBKhoaHoc(), "🎯 Điểm Trung Bình Khóa Học (Câu k)");
-    subTabs->addTab(createSubTabTongKet(), "📊 Bảng Điểm Tổng Kết Ma Trận (Câu l)");
+    subTabs->addTab(createSubTabNhapDiem(), "✍️ Nhập Điểm Thi");
+    subTabs->addTab(createSubTabBangDiemMH(), "📋 Bảng Điểm Môn Học");
+    subTabs->addTab(createSubTabDTBKhoaHoc(), "🎯 Điểm Trung Bình Khóa Học");
+    subTabs->addTab(createSubTabTongKet(), "📊 Bảng Điểm Tổng Kết");
 
     mainLayout->addWidget(subTabs);
 }
@@ -221,7 +221,7 @@ void TabDiem::onLuuDiemThi() {
     }
 
     AppData::instance().saveAll();
-    QMessageBox::information(this, "Thành công (Câu i)",
+    QMessageBox::information(this, "Thành công",
                              QString("Đã lưu bảng điểm thành công cho %1 sinh viên của Lớp Tín Chỉ mã %2!")
                                  .arg(soLuongLuu).arg(currentMaLTC_Nhap));
 }
@@ -324,7 +324,7 @@ void TabDiem::onXemBangDiemMonHoc() {
     TreeMonHoc mhNode = TimMonHoc(dsMH.root, mamh.toUtf8().constData());
     QString tenMH = mhNode ? QString::fromUtf8(mhNode->mh.TENMH) : mamh;
 
-    lblInfo_BD->setText(QString("🎓 <b>BẢNG ĐIỂM MÔN HỌC (CÂU J):</b> %1 | Niên khóa: %2 - HK%3 - Nhóm: %4 | Tổng SV: <b>%5</b>")
+    lblInfo_BD->setText(QString("🎓 <b>BẢNG ĐIỂM MÔN HỌC:</b> %1 | Niên khóa: %2 - HK%3 - Nhóm: %4 | Tổng SV: <b>%5</b>")
                             .arg(tenMH).arg(nk).arg(hk).arg(nhom).arg(count));
     lblInfo_BD->setStyleSheet("color: #1e293b; font-size: 13px; font-weight: 500;");
 
@@ -504,7 +504,7 @@ QWidget* TabDiem::createSubTabTongKet() {
     cboLop_TK = new QComboBox(tab);
     cboLop_TK->setMinimumWidth(220);
 
-    QPushButton *btnXem = new QPushButton("📊 Trích Xuất Bảng Điểm Ma Trận (Câu l)", tab);
+    QPushButton *btnXem = new QPushButton("📊 Trích Xuất Bảng Điểm", tab);
     btnXem->setMinimumHeight(32);
     btnXem->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
     connect(btnXem, &QPushButton::clicked, this, &TabDiem::onXemBangDiemTongKet);
@@ -555,7 +555,7 @@ void TabDiem::onXemBangDiemTongKet() {
     }
 
     lblInfo_TK->setText(
-        QString("📊 <b>BẢNG ĐIỂM TỔNG KẾT (CÂU L) - LỚP: %1</b> (%2) | Số môn: <b>%3</b> | Số SV: <b>%4</b>")
+        QString("📊 <b>BẢNG ĐIỂM TỔNG KẾT - LỚP: %1</b> (%2) | Số môn: <b>%3</b> | Số SV: <b>%4</b>")
             .arg(bangDiem->MALOP)
             .arg(QString::fromUtf8(bangDiem->TENLOP))
             .arg(bangDiem->soMon)

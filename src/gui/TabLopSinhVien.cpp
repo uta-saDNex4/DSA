@@ -92,8 +92,8 @@ void TabLopSinhVien::setupUI() {
     QGroupBox *grpSort = new QGroupBox("Chế độ sắp xếp:", rightPanel);
     QHBoxLayout *sortLayout = new QHBoxLayout(grpSort);
     sortLayout->setContentsMargins(8, 4, 8, 4);
-    radSortTenHo = new QRadioButton("Tăng dần Tên + Họ (Câu c)", grpSort);
-    radSortMaSV = new QRadioButton("Alphabet Mã SV (Câu d)", grpSort);
+    radSortTenHo = new QRadioButton("Tăng dần theo Tên + Họ", grpSort);
+    radSortMaSV = new QRadioButton("Theo Mã Sinh Viên", grpSort);
     radSortTenHo->setChecked(true);
     connect(radSortTenHo, &QRadioButton::toggled, this, &TabLopSinhVien::onSortModeChanged);
     sortLayout->addWidget(radSortTenHo);
@@ -121,7 +121,7 @@ void TabLopSinhVien::setupUI() {
 
     // SV action buttons
     QHBoxLayout *svBtnLayout = new QHBoxLayout();
-    QPushButton *btnThemSV = new QPushButton("➕ Thêm Sinh Viên (Câu c)", rightPanel);
+    QPushButton *btnThemSV = new QPushButton("➕ Thêm Sinh Viên", rightPanel);
     QPushButton *btnSuaSV = new QPushButton("✏️ Hiệu Chỉnh Sinh Viên", rightPanel);
     QPushButton *btnXoaSV = new QPushButton("🗑️ Xóa Sinh Viên", rightPanel);
 
@@ -466,7 +466,7 @@ void TabLopSinhVien::onThemSV() {
     LOPSV &lop = dsLop.nodes[currentClassIdx];
 
     QDialog dlg(this);
-    dlg.setWindowTitle(QString("Thêm Sinh Viên - Lớp %1 (Câu c)").arg(QString::fromUtf8(lop.MALOP)));
+    dlg.setWindowTitle(QString("Thêm Sinh Viên - Lớp %1").arg(QString::fromUtf8(lop.MALOP)));
     dlg.resize(440, 260);
 
     QFormLayout *form = new QFormLayout(&dlg);

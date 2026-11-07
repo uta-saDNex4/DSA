@@ -123,7 +123,7 @@ bool XoaLopTC(DS_LopTC &ds, int maLopTC) {
     if (soSVDK > 0) {
         cout << "[!] Khong the xoa lop tin chi ma " << maLopTC
              << " vi da co " << soSVDK << " sinh vien dang ky!\n";
-        cout << "    (Goi y: Hay su dung chuc nang Huy lop tin chi o Cau h de bao toan lich su)\n";
+        cout << "    (Goi y: Hay su dung chuc nang Huy lop tin chi de bao toan lich su)\n";
         return false;
     }
 

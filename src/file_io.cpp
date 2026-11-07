@@ -479,7 +479,7 @@ bool LuuToanBoDuLieu(TreeMonHoc rootMH, const DS_LOPSV &dsLop, const DS_LopTC &d
     bool ok5 = GhiFileDangKy(dsLTC);
 
     if (ok1 && ok2 && ok3 && ok4 && ok5) {
-        cout << "[OK] Luu toan bo du lieu thanh cong vao thu muc 'data/'.\n";
+        cout << "[OK] Luu toan bo du lieu thanh cong.\n";
         return true;
     }
     cout << "[!] Co loi xay ra khi luu mot so file du lieu!\n";
@@ -487,7 +487,7 @@ bool LuuToanBoDuLieu(TreeMonHoc rootMH, const DS_LOPSV &dsLop, const DS_LopTC &d
 }
 
 bool DocToanBoDuLieu(DS_MonHoc &dsMH, DS_LOPSV &dsLop, DS_LopTC &dsLTC) {
-    cout << "\n[...] Dang doc du lieu he thong tu thu muc 'data/'...\n";
+    cout << "\n[...] Dang doc du lieu he thong...\n";
     bool ok1 = DocFileMonHoc(dsMH);
     bool ok2 = DocFileLop(dsLop);
     bool ok3 = DocFileSinhVien(dsLop);
