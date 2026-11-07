@@ -81,11 +81,11 @@ void MainWindow::setupUI() {
     tabDangKy = new TabDangKy(tabWidget);
     tabDiem = new TabDiem(tabWidget);
 
-    tabWidget->addTab(tabMonHoc, "📚 1. Môn Học (e, f)");
-    tabWidget->addTab(tabLopSinhVien, "🎓 2. Lớp & Sinh Viên (c, d)");
-    tabWidget->addTab(tabLopTinChi, "📋 3. Lớp Tín Chỉ (a, b, h)");
-    tabWidget->addTab(tabDangKy, "📝 4. Đăng Ký Tín Chỉ (g)");
-    tabWidget->addTab(tabDiem, "📊 5. Điểm & Báo Cáo (i, j, k, l)");
+    tabWidget->addTab(tabMonHoc, "📚 1. Môn Học");
+    tabWidget->addTab(tabLopSinhVien, "🎓 2. Lớp & Sinh Viên");
+    tabWidget->addTab(tabLopTinChi, "📋 3. Lớp Tín Chỉ");
+    tabWidget->addTab(tabDangKy, "📝 4. Đăng Ký Tín Chỉ");
+    tabWidget->addTab(tabDiem, "📊 5. Điểm & Báo Cáo");
 
     connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::onTabChanged);
 
