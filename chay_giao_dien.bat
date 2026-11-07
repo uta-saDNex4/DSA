@@ -1,12 +1,13 @@
 @echo off
-chcp 65001 >nul
-title Hệ Thống Quản Lý Điểm Sinh Viên Hệ Tín Chỉ - PTIT Qt6
+setlocal
 cd /d "%~dp0"
 set "PATH=C:\msys64\mingw64\bin;%PATH%"
+
 if not exist "build\DSA_QtApp.exe" (
-    echo [!] Chưa tìm thấy build\DSA_QtApp.exe. Đang tiến hành biên dịch...
-    cmake -B build -G "Ninja" -DCMAKE_CXX_COMPILER="C:/msys64/mingw64/bin/c++.exe"
+    echo [!] Chua tim thay build\DSA_QtApp.exe. Dang bien dich...
+    cmake -B build -G "Ninja"
     cmake --build build
 )
-echo [*] Đang khởi chạy ứng dụng giao diện đồ họa Qt6...
-start "" "build\DSA_QtApp.exe"
+
+echo [*] Dang khoi chay DSA_QtApp.exe...
+start "" "%~dp0build\DSA_QtApp.exe"
