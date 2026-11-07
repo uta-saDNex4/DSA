@@ -27,7 +27,7 @@ struct LOPSV {
 
 struct DS_LOPSV {
     int n = 0;
-    LOPSV *nodes[MAX_LOPSV];
+    LOPSV nodes[MAX_LOPSV];
 };
 
 // === 2. DANH SÁCH MÔN HỌC (CÂY NHỊ PHÂN TÌM KIẾM - BST) ===

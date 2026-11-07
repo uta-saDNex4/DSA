@@ -525,8 +525,7 @@ int LayDSDiemTrungBinhLop(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMonH
     int idx = TimLop(dslop, malopChuan);
     if (idx == -1) return -1; // Không tìm thấy lớp
 
-    LOPSV* lop = dslop.nodes[idx];
-    if (lop == nullptr) return -1;
+    LOPSV* lop = (LOPSV*)&dslop.nodes[idx];
 
     int count = 0;
     for (PTRSV p = lop->FirstSV; p != nullptr; p = p->next) {
@@ -564,7 +563,7 @@ void InDiemTrungBinhKhoaHocLop_Console(const DS_LOPSV &dslop, const DS_LopTC &ds
 
     cout << "\n=================================================================================\n";
     cout << "                 BANG THONG KE DIEM TRUNG BINH KHOA HOC                          \n";
-    cout << "                 Lop : " << malopChuan << " - " << dslop.nodes[idx]->TENLOP << "\n";
+    cout << "                 Lop : " << malopChuan << " - " << dslop.nodes[idx].TENLOP << "\n";
     cout << "=================================================================================\n";
     cout << left << setw(6)  << "STT"
          << setw(16) << "MASV"
@@ -620,8 +619,7 @@ bool LayBangDiemTongKetLop(const DS_LOPSV &dslop, const DS_LopTC &dsltc, TreeMon
     int idx = TimLop(dslop, malopChuan);
     if (idx == -1) return false;
 
-    LOPSV* lop = dslop.nodes[idx];
-    if (lop == nullptr) return false;
+    LOPSV* lop = (LOPSV*)&dslop.nodes[idx];
 
     strcpy(bangDiem.MALOP, lop->MALOP);
     strcpy(bangDiem.TENLOP, lop->TENLOP);

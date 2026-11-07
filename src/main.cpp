@@ -108,7 +108,7 @@ void MenuLopVaSinhVien(DS_LOPSV &dsLop, const DS_LopTC &dsLTC) {
                     cout << "[!] Khong tim thay lop '" << maLop << "'!\n";
                 } else {
                     cout << "[i] Bat dau nhap sinh vien cho lop " << maLop << " (nhap Ma SV rong de ket thuc):\n";
-                    NhapDanhSachSV(dsLop.nodes[idx]->FirstSV);
+                    NhapDanhSachSV(dsLop.nodes[idx].FirstSV);
                 }
                 break;
             }
@@ -124,7 +124,7 @@ void MenuLopVaSinhVien(DS_LOPSV &dsLop, const DS_LopTC &dsLTC) {
                     cout << "Nhap Ma SV can sua: ";
                     cin.getline(maSV, sizeof(maSV));
                     ChuanHoaMa(maSV);
-                    SuaSV(dsLop.nodes[idx]->FirstSV, maSV);
+                    SuaSV(dsLop.nodes[idx].FirstSV, maSV);
                 }
                 break;
             }
@@ -140,7 +140,7 @@ void MenuLopVaSinhVien(DS_LOPSV &dsLop, const DS_LopTC &dsLTC) {
                     cout << "Nhap Ma SV can xoa: ";
                     cin.getline(maSV, sizeof(maSV));
                     ChuanHoaMa(maSV);
-                    XoaSV(dsLop.nodes[idx]->FirstSV, maSV, dsLTC);
+                    XoaSV(dsLop.nodes[idx].FirstSV, maSV, dsLTC);
                 }
                 break;
             }
@@ -153,7 +153,7 @@ void MenuLopVaSinhVien(DS_LOPSV &dsLop, const DS_LopTC &dsLTC) {
                 if (idx == -1) {
                     cout << "[!] Khong tim thay lop '" << maLop << "'!\n";
                 } else {
-                    InDSSVTheoMa(dsLop.nodes[idx]->FirstSV);
+                    InDSSVTheoMa(dsLop.nodes[idx].FirstSV);
                 }
                 break;
             }
@@ -371,7 +371,7 @@ int main() {
     DS_MonHoc dsMH;
     KhoiTaoCayMonHoc(dsMH.root);
 
-    DS_LOPSV dsLop;
+    static DS_LOPSV dsLop;
     KhoiTaoDanhSachLop(dsLop);
 
     DS_LopTC dsLTC;

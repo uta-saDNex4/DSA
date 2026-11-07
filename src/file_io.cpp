@@ -138,9 +138,7 @@ bool GhiFileLop(const DS_LOPSV &ds, const char* filename) {
     }
 
     for (int i = 0; i < ds.n; i++) {
-        if (ds.nodes[i] != nullptr) {
-            outFile << ds.nodes[i]->MALOP << "|" << ds.nodes[i]->TENLOP << "\n";
-        }
+        outFile << ds.nodes[i].MALOP << "|" << ds.nodes[i].TENLOP << "\n";
     }
     outFile.close();
 
@@ -174,11 +172,10 @@ bool DocFileLop(DS_LOPSV &ds, const char* filename) {
         ChuanHoaTen(tenLop);
 
         if (ds.n < MAX_LOPSV) {
-            LOPSV* lop = new LOPSV;
-            strcpy(lop->MALOP, maLop);
-            strcpy(lop->TENLOP, tenLop);
-            lop->FirstSV = nullptr;
-            ds.nodes[ds.n++] = lop;
+            strcpy(ds.nodes[ds.n].MALOP, maLop);
+            strcpy(ds.nodes[ds.n].TENLOP, tenLop);
+            ds.nodes[ds.n].FirstSV = nullptr;
+            ds.n++;
         }
     }
 
@@ -202,11 +199,8 @@ bool GhiFileSinhVien(const DS_LOPSV &ds, const char* filename) {
     }
 
     for (int i = 0; i < ds.n; i++) {
-        LOPSV* lop = ds.nodes[i];
-        if (lop == nullptr) continue;
-
-        for (PTRSV p = lop->FirstSV; p != nullptr; p = p->next) {
-            outFile << lop->MALOP << "|"
+        for (PTRSV p = ds.nodes[i].FirstSV; p != nullptr; p = p->next) {
+            outFile << ds.nodes[i].MALOP << "|"
                     << p->sv.MASV << "|"
                     << p->sv.HO << "|"
                     << p->sv.TEN << "|"
@@ -228,9 +222,7 @@ bool DocFileSinhVien(DS_LOPSV &ds, const char* filename) {
 
     // Đảm bảo xóa sạch các DSSV cũ trong các lớp trước khi nạp
     for (int i = 0; i < ds.n; i++) {
-        if (ds.nodes[i] != nullptr) {
-            GiaiPhongDSSV(ds.nodes[i]->FirstSV);
-        }
+        GiaiPhongDSSV(ds.nodes[i].FirstSV);
     }
 
     char buffer[256];
@@ -278,7 +270,7 @@ bool DocFileSinhVien(DS_LOPSV &ds, const char* filename) {
         ChuanHoaMa(sv.SODT);
 
         // Chèn vào đúng lớp, luôn tự động bảo đảm thứ tự Tên + Họ
-        InsertOrderSV(ds.nodes[idxLop]->FirstSV, sv);
+        InsertOrderSV(ds.nodes[idxLop].FirstSV, sv);
     }
 
     inFile.close();
@@ -520,9 +512,8 @@ bool GhiFileLopVaSinhVien(const DS_LOPSV &ds, const char* filename) {
 
     outFile << ds.n << "\n";
     for (int i = 0; i < ds.n; i++) {
-        LOPSV* lop = ds.nodes[i];
-        outFile << lop->MALOP << "|" << lop->TENLOP << "\n";
-        for (PTRSV p = lop->FirstSV; p != nullptr; p = p->next) {
+        outFile << ds.nodes[i].MALOP << "|" << ds.nodes[i].TENLOP << "\n";
+        for (PTRSV p = ds.nodes[i].FirstSV; p != nullptr; p = p->next) {
             outFile << p->sv.MASV << "|"
                     << p->sv.HO << "|"
                     << p->sv.TEN << "|"
@@ -548,15 +539,14 @@ bool DocFileLopVaSinhVien(DS_LOPSV &ds, const char* filename) {
     }
     int soLop = atoi(buffer);
 
-    for (int i = 0; i < soLop; i++) {
+    for (int i = 0; i < soLop && i < MAX_LOPSV; i++) {
         if (!inFile.getline(buffer, 256)) break;
 
-        ds.nodes[i] = new LOPSV;
         char* token = strtok(buffer, "|");
-        if (token) strcpy(ds.nodes[i]->MALOP, token);
+        if (token) strcpy(ds.nodes[i].MALOP, token);
         token = strtok(NULL, "|");
-        if (token) strcpy(ds.nodes[i]->TENLOP, token);
-        ds.nodes[i]->FirstSV = nullptr;
+        if (token) strcpy(ds.nodes[i].TENLOP, token);
+        ds.nodes[i].FirstSV = nullptr;
 
         while (inFile.getline(buffer, 256)) {
             if (strcmp(buffer, "END_LOP") == 0) break;
@@ -579,7 +569,7 @@ bool DocFileLopVaSinhVien(DS_LOPSV &ds, const char* filename) {
             if (!token) continue;
             strcpy(sv.SODT, token);
 
-            InsertOrderSV(ds.nodes[i]->FirstSV, sv);
+            InsertOrderSV(ds.nodes[i].FirstSV, sv);
         }
         ds.n++;
     }

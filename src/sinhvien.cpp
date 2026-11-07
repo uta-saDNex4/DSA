@@ -315,10 +315,9 @@ int DemSV(PTRSV First) {
 PTRSV TimSVToanTruong(const DS_LOPSV &dsLop, const char MASV[], LOPSV* &lopChuaSV) {
     lopChuaSV = nullptr;
     for (int i = 0; i < dsLop.n; i++) {
-        if (dsLop.nodes[i] == nullptr) continue;
-        for (PTRSV p = dsLop.nodes[i]->FirstSV; p != nullptr; p = p->next) {
+        for (PTRSV p = dsLop.nodes[i].FirstSV; p != nullptr; p = p->next) {
             if (stricmp(p->sv.MASV, MASV) == 0) {
-                lopChuaSV = dsLop.nodes[i];
+                lopChuaSV = (LOPSV*)&dsLop.nodes[i];
                 return p;
             }
         }
