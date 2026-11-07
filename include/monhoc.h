@@ -21,6 +21,9 @@ TreeMonHoc TimMonHoc(TreeMonHoc root, const char MAMH[]);
 
 void InDanhSachMonHoc(TreeMonHoc root, int n);
 
+void InOrderTraversal(TreeMonHoc root, TreeMonHoc* arr, int &idx);
+void QuickSortMH(TreeMonHoc* arr, int low, int high);
+
 void GiaiPhongCay(TreeMonHoc &root);
 
 #endif
