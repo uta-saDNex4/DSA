@@ -108,7 +108,7 @@ void MenuLopVaSinhVien(DS_LOPSV &dsLop, const DS_LopTC &dsLTC) {
                     cout << "[!] Khong tim thay lop '" << maLop << "'!\n";
                 } else {
                     cout << "[i] Bat dau nhap sinh vien cho lop " << maLop << " (nhap Ma SV rong de ket thuc):\n";
-                    NhapDanhSachSV(dsLop.nodes[idx].FirstSV);
+                    NhapDanhSachSV(dsLop.nodes[idx].FirstSV, dsLop);
                 }
                 break;
             }

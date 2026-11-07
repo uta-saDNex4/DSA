@@ -50,6 +50,58 @@ void InsertOrderSV(PTRSV &First, SinhVien sv) {
     curr->next = p;
 }
 
+void NhapDanhSachSV(PTRSV &First, const DS_LOPSV &dsLop) {
+    SinhVien sv;
+    while (true) {
+        cout << "\nNhap Ma SV (de trong de thoat): ";
+        cin.getline(sv.MASV, 16);
+        ChuanHoaMa(sv.MASV);
+        if (KiemTraRong(sv.MASV)) break;
+        
+        // Kiểm tra trùng Mã SV trên TOÀN BỘ các lớp trong trường
+        LOPSV* lopTrung = nullptr;
+        if (TimSVToanTruong(dsLop, sv.MASV, lopTrung) != nullptr) {
+            cout << "[!] Loi: Ma sinh vien '" << sv.MASV << "' da ton tai tai lop "
+                 << (lopTrung != nullptr ? lopTrung->MALOP : "") << " ("
+                 << (lopTrung != nullptr ? lopTrung->TENLOP : "") << ")!\n";
+            continue;
+        }
+        
+        do {
+            cout << "Nhap Ho: ";
+            cin.getline(sv.HO, 51);
+            ChuanHoaTen(sv.HO);
+            if (KiemTraRong(sv.HO)) cout << "[!] Loi: Ho khong duoc de trong!\n";
+        } while (KiemTraRong(sv.HO));
+        
+        do {
+            cout << "Nhap Ten: ";
+            cin.getline(sv.TEN, 16);
+            ChuanHoaTen(sv.TEN);
+            if (KiemTraRong(sv.TEN)) cout << "[!] Loi: Ten khong duoc de trong!\n";
+        } while (KiemTraRong(sv.TEN));
+        
+        do {
+            cout << "Nhap Phai (NAM/NU): ";
+            cin.getline(sv.PHAI, 4);
+            ChuanHoaMa(sv.PHAI);
+            if (strcmp(sv.PHAI, "NAM") != 0 && strcmp(sv.PHAI, "NU") != 0) {
+                cout << "[!] Loi: Phai chi duoc nhap NAM hoac NU!\n";
+            }
+        } while (strcmp(sv.PHAI, "NAM") != 0 && strcmp(sv.PHAI, "NU") != 0);
+        
+        do {
+            cout << "Nhap So DT: ";
+            cin.getline(sv.SODT, 16);
+            ChuanHoaMa(sv.SODT);
+            if (KiemTraRong(sv.SODT)) cout << "[!] Loi: So dien thoai khong duoc de trong!\n";
+        } while (KiemTraRong(sv.SODT));
+        
+        InsertOrderSV(First, sv);
+        cout << "[OK] Da them sinh vien '" << sv.MASV << "' thanh cong!\n";
+    }
+}
+
 void NhapDanhSachSV(PTRSV &First) {
     SinhVien sv;
     while (true) {

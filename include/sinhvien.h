@@ -12,6 +12,7 @@ int SoSanhTen(SinhVien a, SinhVien b);
 void InsertOrderSV(PTRSV &First, SinhVien sv);
 
 void NhapDanhSachSV(PTRSV &First);
+void NhapDanhSachSV(PTRSV &First, const DS_LOPSV &dsLop);
 
 // Xóa sinh viên CÓ kiểm tra ràng buộc (cần const DS_LopTC &dsltc)
 void XoaSV(PTRSV &First, const char MASV[], const DS_LopTC &dsltc);
