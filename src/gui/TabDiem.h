@@ -21,9 +21,15 @@ private slots:
     // Sub-tab 1: Nhập điểm (Câu i)
     void onLuuDiemThi();
     void onTaiDanhSachNhapDiem();
+    void onMHNhapChanged();
+    void onNKNhapChanged();
+    void onHKNhapChanged();
 
     // Sub-tab 2: Bảng điểm môn học (Câu j)
     void onXemBangDiemMonHoc();
+    void onMHBdChanged();
+    void onNKBdChanged();
+    void onHKBdChanged();
 
     // Sub-tab 3: Điểm trung bình khóa học (Câu k)
     void onXemDiemTrungBinhKhoaHoc();
@@ -35,18 +41,18 @@ private:
     QTabWidget *subTabs;
 
     // --- Sub-tab 1: Nhập điểm ---
+    QComboBox *cboMH_Nhap;
     QComboBox *cboNK_Nhap;
     QComboBox *cboHK_Nhap;
-    QComboBox *cboMH_Nhap;
     QComboBox *cboNhom_Nhap;
     QTableWidget *tblNhapDiem;
     QLabel *lblInfoLTC_Nhap;
     int currentMaLTC_Nhap;
 
     // --- Sub-tab 2: Bảng điểm môn học ---
+    QComboBox *cboMH_BD;
     QComboBox *cboNK_BD;
     QComboBox *cboHK_BD;
-    QComboBox *cboMH_BD;
     QComboBox *cboNhom_BD;
     QTableWidget *tblBangDiemMH;
     QLabel *lblInfo_BD;
@@ -69,7 +75,6 @@ private:
 
     void capNhatComboMonHoc(QComboBox *cbo);
     void capNhatComboLop(QComboBox *cbo);
-    void capNhatComboNienKhoa(QComboBox *cbo);
 };
 
 #endif // TAB_DIEM_H

@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QDoubleSpinBox>
 #include <QGroupBox>
+#include <algorithm>
 #include <cstring>
 #include "lop.h"
 #include "sinhvien.h"
@@ -48,27 +49,25 @@ QWidget* TabDiem::createSubTabNhapDiem() {
 
     QHBoxLayout *filterLayout = new QHBoxLayout();
     
+    QLabel *lblMH = new QLabel("Môn học:", tab);
+    lblMH->setStyleSheet("font-weight: bold;");
+    cboMH_Nhap = new QComboBox(tab);
+    cboMH_Nhap->setMinimumWidth(260);
+
     QLabel *lblNK = new QLabel("Niên khóa:", tab);
     lblNK->setStyleSheet("font-weight: bold;");
     cboNK_Nhap = new QComboBox(tab);
-    cboNK_Nhap->setMinimumWidth(120);
+    cboNK_Nhap->setMinimumWidth(130);
 
     QLabel *lblHK = new QLabel("Học kỳ:", tab);
     lblHK->setStyleSheet("font-weight: bold;");
     cboHK_Nhap = new QComboBox(tab);
-    cboHK_Nhap->addItem("1", 1);
-    cboHK_Nhap->addItem("2", 2);
-    cboHK_Nhap->addItem("3", 3);
-
-    QLabel *lblMH = new QLabel("Môn học:", tab);
-    lblMH->setStyleSheet("font-weight: bold;");
-    cboMH_Nhap = new QComboBox(tab);
-    cboMH_Nhap->setMinimumWidth(220);
+    cboHK_Nhap->setMinimumWidth(90);
 
     QLabel *lblNhom = new QLabel("Nhóm:", tab);
     lblNhom->setStyleSheet("font-weight: bold;");
     cboNhom_Nhap = new QComboBox(tab);
-    for (int i = 1; i <= 20; ++i) cboNhom_Nhap->addItem(QString::number(i), i);
+    cboNhom_Nhap->setMinimumWidth(90);
 
     QPushButton *btnTai = new QPushButton("🔍 Tải Lớp & DSSV", tab);
     btnTai->setMinimumHeight(32);
@@ -80,12 +79,12 @@ QWidget* TabDiem::createSubTabNhapDiem() {
     btnLuu->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
     connect(btnLuu, &QPushButton::clicked, this, &TabDiem::onLuuDiemThi);
 
+    filterLayout->addWidget(lblMH);
+    filterLayout->addWidget(cboMH_Nhap, 1);
     filterLayout->addWidget(lblNK);
     filterLayout->addWidget(cboNK_Nhap);
     filterLayout->addWidget(lblHK);
     filterLayout->addWidget(cboHK_Nhap);
-    filterLayout->addWidget(lblMH);
-    filterLayout->addWidget(cboMH_Nhap, 1);
     filterLayout->addWidget(lblNhom);
     filterLayout->addWidget(cboNhom_Nhap);
     filterLayout->addWidget(btnTai);
@@ -93,7 +92,12 @@ QWidget* TabDiem::createSubTabNhapDiem() {
 
     layout->addLayout(filterLayout);
 
-    lblInfoLTC_Nhap = new QLabel("Vui lòng chọn thông tin lớp tín chỉ và nhấn 'Tải Lớp & DSSV'.", tab);
+    connect(cboMH_Nhap, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onMHNhapChanged);
+    connect(cboNK_Nhap, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onNKNhapChanged);
+    connect(cboHK_Nhap, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onHKNhapChanged);
+    connect(cboNhom_Nhap, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onTaiDanhSachNhapDiem);
+
+    lblInfoLTC_Nhap = new QLabel("Vui lòng chọn thông tin môn học và lớp tín chỉ.", tab);
     lblInfoLTC_Nhap->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500;");
     layout->addWidget(lblInfoLTC_Nhap);
 
@@ -114,17 +118,192 @@ QWidget* TabDiem::createSubTabNhapDiem() {
     return tab;
 }
 
+void TabDiem::onMHNhapChanged() {
+    QString mamh = cboMH_Nhap->currentData().toString().trimmed();
+    if (mamh.isEmpty()) {
+        cboNK_Nhap->blockSignals(true);
+        cboNK_Nhap->clear();
+        cboNK_Nhap->setEnabled(false);
+        cboNK_Nhap->blockSignals(false);
+
+        cboHK_Nhap->blockSignals(true);
+        cboHK_Nhap->clear();
+        cboHK_Nhap->setEnabled(false);
+        cboHK_Nhap->blockSignals(false);
+
+        cboNhom_Nhap->blockSignals(true);
+        cboNhom_Nhap->clear();
+        cboNhom_Nhap->setEnabled(false);
+        cboNhom_Nhap->blockSignals(false);
+
+        tblNhapDiem->setRowCount(0);
+        currentMaLTC_Nhap = -1;
+        lblInfoLTC_Nhap->setText("⚠️ Vui lòng chọn môn học.");
+        lblInfoLTC_Nhap->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500;");
+        return;
+    }
+
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QList<QString> listNK;
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr && strcmp(dsltc.nodes[i]->MAMH, mamh.toUtf8().constData()) == 0) {
+            QString nk = QString::fromUtf8(dsltc.nodes[i]->NienKhoa).trimmed();
+            if (!listNK.contains(nk)) {
+                listNK.append(nk);
+            }
+        }
+    }
+
+    cboNK_Nhap->blockSignals(true);
+    cboNK_Nhap->clear();
+
+    if (listNK.isEmpty()) {
+        cboNK_Nhap->addItem("-- Môn này chưa mở lớp --", "");
+        cboNK_Nhap->setEnabled(false);
+        cboNK_Nhap->blockSignals(false);
+
+        cboHK_Nhap->blockSignals(true);
+        cboHK_Nhap->clear();
+        cboHK_Nhap->setEnabled(false);
+        cboHK_Nhap->blockSignals(false);
+
+        cboNhom_Nhap->blockSignals(true);
+        cboNhom_Nhap->clear();
+        cboNhom_Nhap->setEnabled(false);
+        cboNhom_Nhap->blockSignals(false);
+
+        tblNhapDiem->setRowCount(0);
+        currentMaLTC_Nhap = -1;
+        lblInfoLTC_Nhap->setText(QString("⚠️ Môn học '%1' hiện chưa có Lớp Tín Chỉ nào được mở trong hệ thống!").arg(mamh));
+        lblInfoLTC_Nhap->setStyleSheet("color: #d97706; font-weight: bold; font-size: 13px;");
+        return;
+    }
+
+    std::sort(listNK.begin(), listNK.end());
+    for (const QString &nk : listNK) {
+        cboNK_Nhap->addItem(nk, nk);
+    }
+    cboNK_Nhap->setEnabled(true);
+    cboNK_Nhap->blockSignals(false);
+
+    onNKNhapChanged();
+}
+
+void TabDiem::onNKNhapChanged() {
+    QString mamh = cboMH_Nhap->currentData().toString().trimmed();
+    QString nk = cboNK_Nhap->currentData().toString().trimmed();
+    if (nk.isEmpty()) nk = cboNK_Nhap->currentText().trimmed();
+
+    if (nk.isEmpty() || nk.contains("--")) {
+        cboHK_Nhap->blockSignals(true);
+        cboHK_Nhap->clear();
+        cboHK_Nhap->setEnabled(false);
+        cboHK_Nhap->blockSignals(false);
+
+        cboNhom_Nhap->blockSignals(true);
+        cboNhom_Nhap->clear();
+        cboNhom_Nhap->setEnabled(false);
+        cboNhom_Nhap->blockSignals(false);
+        return;
+    }
+
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QList<int> listHK;
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr &&
+            strcmp(dsltc.nodes[i]->MAMH, mamh.toUtf8().constData()) == 0 &&
+            strcmp(dsltc.nodes[i]->NienKhoa, nk.toUtf8().constData()) == 0) {
+            int hk = dsltc.nodes[i]->HocKy;
+            if (!listHK.contains(hk)) {
+                listHK.append(hk);
+            }
+        }
+    }
+
+    cboHK_Nhap->blockSignals(true);
+    cboHK_Nhap->clear();
+
+    if (listHK.isEmpty()) {
+        cboHK_Nhap->setEnabled(false);
+        cboHK_Nhap->blockSignals(false);
+
+        cboNhom_Nhap->blockSignals(true);
+        cboNhom_Nhap->clear();
+        cboNhom_Nhap->setEnabled(false);
+        cboNhom_Nhap->blockSignals(false);
+        return;
+    }
+
+    std::sort(listHK.begin(), listHK.end());
+    for (int hk : listHK) {
+        cboHK_Nhap->addItem(QString("Học kỳ %1").arg(hk), hk);
+    }
+    cboHK_Nhap->setEnabled(true);
+    cboHK_Nhap->blockSignals(false);
+
+    onHKNhapChanged();
+}
+
+void TabDiem::onHKNhapChanged() {
+    QString mamh = cboMH_Nhap->currentData().toString().trimmed();
+    QString nk = cboNK_Nhap->currentData().toString().trimmed();
+    if (nk.isEmpty()) nk = cboNK_Nhap->currentText().trimmed();
+    int hk = cboHK_Nhap->currentData().toInt();
+
+    if (hk <= 0 || nk.isEmpty() || nk.contains("--")) {
+        cboNhom_Nhap->blockSignals(true);
+        cboNhom_Nhap->clear();
+        cboNhom_Nhap->setEnabled(false);
+        cboNhom_Nhap->blockSignals(false);
+        return;
+    }
+
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QList<int> listNhom;
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr &&
+            strcmp(dsltc.nodes[i]->MAMH, mamh.toUtf8().constData()) == 0 &&
+            strcmp(dsltc.nodes[i]->NienKhoa, nk.toUtf8().constData()) == 0 &&
+            dsltc.nodes[i]->HocKy == hk) {
+            int nhom = dsltc.nodes[i]->Nhom;
+            if (!listNhom.contains(nhom)) {
+                listNhom.append(nhom);
+            }
+        }
+    }
+
+    cboNhom_Nhap->blockSignals(true);
+    cboNhom_Nhap->clear();
+
+    if (listNhom.isEmpty()) {
+        cboNhom_Nhap->setEnabled(false);
+        cboNhom_Nhap->blockSignals(false);
+        return;
+    }
+
+    std::sort(listNhom.begin(), listNhom.end());
+    for (int nhom : listNhom) {
+        cboNhom_Nhap->addItem(QString("Nhóm %1").arg(nhom), nhom);
+    }
+    cboNhom_Nhap->setEnabled(true);
+    cboNhom_Nhap->blockSignals(false);
+
+    onTaiDanhSachNhapDiem();
+}
+
 void TabDiem::onTaiDanhSachNhapDiem() {
     DS_LopTC &dsltc = AppData::instance().dsLTC;
     DS_LOPSV &dsLop = AppData::instance().dsLop;
 
-    QString nk = cboNK_Nhap->currentText();
+    QString nk = cboNK_Nhap->currentData().toString().trimmed();
+    if (nk.isEmpty()) nk = cboNK_Nhap->currentText().trimmed();
     int hk = cboHK_Nhap->currentData().toInt();
-    QString mamh = cboMH_Nhap->currentData().toString();
+    QString mamh = cboMH_Nhap->currentData().toString().trimmed();
     int nhom = cboNhom_Nhap->currentData().toInt();
 
-    if (mamh.isEmpty()) {
-        QMessageBox::warning(this, "Thông báo", "Vui lòng chọn môn học!");
+    if (mamh.isEmpty() || nk.isEmpty() || nk.contains("--") || hk <= 0 || nhom <= 0) {
+        currentMaLTC_Nhap = -1;
+        tblNhapDiem->setRowCount(0);
         return;
     }
 
@@ -237,46 +416,49 @@ QWidget* TabDiem::createSubTabBangDiemMH() {
 
     QHBoxLayout *filterLayout = new QHBoxLayout();
     
+    QLabel *lblMH = new QLabel("Môn học:", tab);
+    lblMH->setStyleSheet("font-weight: bold;");
+    cboMH_BD = new QComboBox(tab);
+    cboMH_BD->setMinimumWidth(260);
+
     QLabel *lblNK = new QLabel("Niên khóa:", tab);
     lblNK->setStyleSheet("font-weight: bold;");
     cboNK_BD = new QComboBox(tab);
-    cboNK_BD->setMinimumWidth(120);
+    cboNK_BD->setMinimumWidth(130);
 
     QLabel *lblHK = new QLabel("Học kỳ:", tab);
     lblHK->setStyleSheet("font-weight: bold;");
     cboHK_BD = new QComboBox(tab);
-    cboHK_BD->addItem("1", 1);
-    cboHK_BD->addItem("2", 2);
-    cboHK_BD->addItem("3", 3);
-
-    QLabel *lblMH = new QLabel("Môn học:", tab);
-    lblMH->setStyleSheet("font-weight: bold;");
-    cboMH_BD = new QComboBox(tab);
-    cboMH_BD->setMinimumWidth(220);
+    cboHK_BD->setMinimumWidth(90);
 
     QLabel *lblNhom = new QLabel("Nhóm:", tab);
     lblNhom->setStyleSheet("font-weight: bold;");
     cboNhom_BD = new QComboBox(tab);
-    for (int i = 1; i <= 20; ++i) cboNhom_BD->addItem(QString::number(i), i);
+    cboNhom_BD->setMinimumWidth(90);
 
     QPushButton *btnXem = new QPushButton("📊 Xem Bảng Điểm", tab);
     btnXem->setMinimumHeight(32);
     btnXem->setStyleSheet("background-color: #059669; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
     connect(btnXem, &QPushButton::clicked, this, &TabDiem::onXemBangDiemMonHoc);
 
+    filterLayout->addWidget(lblMH);
+    filterLayout->addWidget(cboMH_BD, 1);
     filterLayout->addWidget(lblNK);
     filterLayout->addWidget(cboNK_BD);
     filterLayout->addWidget(lblHK);
     filterLayout->addWidget(cboHK_BD);
-    filterLayout->addWidget(lblMH);
-    filterLayout->addWidget(cboMH_BD, 1);
     filterLayout->addWidget(lblNhom);
     filterLayout->addWidget(cboNhom_BD);
     filterLayout->addWidget(btnXem);
 
     layout->addLayout(filterLayout);
 
-    lblInfo_BD = new QLabel("Chọn tổ hợp Niên khóa, Học kỳ, Môn học, Nhóm để xem bảng điểm môn học.", tab);
+    connect(cboMH_BD, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onMHBdChanged);
+    connect(cboNK_BD, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onNKBdChanged);
+    connect(cboHK_BD, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onHKBdChanged);
+    connect(cboNhom_BD, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TabDiem::onXemBangDiemMonHoc);
+
+    lblInfo_BD = new QLabel("Chọn tổ hợp Môn học, Niên khóa, Học kỳ, Nhóm để xem bảng điểm môn học.", tab);
     lblInfo_BD->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500;");
     layout->addWidget(lblInfo_BD);
 
@@ -299,15 +481,192 @@ QWidget* TabDiem::createSubTabBangDiemMH() {
     return tab;
 }
 
+void TabDiem::onMHBdChanged() {
+    QString mamh = cboMH_BD->currentData().toString().trimmed();
+    if (mamh.isEmpty()) {
+        cboNK_BD->blockSignals(true);
+        cboNK_BD->clear();
+        cboNK_BD->setEnabled(false);
+        cboNK_BD->blockSignals(false);
+
+        cboHK_BD->blockSignals(true);
+        cboHK_BD->clear();
+        cboHK_BD->setEnabled(false);
+        cboHK_BD->blockSignals(false);
+
+        cboNhom_BD->blockSignals(true);
+        cboNhom_BD->clear();
+        cboNhom_BD->setEnabled(false);
+        cboNhom_BD->blockSignals(false);
+
+        tblBangDiemMH->setRowCount(0);
+        lblInfo_BD->setText("⚠️ Vui lòng chọn môn học.");
+        lblInfo_BD->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500;");
+        return;
+    }
+
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QList<QString> listNK;
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr && strcmp(dsltc.nodes[i]->MAMH, mamh.toUtf8().constData()) == 0) {
+            QString nk = QString::fromUtf8(dsltc.nodes[i]->NienKhoa).trimmed();
+            if (!listNK.contains(nk)) {
+                listNK.append(nk);
+            }
+        }
+    }
+
+    cboNK_BD->blockSignals(true);
+    cboNK_BD->clear();
+
+    if (listNK.isEmpty()) {
+        cboNK_BD->addItem("-- Môn này chưa mở lớp --", "");
+        cboNK_BD->setEnabled(false);
+        cboNK_BD->blockSignals(false);
+
+        cboHK_BD->blockSignals(true);
+        cboHK_BD->clear();
+        cboHK_BD->setEnabled(false);
+        cboHK_BD->blockSignals(false);
+
+        cboNhom_BD->blockSignals(true);
+        cboNhom_BD->clear();
+        cboNhom_BD->setEnabled(false);
+        cboNhom_BD->blockSignals(false);
+
+        tblBangDiemMH->setRowCount(0);
+        lblInfo_BD->setText(QString("⚠️ Môn học '%1' hiện chưa có Lớp Tín Chỉ nào được mở trong hệ thống!").arg(mamh));
+        lblInfo_BD->setStyleSheet("color: #d97706; font-weight: bold; font-size: 13px;");
+        return;
+    }
+
+    std::sort(listNK.begin(), listNK.end());
+    for (const QString &nk : listNK) {
+        cboNK_BD->addItem(nk, nk);
+    }
+    cboNK_BD->setEnabled(true);
+    cboNK_BD->blockSignals(false);
+
+    onNKBdChanged();
+}
+
+void TabDiem::onNKBdChanged() {
+    QString mamh = cboMH_BD->currentData().toString().trimmed();
+    QString nk = cboNK_BD->currentData().toString().trimmed();
+    if (nk.isEmpty()) nk = cboNK_BD->currentText().trimmed();
+
+    if (nk.isEmpty() || nk.contains("--")) {
+        cboHK_BD->blockSignals(true);
+        cboHK_BD->clear();
+        cboHK_BD->setEnabled(false);
+        cboHK_BD->blockSignals(false);
+
+        cboNhom_BD->blockSignals(true);
+        cboNhom_BD->clear();
+        cboNhom_BD->setEnabled(false);
+        cboNhom_BD->blockSignals(false);
+        return;
+    }
+
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QList<int> listHK;
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr &&
+            strcmp(dsltc.nodes[i]->MAMH, mamh.toUtf8().constData()) == 0 &&
+            strcmp(dsltc.nodes[i]->NienKhoa, nk.toUtf8().constData()) == 0) {
+            int hk = dsltc.nodes[i]->HocKy;
+            if (!listHK.contains(hk)) {
+                listHK.append(hk);
+            }
+        }
+    }
+
+    cboHK_BD->blockSignals(true);
+    cboHK_BD->clear();
+
+    if (listHK.isEmpty()) {
+        cboHK_BD->setEnabled(false);
+        cboHK_BD->blockSignals(false);
+
+        cboNhom_BD->blockSignals(true);
+        cboNhom_BD->clear();
+        cboNhom_BD->setEnabled(false);
+        cboNhom_BD->blockSignals(false);
+        return;
+    }
+
+    std::sort(listHK.begin(), listHK.end());
+    for (int hk : listHK) {
+        cboHK_BD->addItem(QString("Học kỳ %1").arg(hk), hk);
+    }
+    cboHK_BD->setEnabled(true);
+    cboHK_BD->blockSignals(false);
+
+    onHKBdChanged();
+}
+
+void TabDiem::onHKBdChanged() {
+    QString mamh = cboMH_BD->currentData().toString().trimmed();
+    QString nk = cboNK_BD->currentData().toString().trimmed();
+    if (nk.isEmpty()) nk = cboNK_BD->currentText().trimmed();
+    int hk = cboHK_BD->currentData().toInt();
+
+    if (hk <= 0 || nk.isEmpty() || nk.contains("--")) {
+        cboNhom_BD->blockSignals(true);
+        cboNhom_BD->clear();
+        cboNhom_BD->setEnabled(false);
+        cboNhom_BD->blockSignals(false);
+        return;
+    }
+
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QList<int> listNhom;
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr &&
+            strcmp(dsltc.nodes[i]->MAMH, mamh.toUtf8().constData()) == 0 &&
+            strcmp(dsltc.nodes[i]->NienKhoa, nk.toUtf8().constData()) == 0 &&
+            dsltc.nodes[i]->HocKy == hk) {
+            int nhom = dsltc.nodes[i]->Nhom;
+            if (!listNhom.contains(nhom)) {
+                listNhom.append(nhom);
+            }
+        }
+    }
+
+    cboNhom_BD->blockSignals(true);
+    cboNhom_BD->clear();
+
+    if (listNhom.isEmpty()) {
+        cboNhom_BD->setEnabled(false);
+        cboNhom_BD->blockSignals(false);
+        return;
+    }
+
+    std::sort(listNhom.begin(), listNhom.end());
+    for (int nhom : listNhom) {
+        cboNhom_BD->addItem(QString("Nhóm %1").arg(nhom), nhom);
+    }
+    cboNhom_BD->setEnabled(true);
+    cboNhom_BD->blockSignals(false);
+
+    onXemBangDiemMonHoc();
+}
+
 void TabDiem::onXemBangDiemMonHoc() {
     DS_LopTC &dsltc = AppData::instance().dsLTC;
     DS_LOPSV &dsLop = AppData::instance().dsLop;
     DS_MonHoc &dsMH = AppData::instance().dsMH;
 
-    QString nk = cboNK_BD->currentText();
+    QString nk = cboNK_BD->currentData().toString().trimmed();
+    if (nk.isEmpty()) nk = cboNK_BD->currentText().trimmed();
     int hk = cboHK_BD->currentData().toInt();
-    QString mamh = cboMH_BD->currentData().toString();
+    QString mamh = cboMH_BD->currentData().toString().trimmed();
     int nhom = cboNhom_BD->currentData().toInt();
+
+    if (mamh.isEmpty() || nk.isEmpty() || nk.contains("--") || hk <= 0 || nhom <= 0) {
+        tblBangDiemMH->setRowCount(0);
+        return;
+    }
 
     SinhVienDiem dsSV[MAX_SV_DANGKY];
     int maLTCFound = -1;
@@ -618,18 +977,39 @@ void TabDiem::onXemBangDiemTongKet() {
 // DATA POPULATION HELPERS
 // ====================================================================
 void TabDiem::capNhatComboMonHoc(QComboBox *cbo) {
+    QString currentMAMH = cbo->currentData().toString();
     cbo->blockSignals(true);
     cbo->clear();
     DS_MonHoc &dsMH = AppData::instance().dsMH;
+    DS_LopTC &dsltc = AppData::instance().dsLTC;
+
+    int restoreIdx = 0;
     if (dsMH.root != nullptr && dsMH.n > 0) {
         TreeMonHoc *arrMH = new TreeMonHoc[dsMH.n];
         int count = 0;
         InOrderTraversal(dsMH.root, arrMH, count);
         for (int i = 0; i < count; ++i) {
-            cbo->addItem(QString("%1 - %2").arg(arrMH[i]->mh.MAMH).arg(QString::fromUtf8(arrMH[i]->mh.TENMH)),
-                         QString::fromUtf8(arrMH[i]->mh.MAMH));
+            int soLop = 0;
+            for (int k = 0; k < dsltc.n; ++k) {
+                if (dsltc.nodes[k] != nullptr && strcmp(dsltc.nodes[k]->MAMH, arrMH[i]->mh.MAMH) == 0) {
+                    soLop++;
+                }
+            }
+            QString text;
+            if (soLop > 0) {
+                text = QString("%1 - %2 (%3 lớp TC)").arg(arrMH[i]->mh.MAMH).arg(QString::fromUtf8(arrMH[i]->mh.TENMH)).arg(soLop);
+            } else {
+                text = QString("%1 - %2 (Chưa mở lớp)").arg(arrMH[i]->mh.MAMH).arg(QString::fromUtf8(arrMH[i]->mh.TENMH));
+            }
+            cbo->addItem(text, QString::fromUtf8(arrMH[i]->mh.MAMH));
+            if (!currentMAMH.isEmpty() && currentMAMH == arrMH[i]->mh.MAMH) {
+                restoreIdx = i;
+            }
         }
         delete[] arrMH;
+    }
+    if (cbo->count() > 0) {
+        cbo->setCurrentIndex(restoreIdx);
     }
     cbo->blockSignals(false);
 }
@@ -645,30 +1025,12 @@ void TabDiem::capNhatComboLop(QComboBox *cbo) {
     cbo->blockSignals(false);
 }
 
-void TabDiem::capNhatComboNienKhoa(QComboBox *cbo) {
-    cbo->blockSignals(true);
-    cbo->clear();
-    DS_LopTC &dsltc = AppData::instance().dsLTC;
-    for (int i = 0; i < dsltc.n; ++i) {
-        if (dsltc.nodes[i] != nullptr) {
-            QString nk = QString::fromUtf8(dsltc.nodes[i]->NienKhoa);
-            if (cbo->findText(nk) == -1) {
-                cbo->addItem(nk);
-            }
-        }
-    }
-    if (cbo->count() == 0) {
-        cbo->addItem("2025-2026");
-    }
-    cbo->blockSignals(false);
-}
-
 void TabDiem::loadData() {
-    capNhatComboNienKhoa(cboNK_Nhap);
     capNhatComboMonHoc(cboMH_Nhap);
+    onMHNhapChanged();
 
-    capNhatComboNienKhoa(cboNK_BD);
     capNhatComboMonHoc(cboMH_BD);
+    onMHBdChanged();
 
     capNhatComboLop(cboLop_DTB);
     capNhatComboLop(cboLop_TK);
