@@ -121,7 +121,27 @@ void TachVaChuanHoaHoTen(char ho[], char ten[], int maxHoLen, int maxTenLen) {
     ChuanHoaTen(ten);
     
     int lenTen = strlen(ten);
-    if (lenTen == 0) return;
+    // Trường hợp: TÊN rỗng nhưng HỌ có nhiều hơn 1 từ (người dùng nhập cả họ và tên vào ô HỌ)
+    if (lenTen == 0) {
+        int lenHo = strlen(ho);
+        if (lenHo > 0) {
+            int lastSpaceHo = -1;
+            for (int i = lenHo - 1; i >= 0; i--) {
+                if (ho[i] == ' ') {
+                    lastSpaceHo = i;
+                    break;
+                }
+            }
+            if (lastSpaceHo != -1) {
+                strncpy(ten, ho + lastSpaceHo + 1, maxTenLen - 1);
+                ten[maxTenLen - 1] = '\0';
+                ho[lastSpaceHo] = '\0';
+                ChuanHoaTen(ho);
+                ChuanHoaTen(ten);
+            }
+        }
+        return;
+    }
     
     // 2. Tìm khoảng trắng cuối cùng trong chuỗi TEN
     int lastSpace = -1;
@@ -133,24 +153,25 @@ void TachVaChuanHoaHoTen(char ho[], char ten[], int maxHoLen, int maxTenLen) {
     }
     
     // 3. Nếu TEN có chứa khoảng trắng (nhiều hơn 1 từ)
-    // Ví dụ: Nhập TEN = "Quang Tho" -> Tách "Quang" ghép vào HO, giữ "Tho" cho TEN
+    // Ví dụ: Nhập TEN = "Văn An" -> Tách "Văn" ghép vào HO, giữ "An" cho TEN
+    // Ví dụ: Nhập HỌ = "", TEN = "Nguyễn Văn An" -> "Nguyễn Văn" ghép vào HỌ, giữ "An" cho TEN
     if (lastSpace != -1) {
-        char phanDem[100];
-        char tenCuoi[50];
+        char phanDem[128];
+        char tenCuoi[64];
         
         int idxDem = 0;
-        for (int i = 0; i < lastSpace; i++) {
+        for (int i = 0; i < lastSpace && idxDem < (int)sizeof(phanDem) - 1; i++) {
             phanDem[idxDem++] = ten[i];
         }
         phanDem[idxDem] = '\0';
         
         int idxTen = 0;
-        for (int i = lastSpace + 1; i < lenTen; i++) {
+        for (int i = lastSpace + 1; i < lenTen && idxTen < (int)sizeof(tenCuoi) - 1; i++) {
             tenCuoi[idxTen++] = ten[i];
         }
         tenCuoi[idxTen] = '\0';
         
-        // Đẩy phanDem sang ho
+        // Đẩy phanDem sang ho (nếu ho đã có nội dung thì thêm dấu cách ngăn cách)
         int curLenHo = strlen(ho);
         if (curLenHo > 0 && curLenHo < maxHoLen - 1) {
             strncat(ho, " ", maxHoLen - 1 - curLenHo);
@@ -165,7 +186,7 @@ void TachVaChuanHoaHoTen(char ho[], char ten[], int maxHoLen, int maxTenLen) {
         strncpy(ten, tenCuoi, maxTenLen - 1);
         ten[maxTenLen - 1] = '\0';
         
-        // 4. Chuẩn hóa lại cả hai
+        // 4. Chuẩn hóa lại cả hai để xóa khoảng trắng thừa và viết hoa chuẩn mực
         ChuanHoaTen(ho);
         ChuanHoaTen(ten);
     }

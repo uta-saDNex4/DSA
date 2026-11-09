@@ -11,6 +11,7 @@
 #include <QGroupBox>
 #include <QKeyEvent>
 #include <cstring>
+#include "utils.h"
 
 TabLopSinhVien::TabLopSinhVien(QWidget *parent) : QWidget(parent) {
     setupUI();
@@ -495,8 +496,8 @@ void TabLopSinhVien::onThemSV() {
     edtHo->setPlaceholderText("VD: Nguyen Van");
 
     QLineEdit *edtTen = new QLineEdit(&dlg);
-    edtTen->setMaxLength(15);
-    edtTen->setPlaceholderText("VD: An");
+    edtTen->setMaxLength(50);
+    edtTen->setPlaceholderText("VD: An (hoặc Nguyen Van An)");
 
     QComboBox *cboPhai = new QComboBox(&dlg);
     cboPhai->addItems({"NAM", "NU"});
@@ -516,19 +517,31 @@ void TabLopSinhVien::onThemSV() {
 
     connect(btnBox, &QDialogButtonBox::accepted, [&]() {
         QString ma = edtMa->text().trimmed().toUpper();
-        QString ho = edtHo->text().trimmed();
-        QString ten = edtTen->text().trimmed();
+        QString hoInput = edtHo->text().trimmed();
+        QString tenInput = edtTen->text().trimmed();
         QString sdt = edtSDT->text().trimmed();
 
         if (ma.isEmpty()) {
             QMessageBox::warning(&dlg, "Lỗi", "Mã sinh viên không được để trống!");
             return;
         }
-        if (ho.isEmpty()) {
-            QMessageBox::warning(&dlg, "Lỗi", "Họ sinh viên không được để trống!");
+
+        // Tạo buffer tạm đủ lớn để xử lý tách họ tên trước khi kiểm tra hợp lệ
+        char bufHo[128];
+        char bufTen[128];
+        strncpy(bufHo, hoInput.toUtf8().constData(), sizeof(bufHo) - 1);
+        bufHo[sizeof(bufHo) - 1] = '\0';
+        strncpy(bufTen, tenInput.toUtf8().constData(), sizeof(bufTen) - 1);
+        bufTen[sizeof(bufTen) - 1] = '\0';
+
+        // Gọi hàm dùng chung xử lý họ và tên trước khi kiểm tra hợp lệ
+        TachVaChuanHoaHoTen(bufHo, bufTen, sizeof(SinhVien::HO), sizeof(SinhVien::TEN));
+
+        if (KiemTraRong(bufHo)) {
+            QMessageBox::warning(&dlg, "Lỗi", "Họ sinh viên không được để trống! (Nếu để trống ô Họ, vui lòng nhập đầy đủ cả Họ và Tên vào ô Tên)");
             return;
         }
-        if (ten.isEmpty()) {
+        if (KiemTraRong(bufTen)) {
             QMessageBox::warning(&dlg, "Lỗi", "Tên sinh viên không được để trống!");
             return;
         }
@@ -550,13 +563,8 @@ void TabLopSinhVien::onThemSV() {
 
         SinhVien sv;
         strcpy(sv.MASV, cMa);
-        strncpy(sv.HO, ho.toUtf8().constData(), sizeof(sv.HO) - 1);
-        sv.HO[sizeof(sv.HO) - 1] = '\0';
-        ChuanHoaTen(sv.HO);
-
-        strncpy(sv.TEN, ten.toUtf8().constData(), sizeof(sv.TEN) - 1);
-        sv.TEN[sizeof(sv.TEN) - 1] = '\0';
-        ChuanHoaTen(sv.TEN);
+        strcpy(sv.HO, bufHo);
+        strcpy(sv.TEN, bufTen);
 
         strcpy(sv.PHAI, cboPhai->currentText().toUtf8().constData());
 
@@ -617,7 +625,7 @@ void TabLopSinhVien::onSuaSV() {
     edtHo->setMaxLength(50);
 
     QLineEdit *edtTen = new QLineEdit(QString::fromUtf8(p->sv.TEN), &dlg);
-    edtTen->setMaxLength(15);
+    edtTen->setMaxLength(50);
 
     QComboBox *cboPhai = new QComboBox(&dlg);
     cboPhai->addItems({"NAM", "NU"});
@@ -636,24 +644,34 @@ void TabLopSinhVien::onSuaSV() {
     form->addRow(btnBox);
 
     connect(btnBox, &QDialogButtonBox::accepted, [&]() {
-        QString ho = edtHo->text().trimmed();
-        QString ten = edtTen->text().trimmed();
+        QString hoInput = edtHo->text().trimmed();
+        QString tenInput = edtTen->text().trimmed();
         QString sdt = edtSDT->text().trimmed();
 
-        if (ho.isEmpty() || ten.isEmpty()) {
-            QMessageBox::warning(&dlg, "Lỗi", "Họ và tên không được để trống!");
+        // Tạo buffer tạm đủ lớn để xử lý tách họ tên trước khi kiểm tra hợp lệ
+        char bufHo[128];
+        char bufTen[128];
+        strncpy(bufHo, hoInput.toUtf8().constData(), sizeof(bufHo) - 1);
+        bufHo[sizeof(bufHo) - 1] = '\0';
+        strncpy(bufTen, tenInput.toUtf8().constData(), sizeof(bufTen) - 1);
+        bufTen[sizeof(bufTen) - 1] = '\0';
+
+        // Gọi hàm dùng chung xử lý họ và tên trước khi kiểm tra hợp lệ
+        TachVaChuanHoaHoTen(bufHo, bufTen, sizeof(SinhVien::HO), sizeof(SinhVien::TEN));
+
+        if (KiemTraRong(bufHo)) {
+            QMessageBox::warning(&dlg, "Lỗi", "Họ sinh viên không được để trống! (Nếu để trống ô Họ, vui lòng nhập đầy đủ cả Họ và Tên vào ô Tên)");
+            return;
+        }
+        if (KiemTraRong(bufTen)) {
+            QMessageBox::warning(&dlg, "Lỗi", "Tên sinh viên không được để trống!");
             return;
         }
 
         SinhVien svMoi;
         strcpy(svMoi.MASV, cMa);
-        strncpy(svMoi.HO, ho.toUtf8().constData(), sizeof(svMoi.HO) - 1);
-        svMoi.HO[sizeof(svMoi.HO) - 1] = '\0';
-        ChuanHoaTen(svMoi.HO);
-
-        strncpy(svMoi.TEN, ten.toUtf8().constData(), sizeof(svMoi.TEN) - 1);
-        svMoi.TEN[sizeof(svMoi.TEN) - 1] = '\0';
-        ChuanHoaTen(svMoi.TEN);
+        strcpy(svMoi.HO, bufHo);
+        strcpy(svMoi.TEN, bufTen);
 
         strcpy(svMoi.PHAI, cboPhai->currentText().toUtf8().constData());
         strncpy(svMoi.SODT, sdt.toUtf8().constData(), sizeof(svMoi.SODT) - 1);
