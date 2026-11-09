@@ -16,4 +16,10 @@ int NhapSoNguyen(const char thongBao[]);
 // Kiểm tra định dạng Niên khóa hợp lệ (dạng YYYY-YYYY với năm sau = năm trước + 1)
 bool KiemTraNienKhoaHopLe(const char nk[]);
 
+// Tách và chuẩn hóa Họ và Tên: Tên chỉ giữ từ cuối cùng. Nếu Tên có nhiều từ (VD: "Quang Thọ") thì tự đẩy các từ trước ("Quang") sang Họ
+void TachVaChuanHoaHoTen(char ho[], char ten[], int maxHoLen = 51, int maxTenLen = 16);
+
+// Nhập chuỗi từ bàn phím Console, tự động viết hoa chữ cái đầu ngay khi đang gõ phím (Real-time on-the-fly)
+void NhapChuoiTuDongHoa(char buffer[], int maxLen, bool vietHoaChuDau = true);
+
 #endif

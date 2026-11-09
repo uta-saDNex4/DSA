@@ -658,7 +658,7 @@ void TabDiem::capNhatComboNienKhoa(QComboBox *cbo) {
         }
     }
     if (cbo->count() == 0) {
-        cbo->addItem("2023-2024");
+        cbo->addItem("2025-2026");
     }
     cbo->blockSignals(false);
 }

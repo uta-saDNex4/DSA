@@ -4,6 +4,11 @@
 #include <iostream>
 #include <stdlib.h>
 
+#ifdef _WIN32
+#include <conio.h>
+#include <io.h>
+#endif
+
 using namespace std;
 
 void ChuanHoaTen(char str[]) {
@@ -106,4 +111,116 @@ bool KiemTraNienKhoaHopLe(const char nk[]) {
     if (y2 != y1 + 1) return false;
     
     return true;
+}
+
+void TachVaChuanHoaHoTen(char ho[], char ten[], int maxHoLen, int maxTenLen) {
+    if (ho == nullptr || ten == nullptr) return;
+    
+    // 1. Chuẩn hóa sơ bộ để loại bỏ khoảng trắng dư thừa
+    ChuanHoaTen(ho);
+    ChuanHoaTen(ten);
+    
+    int lenTen = strlen(ten);
+    if (lenTen == 0) return;
+    
+    // 2. Tìm khoảng trắng cuối cùng trong chuỗi TEN
+    int lastSpace = -1;
+    for (int i = lenTen - 1; i >= 0; i--) {
+        if (ten[i] == ' ') {
+            lastSpace = i;
+            break;
+        }
+    }
+    
+    // 3. Nếu TEN có chứa khoảng trắng (nhiều hơn 1 từ)
+    // Ví dụ: Nhập TEN = "Quang Tho" -> Tách "Quang" ghép vào HO, giữ "Tho" cho TEN
+    if (lastSpace != -1) {
+        char phanDem[100];
+        char tenCuoi[50];
+        
+        int idxDem = 0;
+        for (int i = 0; i < lastSpace; i++) {
+            phanDem[idxDem++] = ten[i];
+        }
+        phanDem[idxDem] = '\0';
+        
+        int idxTen = 0;
+        for (int i = lastSpace + 1; i < lenTen; i++) {
+            tenCuoi[idxTen++] = ten[i];
+        }
+        tenCuoi[idxTen] = '\0';
+        
+        // Đẩy phanDem sang ho
+        int curLenHo = strlen(ho);
+        if (curLenHo > 0 && curLenHo < maxHoLen - 1) {
+            strncat(ho, " ", maxHoLen - 1 - curLenHo);
+        }
+        curLenHo = strlen(ho);
+        if (curLenHo < maxHoLen - 1) {
+            strncat(ho, phanDem, maxHoLen - 1 - curLenHo);
+        }
+        ho[maxHoLen - 1] = '\0';
+        
+        // Gán lại tên cuối vào ten
+        strncpy(ten, tenCuoi, maxTenLen - 1);
+        ten[maxTenLen - 1] = '\0';
+        
+        // 4. Chuẩn hóa lại cả hai
+        ChuanHoaTen(ho);
+        ChuanHoaTen(ten);
+    }
+}
+
+void NhapChuoiTuDongHoa(char buffer[], int maxLen, bool vietHoaChuDau) {
+    if (buffer == nullptr || maxLen <= 0) return;
+
+#ifdef _WIN32
+    // Nếu stdin bị redirect (chạy test pipe tự động), fallback sang cin.getline
+    if (!_isatty(_fileno(stdin))) {
+        cin.getline(buffer, maxLen);
+        if (vietHoaChuDau) ChuanHoaTen(buffer);
+        return;
+    }
+
+    int idx = 0;
+    while (idx < maxLen - 1) {
+        int ch = _getch();
+        if (ch == 0 || ch == 224) { // Phím chức năng / mũi tên (2 byte)
+            _getch(); // bỏ qua byte thứ hai
+            continue;
+        }
+        
+        // Nhấn Enter để kết thúc nhập
+        if (ch == '\r' || ch == '\n') {
+            cout << "\n";
+            break;
+        }
+        
+        // Nhấn Backspace để xóa ký tự
+        if (ch == '\b' || ch == 127) {
+            if (idx > 0) {
+                idx--;
+                cout << "\b \b";
+            }
+            continue;
+        }
+        
+        // Ký tự thông thường có thể in được
+        if (isprint((unsigned char)ch)) {
+            char c = (char)ch;
+            if (vietHoaChuDau) {
+                // Viết hoa chữ cái đầu tiên hoặc chữ cái ngay sau dấu cách ngay lúc gõ (Real-time)
+                if (idx == 0 || buffer[idx - 1] == ' ') {
+                    c = (char)toupper((unsigned char)c);
+                }
+            }
+            buffer[idx++] = c;
+            cout << c;
+        }
+    }
+    buffer[idx] = '\0';
+#else
+    cin.getline(buffer, maxLen);
+    if (vietHoaChuDau) ChuanHoaTen(buffer);
+#endif
 }

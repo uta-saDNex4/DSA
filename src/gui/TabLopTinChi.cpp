@@ -14,6 +14,7 @@
 #include "lop.h"
 #include "sinhvien.h"
 #include "dangky.h"
+#include "utils.h"
 
 TabLopTinChi::TabLopTinChi(QWidget *parent) : QWidget(parent) {
     setupUI();
@@ -301,14 +302,33 @@ void TabLopTinChi::onMoLopTC() {
     delete[] arrMH;
     form->addRow("Môn học (*):", cboMH);
 
-    QLineEdit *txtNK = new QLineEdit(&dlg);
-    txtNK->setPlaceholderText("VD: 2023-2024");
-    if (cboNienKhoa->currentText() != "-- Tất cả --") {
-        txtNK->setText(cboNienKhoa->currentText());
-    } else {
-        txtNK->setText("2023-2024");
+    // Niên khóa combo (chọn từ danh sách hoặc nhập mới)
+    QComboBox *cboNK = new QComboBox(&dlg);
+    cboNK->setEditable(true);
+
+    QStringList dsNK;
+    for (int y = 2021; y <= 2030; ++y) {
+        dsNK << QString("%1-%2").arg(y).arg(y + 1);
     }
-    form->addRow("Niên khóa (*):", txtNK);
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr) {
+            QString existNK = QString::fromUtf8(dsltc.nodes[i]->NienKhoa).trimmed();
+            if (!existNK.isEmpty() && !dsNK.contains(existNK)) {
+                dsNK.append(existNK);
+            }
+        }
+    }
+    dsNK.sort();
+    cboNK->addItems(dsNK);
+
+    if (cboNienKhoa->currentText() != "-- Tất cả --" && !cboNienKhoa->currentText().isEmpty()) {
+        cboNK->setCurrentText(cboNienKhoa->currentText());
+    } else {
+        int idxDef = cboNK->findText("2025-2026");
+        if (idxDef >= 0) cboNK->setCurrentIndex(idxDef);
+        else cboNK->setCurrentIndex(0);
+    }
+    form->addRow("Niên khóa (*):", cboNK);
 
     QSpinBox *spnHK = new QSpinBox(&dlg);
     spnHK->setRange(1, 3);
@@ -339,7 +359,7 @@ void TabLopTinChi::onMoLopTC() {
 
     if (dlg.exec() == QDialog::Accepted) {
         QString mamh = cboMH->currentData().toString().trimmed();
-        QString nk = txtNK->text().trimmed();
+        QString nk = cboNK->currentText().trimmed();
         int hk = spnHK->value();
         int nhom = spnNhom->value();
         int minSV = spnMin->value();
@@ -347,6 +367,11 @@ void TabLopTinChi::onMoLopTC() {
 
         if (nk.isEmpty()) {
             QMessageBox::warning(this, "Lỗi nhập liệu", "Niên khóa không được để trống!");
+            return;
+        }
+
+        if (!KiemTraNienKhoaHopLe(nk.toUtf8().constData())) {
+            QMessageBox::warning(this, "Lỗi nhập liệu", "Định dạng niên khóa không hợp lệ!\nVui lòng chọn từ danh sách hoặc nhập theo dạng YYYY-YYYY (ví dụ: 2025-2026).");
             return;
         }
 
@@ -413,7 +438,29 @@ void TabLopTinChi::onHieuChinhLopTC() {
     QLabel *lblMH = new QLabel(QString("%1 - %2").arg(ltc->MAMH).arg(tenMH), &dlg);
     form->addRow("Môn học:", lblMH);
 
-    QLineEdit *txtNK = new QLineEdit(QString::fromUtf8(ltc->NienKhoa), &dlg);
+    QComboBox *cboNK = new QComboBox(&dlg);
+    cboNK->setEditable(true);
+
+    QStringList dsNK;
+    for (int y = 2021; y <= 2030; ++y) {
+        dsNK << QString("%1-%2").arg(y).arg(y + 1);
+    }
+    for (int i = 0; i < dsltc.n; ++i) {
+        if (dsltc.nodes[i] != nullptr) {
+            QString existNK = QString::fromUtf8(dsltc.nodes[i]->NienKhoa).trimmed();
+            if (!existNK.isEmpty() && !dsNK.contains(existNK)) {
+                dsNK.append(existNK);
+            }
+        }
+    }
+    QString curNK = QString::fromUtf8(ltc->NienKhoa).trimmed();
+    if (!curNK.isEmpty() && !dsNK.contains(curNK)) {
+        dsNK.append(curNK);
+    }
+    dsNK.sort();
+    cboNK->addItems(dsNK);
+    cboNK->setCurrentText(curNK);
+
     QSpinBox *spnHK = new QSpinBox(&dlg);
     spnHK->setRange(1, 3);
     spnHK->setValue(ltc->HocKy);
@@ -424,7 +471,7 @@ void TabLopTinChi::onHieuChinhLopTC() {
 
     // Nếu đã có SV đăng ký, không cho sửa Niên khóa, Học kỳ, Nhóm để đảm bảo tính toàn vẹn
     if (soSV > 0) {
-        txtNK->setReadOnly(true);
+        cboNK->setEnabled(false);
         spnHK->setEnabled(false);
         spnNhom->setEnabled(false);
         QLabel *lblNotice = new QLabel("⚠️ Lớp đã có sinh viên đăng ký, chỉ được phép sửa Sĩ số Min / Max!", &dlg);
@@ -432,7 +479,7 @@ void TabLopTinChi::onHieuChinhLopTC() {
         form->addRow(lblNotice);
     }
 
-    form->addRow("Niên khóa:", txtNK);
+    form->addRow("Niên khóa:", cboNK);
     form->addRow("Học kỳ:", spnHK);
     form->addRow("Nhóm:", spnNhom);
 
@@ -458,8 +505,18 @@ void TabLopTinChi::onHieuChinhLopTC() {
             return;
         }
 
+        QString nk = cboNK->currentText().trimmed();
+        if (nk.isEmpty()) {
+            QMessageBox::warning(this, "Lỗi", "Niên khóa không được để trống!");
+            return;
+        }
+        if (!KiemTraNienKhoaHopLe(nk.toUtf8().constData())) {
+            QMessageBox::warning(this, "Lỗi", "Định dạng niên khóa không hợp lệ!\nVui lòng chọn từ danh sách hoặc nhập theo dạng YYYY-YYYY (ví dụ: 2025-2026).");
+            return;
+        }
+
         LopTinChi ltcMoi = *ltc;
-        std::strncpy(ltcMoi.NienKhoa, txtNK->text().trimmed().toUtf8().constData(), sizeof(ltcMoi.NienKhoa) - 1);
+        std::strncpy(ltcMoi.NienKhoa, nk.toUtf8().constData(), sizeof(ltcMoi.NienKhoa) - 1);
         ltcMoi.NienKhoa[sizeof(ltcMoi.NienKhoa) - 1] = '\0';
         ltcMoi.HocKy = spnHK->value();
         ltcMoi.Nhom = spnNhom->value();

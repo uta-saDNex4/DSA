@@ -206,7 +206,7 @@ void TabDangKy::capNhatDanhSachNienKhoa() {
     }
 
     if (cboNienKhoa->count() == 0) {
-        cboNienKhoa->addItem("2023-2024");
+        cboNienKhoa->addItem("2025-2026");
     }
 
     int idx = cboNienKhoa->findText(current);
