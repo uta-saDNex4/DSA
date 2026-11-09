@@ -4,6 +4,7 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QSplitter>
+#include <QShortcut>
 #include <cstring>
 #include "lop.h"
 #include "sinhvien.h"
@@ -95,9 +96,10 @@ void TabDangKy::setupUI() {
     QHBoxLayout *hdrMo = new QHBoxLayout();
     QLabel *lblTitleMo = new QLabel("📋 DANH SÁCH CÁC LỚP TÍN CHỈ ĐANG MỞ TRONG HỌC KỲ", pnlLopMo);
     lblTitleMo->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
-    QPushButton *btnDK = new QPushButton("✅ [Enter] Đăng Ký Lớp Đã Chọn", pnlLopMo);
+    QPushButton *btnDK = new QPushButton("✅ Đăng Ký Lớp Đã Chọn", pnlLopMo);
     btnDK->setMinimumHeight(32);
     btnDK->setStyleSheet("background-color: #059669; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
+    btnDK->setToolTip("Nhấn nút này, hoặc nhấn phím Enter / Nhấp đúp chuột vào lớp để đăng ký");
     connect(btnDK, &QPushButton::clicked, this, &TabDangKy::onDangKyLTC);
 
     hdrMo->addWidget(lblTitleMo);
@@ -126,6 +128,11 @@ void TabDangKy::setupUI() {
     tableLopMo->verticalHeader()->setVisible(false);
     connect(tableLopMo, &QTableWidget::cellDoubleClicked, this, &TabDangKy::onDangKyLTC);
 
+    QShortcut *scEnter1 = new QShortcut(QKeySequence(Qt::Key_Return), tableLopMo);
+    connect(scEnter1, &QShortcut::activated, this, &TabDangKy::onDangKyLTC);
+    QShortcut *scEnter2 = new QShortcut(QKeySequence(Qt::Key_Enter), tableLopMo);
+    connect(scEnter2, &QShortcut::activated, this, &TabDangKy::onDangKyLTC);
+
     layoutLopMo->addWidget(tableLopMo);
     splitter->addWidget(pnlLopMo);
 
@@ -142,9 +149,10 @@ void TabDangKy::setupUI() {
     lblTongTinChi = new QLabel("Tổng tín chỉ: <b>0</b>", pnlDaDK);
     lblTongTinChi->setStyleSheet("background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 4px 10px; font-size: 13px;");
 
-    QPushButton *btnHuyDK = new QPushButton("🗑️ [Del] Hủy Đăng Ký Môn Này", pnlDaDK);
+    QPushButton *btnHuyDK = new QPushButton("🗑️ Hủy Đăng Ký Môn Này", pnlDaDK);
     btnHuyDK->setMinimumHeight(32);
     btnHuyDK->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
+    btnHuyDK->setToolTip("Nhấn nút này, hoặc nhấn phím Delete / Nhấp đúp chuột vào môn để hủy đăng ký");
     connect(btnHuyDK, &QPushButton::clicked, this, &TabDangKy::onHuyDangKyLTC);
 
     hdrDaDK->addWidget(lblTitleDaDK);
@@ -171,6 +179,10 @@ void TabDangKy::setupUI() {
     tableLopDaDK->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableLopDaDK->setAlternatingRowColors(true);
     tableLopDaDK->verticalHeader()->setVisible(false);
+    connect(tableLopDaDK, &QTableWidget::cellDoubleClicked, this, &TabDangKy::onHuyDangKyLTC);
+
+    QShortcut *scDel = new QShortcut(QKeySequence(Qt::Key_Delete), tableLopDaDK);
+    connect(scDel, &QShortcut::activated, this, &TabDangKy::onHuyDangKyLTC);
 
     layoutDaDK->addWidget(tableLopDaDK);
     splitter->addWidget(pnlDaDK);
@@ -208,11 +220,21 @@ void TabDangKy::loadData() {
     capNhatDanhSachNienKhoa();
     capNhatDanhSachLopMo();
     capNhatDanhSachDaDangKy();
+
+    if (svFound && tableLopMo->rowCount() > 0) {
+        tableLopMo->selectRow(0);
+        tableLopMo->setFocus();
+    }
 }
 
 void TabDangKy::onFilterChanged() {
     capNhatDanhSachLopMo();
     capNhatDanhSachDaDangKy();
+
+    if (svFound && tableLopMo->rowCount() > 0) {
+        tableLopMo->selectRow(0);
+        tableLopMo->setFocus();
+    }
 }
 
 void TabDangKy::onSearchSinhVien() {
@@ -254,6 +276,11 @@ void TabDangKy::onSearchSinhVien() {
 
     capNhatDanhSachLopMo();
     capNhatDanhSachDaDangKy();
+
+    if (svFound && tableLopMo->rowCount() > 0) {
+        tableLopMo->selectRow(0);
+        tableLopMo->setFocus();
+    }
 }
 
 void TabDangKy::capNhatDanhSachLopMo() {
@@ -329,6 +356,10 @@ void TabDangKy::capNhatDanhSachLopMo() {
         tableLopMo->setItem(row, 8, itemTrong);
 
         row++;
+    }
+
+    if (tableLopMo->rowCount() > 0 && tableLopMo->currentRow() < 0) {
+        tableLopMo->selectRow(0);
     }
 }
 
