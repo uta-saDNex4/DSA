@@ -41,12 +41,6 @@ void TabLopSinhVien::setupUI() {
     connect(searchLopEdit, &QLineEdit::textChanged, this, &TabLopSinhVien::onSearchClass);
     leftLayout->addWidget(searchLopEdit);
 
-    listLop = new QListWidget(leftPanel);
-    listLop->setStyleSheet("QListWidget::item { padding: 8px; border-bottom: 1px solid #e2e8f0; } "
-                           "QListWidget::item:selected { background-color: #fbe6e8; color: #740d18; font-weight: bold; }");
-    connect(listLop, &QListWidget::currentRowChanged, this, &TabLopSinhVien::onClassSelected);
-    leftLayout->addWidget(listLop);
-
     QHBoxLayout *lopBtnLayout = new QHBoxLayout();
     QPushButton *btnThemLop = new QPushButton("➕ Thêm Lớp", leftPanel);
     QPushButton *btnSuaLop = new QPushButton("✏️ Sửa Tên", leftPanel);
@@ -65,6 +59,13 @@ void TabLopSinhVien::setupUI() {
     lopBtnLayout->addWidget(btnXoaLop);
     leftLayout->addLayout(lopBtnLayout);
 
+    listLop = new QListWidget(leftPanel);
+    listLop->setStyleSheet("QListWidget::item { padding: 8px; border-bottom: 1px solid #e2e8f0; } "
+                           "QListWidget::item:selected { background-color: #fbe6e8; color: #740d18; font-weight: bold; }");
+    connect(listLop, &QListWidget::currentRowChanged, this, &TabLopSinhVien::onClassSelected);
+    connect(listLop, &QListWidget::itemDoubleClicked, this, &TabLopSinhVien::onSuaLop);
+    leftLayout->addWidget(listLop, 1);
+
     leftPanel->setMinimumWidth(300);
     splitter->addWidget(leftPanel);
 
@@ -81,26 +82,49 @@ void TabLopSinhVien::setupUI() {
     classHeaderLabel->setStyleSheet("font-size: 15px; font-weight: bold; color: #1e293b; padding: 4px 0;");
     rightLayout->addWidget(classHeaderLabel);
 
-    // Filter and Sort bar
-    QHBoxLayout *filterSVLayout = new QHBoxLayout();
+    // Filter, Sort and Actions Bar (ALL ON TOP)
+    QHBoxLayout *topToolBar = new QHBoxLayout();
+    topToolBar->setSpacing(8);
+
     searchSVEdit = new QLineEdit(rightPanel);
     searchSVEdit->setPlaceholderText("🔍 Tìm theo Mã SV hoặc Họ tên...");
     searchSVEdit->setClearButtonEnabled(true);
+    searchSVEdit->setMinimumHeight(34);
     connect(searchSVEdit, &QLineEdit::textChanged, this, &TabLopSinhVien::onSearchSV);
-    filterSVLayout->addWidget(searchSVEdit, 2);
+    topToolBar->addWidget(searchSVEdit, 2);
 
-    QGroupBox *grpSort = new QGroupBox("Chế độ sắp xếp:", rightPanel);
+    QGroupBox *grpSort = new QGroupBox("Sắp xếp:", rightPanel);
     QHBoxLayout *sortLayout = new QHBoxLayout(grpSort);
-    sortLayout->setContentsMargins(8, 4, 8, 4);
-    radSortTenHo = new QRadioButton("Tăng dần theo Tên + Họ", grpSort);
-    radSortMaSV = new QRadioButton("Theo Mã Sinh Viên", grpSort);
+    sortLayout->setContentsMargins(8, 2, 8, 2);
+    sortLayout->setSpacing(8);
+    radSortTenHo = new QRadioButton("Tên + Họ", grpSort);
+    radSortMaSV = new QRadioButton("Mã SV", grpSort);
     radSortTenHo->setChecked(true);
     connect(radSortTenHo, &QRadioButton::toggled, this, &TabLopSinhVien::onSortModeChanged);
     sortLayout->addWidget(radSortTenHo);
     sortLayout->addWidget(radSortMaSV);
-    filterSVLayout->addWidget(grpSort);
+    topToolBar->addWidget(grpSort);
 
-    rightLayout->addLayout(filterSVLayout);
+    QPushButton *btnThemSV = new QPushButton("➕ Thêm Sinh Viên", rightPanel);
+    QPushButton *btnSuaSV = new QPushButton("✏️ Hiệu Chỉnh", rightPanel);
+    QPushButton *btnXoaSV = new QPushButton("🗑️ Xóa", rightPanel);
+
+    btnThemSV->setMinimumHeight(34);
+    btnThemSV->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+    btnSuaSV->setMinimumHeight(34);
+    btnSuaSV->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+    btnXoaSV->setMinimumHeight(34);
+    btnXoaSV->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+
+    connect(btnThemSV, &QPushButton::clicked, this, &TabLopSinhVien::onThemSV);
+    connect(btnSuaSV, &QPushButton::clicked, this, &TabLopSinhVien::onSuaSV);
+    connect(btnXoaSV, &QPushButton::clicked, this, &TabLopSinhVien::onXoaSV);
+
+    topToolBar->addWidget(btnThemSV);
+    topToolBar->addWidget(btnSuaSV);
+    topToolBar->addWidget(btnXoaSV);
+
+    rightLayout->addLayout(topToolBar);
 
     // Table SV
     tableSV = new QTableWidget(rightPanel);
@@ -117,35 +141,12 @@ void TabLopSinhVien::setupUI() {
     tableSV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableSV->setAlternatingRowColors(true);
     tableSV->verticalHeader()->setVisible(false);
-    rightLayout->addWidget(tableSV);
-
-    // SV action buttons
-    QHBoxLayout *svBtnLayout = new QHBoxLayout();
-    QPushButton *btnThemSV = new QPushButton("➕ Thêm Sinh Viên", rightPanel);
-    QPushButton *btnSuaSV = new QPushButton("✏️ Hiệu Chỉnh Sinh Viên", rightPanel);
-    QPushButton *btnXoaSV = new QPushButton("🗑️ Xóa Sinh Viên", rightPanel);
-
-    btnThemSV->setMinimumHeight(34);
-    btnThemSV->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
-    btnSuaSV->setMinimumHeight(34);
-    btnSuaSV->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
-    btnXoaSV->setMinimumHeight(34);
-    btnXoaSV->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
-
-    connect(btnThemSV, &QPushButton::clicked, this, &TabLopSinhVien::onThemSV);
-    connect(btnSuaSV, &QPushButton::clicked, this, &TabLopSinhVien::onSuaSV);
-    connect(btnXoaSV, &QPushButton::clicked, this, &TabLopSinhVien::onXoaSV);
+    connect(tableSV, &QTableWidget::cellDoubleClicked, this, &TabLopSinhVien::onSuaSV);
+    rightLayout->addWidget(tableSV, 1);
 
     statusSVLabel = new QLabel(rightPanel);
-    statusSVLabel->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500;");
-
-    svBtnLayout->addWidget(btnThemSV);
-    svBtnLayout->addWidget(btnSuaSV);
-    svBtnLayout->addWidget(btnXoaSV);
-    svBtnLayout->addStretch();
-    svBtnLayout->addWidget(statusSVLabel);
-
-    rightLayout->addLayout(svBtnLayout);
+    statusSVLabel->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500; padding: 4px 0;");
+    rightLayout->addWidget(statusSVLabel);
 
     splitter->addWidget(rightPanel);
     splitter->setStretchFactor(0, 1);
@@ -249,7 +250,7 @@ void TabLopSinhVien::loadSinhVienCuaLop(int classIdx) {
 
     tableSV->setRowCount(0);
     if (count == 0) {
-        statusSVLabel->setText("Lớp này chưa có sinh viên nào.");
+        statusSVLabel->setText("💡 Lớp này chưa có sinh viên nào. Bấm nút [➕ Thêm Sinh Viên] ở thanh công cụ phía trên để bắt đầu thêm.");
         return;
     }
 

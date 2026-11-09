@@ -186,7 +186,7 @@ void TabDiem::onTaiDanhSachNhapDiem() {
         spinDiem->setRange(-1.0, 10.0);
         spinDiem->setSingleStep(0.25);
         spinDiem->setDecimals(1);
-        spinDiem->setSpecialValueText("Chưa nhập (-1)");
+        spinDiem->setSpecialValueText("Chưa nhập");
         spinDiem->setValue(dsSV[i].DIEM < 0 ? -1.0 : dsSV[i].DIEM);
         spinDiem->setAlignment(Qt::AlignCenter);
         spinDiem->setStyleSheet("font-weight: bold; color: #be3142;");

@@ -293,7 +293,7 @@ void NhapDiemLTC_Console(DS_LopTC &dsltc, const DS_LOPSV &dslop, TreeMonHoc root
     cout << "\n[HUONG DAN NHAP LIEU]:\n";
     cout << " - Nhap so thuc tu 0.0 den 10.0 de cap nhat diem cho sinh vien.\n";
     cout << " - Nhan [Enter] de GIU NGUYEN diem hien tai.\n";
-    cout << " - Nhap 'x' hoac '-1' de XOA DIEM (ve trang thai chua thi).\n";
+    cout << " - Nhap 'x' de XOA DIEM (ve trang thai chua co diem).\n";
     cout << " - Nhap 'q' de KET THUC som va luu cac diem da nhap.\n\n";
 
     int soCapNhat = 0;
