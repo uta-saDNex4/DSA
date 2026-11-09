@@ -481,15 +481,32 @@ void TabLopSinhVien::onThemSV() {
     LOPSV &lop = dsLop.nodes[currentClassIdx];
 
     QDialog dlg(this);
-    dlg.setWindowTitle(QString("Thêm Sinh Viên - Lớp %1").arg(QString::fromUtf8(lop.MALOP)));
-    dlg.resize(440, 260);
+    dlg.setWindowTitle(QString("➕ Nhập Danh Sách Sinh Viên - Lớp %1").arg(QString::fromUtf8(lop.MALOP)));
+    dlg.resize(640, 520);
 
-    QFormLayout *form = new QFormLayout(&dlg);
-    form->setSpacing(10);
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dlg);
+    mainLayout->setContentsMargins(16, 14, 16, 14);
+    mainLayout->setSpacing(10);
+
+    // Banner hướng dẫn
+    QLabel *lblHeader = new QLabel(
+        QString("🎓 <b>LỚP: %1 - %2</b> (Sĩ số hiện tại: <b>%3</b> SV)<br>"
+                "<span style='color: #475569; font-size: 12px;'>"
+                "💡 <b>Chế độ nhập liên tục:</b> Nhập thông tin và bấm <b>[➕ Lưu & Nhập Tiếp (Enter)]</b> để thêm liên tục nhiều SV.<br>"
+                "Quá trình nhập sẽ <b>DỪNG</b> khi để trống <b>Mã SV</b> và bấm Enter (hoặc bấm nút [⏹️ Dừng Nhập / Hoàn Tất]).</span>")
+            .arg(QString::fromUtf8(lop.MALOP))
+            .arg(QString::fromUtf8(lop.TENLOP))
+            .arg(DemSV(lop.FirstSV)), &dlg);
+    lblHeader->setStyleSheet("background-color: #f1f5f9; padding: 10px; border-radius: 6px; border-left: 4px solid #be3142;");
+    mainLayout->addWidget(lblHeader);
+
+    // Form nhập liệu
+    QFormLayout *form = new QFormLayout();
+    form->setSpacing(8);
 
     QLineEdit *edtMa = new QLineEdit(&dlg);
     edtMa->setMaxLength(15);
-    edtMa->setPlaceholderText("VD: N24DCCN001");
+    edtMa->setPlaceholderText("VD: N24DCCN001 (để trống & bấm Enter để dừng)");
 
     QLineEdit *edtHo = new QLineEdit(&dlg);
     edtHo->setMaxLength(50);
@@ -506,27 +523,62 @@ void TabLopSinhVien::onThemSV() {
     edtSDT->setMaxLength(15);
     edtSDT->setPlaceholderText("VD: 0901234567");
 
-    form->addRow("Mã sinh viên (C15):", edtMa);
-    form->addRow("Họ & tên đệm (C50):", edtHo);
-    form->addRow("Tên sinh viên (C15):", edtTen);
+    form->addRow("Mã sinh viên (*):", edtMa);
+    form->addRow("Họ & tên đệm (*):", edtHo);
+    form->addRow("Tên sinh viên (*):", edtTen);
     form->addRow("Phái:", cboPhai);
-    form->addRow("Số điện thoại (C15):", edtSDT);
+    form->addRow("Số điện thoại (*):", edtSDT);
+    mainLayout->addLayout(form);
 
-    QDialogButtonBox *btnBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dlg);
-    form->addRow(btnBox);
+    // Status label
+    QLabel *lblStatus = new QLabel("Sẵn sàng nhập sinh viên...", &dlg);
+    lblStatus->setStyleSheet("color: #64748b; font-size: 12px; font-weight: 500;");
+    mainLayout->addWidget(lblStatus);
 
-    connect(btnBox, &QDialogButtonBox::accepted, [&]() {
+    // Hàng nút bấm
+    QHBoxLayout *btnLayout = new QHBoxLayout();
+    QPushButton *btnLuuTiep = new QPushButton("➕ Lưu & Nhập Tiếp (Enter)", &dlg);
+    btnLuuTiep->setMinimumHeight(32);
+    btnLuuTiep->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+
+    QPushButton *btnDung = new QPushButton("⏹️ Dừng Nhập / Hoàn Tất", &dlg);
+    btnDung->setMinimumHeight(32);
+    btnDung->setStyleSheet("background-color: #64748b; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+
+    btnLayout->addWidget(btnLuuTiep);
+    btnLayout->addWidget(btnDung);
+    mainLayout->addLayout(btnLayout);
+
+    // Bảng danh sách các sinh viên vừa thêm trong đợt này
+    QLabel *lblTblTitle = new QLabel("📋 Danh sách sinh viên vừa thêm trong đợt này (0 SV):", &dlg);
+    lblTblTitle->setStyleSheet("font-weight: bold; margin-top: 4px; color: #1e293b;");
+    mainLayout->addWidget(lblTblTitle);
+
+    QTableWidget *tblDotNay = new QTableWidget(&dlg);
+    tblDotNay->setColumnCount(5);
+    tblDotNay->setHorizontalHeaderLabels({"STT", "Mã SV", "Họ & Tên Đệm", "Tên", "Phái"});
+    tblDotNay->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+    tblDotNay->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tblDotNay->setAlternatingRowColors(true);
+    tblDotNay->verticalHeader()->setVisible(false);
+    mainLayout->addWidget(tblDotNay, 1);
+
+    int soLuongDaThem = 0;
+
+    auto thucHienLuuSV = [&]() -> bool {
         QString ma = edtMa->text().trimmed().toUpper();
         QString hoInput = edtHo->text().trimmed();
         QString tenInput = edtTen->text().trimmed();
         QString sdt = edtSDT->text().trimmed();
 
         if (ma.isEmpty()) {
-            QMessageBox::warning(&dlg, "Lỗi", "Mã sinh viên không được để trống!");
-            return;
+            return false;
         }
 
-        // Tạo buffer tạm đủ lớn để xử lý tách họ tên trước khi kiểm tra hợp lệ
         char bufHo[128];
         char bufTen[128];
         strncpy(bufHo, hoInput.toUtf8().constData(), sizeof(bufHo) - 1);
@@ -534,16 +586,17 @@ void TabLopSinhVien::onThemSV() {
         strncpy(bufTen, tenInput.toUtf8().constData(), sizeof(bufTen) - 1);
         bufTen[sizeof(bufTen) - 1] = '\0';
 
-        // Gọi hàm dùng chung xử lý họ và tên trước khi kiểm tra hợp lệ
         TachVaChuanHoaHoTen(bufHo, bufTen, sizeof(SinhVien::HO), sizeof(SinhVien::TEN));
 
         if (KiemTraRong(bufHo)) {
             QMessageBox::warning(&dlg, "Lỗi", "Họ sinh viên không được để trống! (Nếu để trống ô Họ, vui lòng nhập đầy đủ cả Họ và Tên vào ô Tên)");
-            return;
+            edtHo->setFocus();
+            return false;
         }
         if (KiemTraRong(bufTen)) {
             QMessageBox::warning(&dlg, "Lỗi", "Tên sinh viên không được để trống!");
-            return;
+            edtTen->setFocus();
+            return false;
         }
 
         char cMa[16];
@@ -551,41 +604,102 @@ void TabLopSinhVien::onThemSV() {
         cMa[sizeof(cMa) - 1] = '\0';
         ChuanHoaMa(cMa);
 
-        // Kiểm tra trùng mã SV trên TOÀN TRƯỜNG
         LOPSV* lopTrung = nullptr;
         if (TimSVToanTruong(dsLop, cMa, lopTrung) != nullptr) {
             QString tenLopTrung = lopTrung ? QString::fromUtf8(lopTrung->MALOP) : "";
             QMessageBox::warning(&dlg, "Trùng Mã SV",
                 QString("Mã sinh viên '%1' đã tồn tại ở lớp '%2'!\nMã sinh viên là duy nhất trên toàn trường.")
                     .arg(cMa).arg(tenLopTrung));
-            return;
+            edtMa->selectAll();
+            edtMa->setFocus();
+            return false;
         }
 
         SinhVien sv;
         strcpy(sv.MASV, cMa);
         strcpy(sv.HO, bufHo);
         strcpy(sv.TEN, bufTen);
-
         strcpy(sv.PHAI, cboPhai->currentText().toUtf8().constData());
-
         strncpy(sv.SODT, sdt.toUtf8().constData(), sizeof(sv.SODT) - 1);
         sv.SODT[sizeof(sv.SODT) - 1] = '\0';
         ChuanHoaMa(sv.SODT);
 
-        // Chèn vào DSLK đơn có thứ tự tăng dần theo Tên + Họ
         InsertOrderSV(lop.FirstSV, sv);
         AppData::instance().save();
+
+        soLuongDaThem++;
+
+        int row = tblDotNay->rowCount();
+        tblDotNay->insertRow(row);
+        tblDotNay->setItem(row, 0, new QTableWidgetItem(QString::number(soLuongDaThem)));
+        tblDotNay->setItem(row, 1, new QTableWidgetItem(QString::fromUtf8(sv.MASV)));
+        tblDotNay->setItem(row, 2, new QTableWidgetItem(QString::fromUtf8(sv.HO)));
+        tblDotNay->setItem(row, 3, new QTableWidgetItem(QString::fromUtf8(sv.TEN)));
+        tblDotNay->setItem(row, 4, new QTableWidgetItem(QString::fromUtf8(sv.PHAI)));
+        tblDotNay->item(row, 0)->setTextAlignment(Qt::AlignCenter);
+        tblDotNay->item(row, 1)->setTextAlignment(Qt::AlignCenter);
+        tblDotNay->item(row, 4)->setTextAlignment(Qt::AlignCenter);
+        tblDotNay->scrollToBottom();
+
+        lblTblTitle->setText(QString("📋 Danh sách sinh viên vừa thêm trong đợt này (%1 SV):").arg(soLuongDaThem));
+        lblStatus->setText(QString("✅ Đã thêm SV <b>%1</b> (%2 %3) thành công! Mời nhập tiếp (hoặc để trống Mã SV và bấm Enter để dừng).")
+                               .arg(sv.MASV).arg(sv.HO).arg(sv.TEN));
+        lblStatus->setStyleSheet("color: #166534; font-size: 12px; font-weight: bold;");
+
+        loadSinhVienCuaLop(currentClassIdx);
+        if (listLop->currentItem()) {
+            listLop->currentItem()->setText(
+                QString("%1 - %2 (%3 SV)").arg(lop.MALOP).arg(lop.TENLOP).arg(DemSV(lop.FirstSV)));
+        }
+
+        edtMa->clear();
+        edtHo->clear();
+        edtTen->clear();
+        edtSDT->clear();
+        cboPhai->setCurrentIndex(0);
+        edtMa->setFocus();
+        return true;
+    };
+
+    connect(btnLuuTiep, &QPushButton::clicked, [&]() {
+        if (edtMa->text().trimmed().isEmpty()) {
+            if (soLuongDaThem > 0) {
+                dlg.accept();
+            } else {
+                QMessageBox::information(&dlg, "Thông báo", "Vui lòng nhập Mã sinh viên! Hoặc bấm [⏹️ Dừng Nhập / Hoàn Tất] để đóng.");
+                edtMa->setFocus();
+            }
+            return;
+        }
+        thucHienLuuSV();
+    });
+
+    connect(btnDung, &QPushButton::clicked, [&]() {
         dlg.accept();
     });
 
-    connect(btnBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+    connect(edtMa, &QLineEdit::returnPressed, [&]() {
+        if (edtMa->text().trimmed().isEmpty()) {
+            dlg.accept();
+        } else {
+            edtHo->setFocus();
+        }
+    });
+    connect(edtHo, &QLineEdit::returnPressed, [&]() { edtTen->setFocus(); });
+    connect(edtTen, &QLineEdit::returnPressed, [&]() { edtSDT->setFocus(); });
+    connect(edtSDT, &QLineEdit::returnPressed, [&]() { btnLuuTiep->click(); });
 
-    if (dlg.exec() == QDialog::Accepted) {
-        loadSinhVienCuaLop(currentClassIdx);
-        // Cập nhật số lượng SV trên danh sách lớp
-        listLop->item(listLop->currentRow())->setText(
+    dlg.exec();
+
+    loadSinhVienCuaLop(currentClassIdx);
+    if (listLop->currentItem()) {
+        listLop->currentItem()->setText(
             QString("%1 - %2 (%3 SV)").arg(lop.MALOP).arg(lop.TENLOP).arg(DemSV(lop.FirstSV)));
-        QMessageBox::information(this, "Thành công", "Đã thêm sinh viên vào lớp thành công (tự động xếp theo Tên + Họ)!");
+    }
+    if (soLuongDaThem > 0) {
+        QMessageBox::information(this, "Hoàn tất nhập liệu",
+            QString("Quá trình nhập hoàn tất!\nĐã thêm thành công %1 sinh viên vào lớp %2.")
+                .arg(soLuongDaThem).arg(QString::fromUtf8(lop.MALOP)));
     }
 }
 
