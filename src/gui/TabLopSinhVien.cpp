@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QGroupBox>
+#include <QKeyEvent>
 #include <cstring>
 
 TabLopSinhVien::TabLopSinhVien(QWidget *parent) : QWidget(parent) {
@@ -141,6 +142,7 @@ void TabLopSinhVien::setupUI() {
     tableSV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableSV->setAlternatingRowColors(true);
     tableSV->verticalHeader()->setVisible(false);
+    tableSV->installEventFilter(this);
     connect(tableSV, &QTableWidget::cellDoubleClicked, this, &TabLopSinhVien::onSuaSV);
     rightLayout->addWidget(tableSV, 1);
 
@@ -153,6 +155,17 @@ void TabLopSinhVien::setupUI() {
     splitter->setStretchFactor(1, 3);
 
     mainLayout->addWidget(splitter);
+}
+
+bool TabLopSinhVien::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == tableSV && event->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+        if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter) {
+            onSuaSV();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 }
 
 void TabLopSinhVien::loadData() {

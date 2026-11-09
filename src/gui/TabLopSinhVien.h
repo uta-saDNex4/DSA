@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QRadioButton>
+#include <QEvent>
 #include "AppData.h"
 
 class TabLopSinhVien : public QWidget {
@@ -15,6 +16,9 @@ class TabLopSinhVien : public QWidget {
 public:
     explicit TabLopSinhVien(QWidget *parent = nullptr);
     void loadData();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void onClassSelected(int row);

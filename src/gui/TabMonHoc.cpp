@@ -7,6 +7,7 @@
 #include <QFormLayout>
 #include <QSpinBox>
 #include <QDialogButtonBox>
+#include <QKeyEvent>
 #include <cstring>
 
 TabMonHoc::TabMonHoc(QWidget *parent) : QWidget(parent) {
@@ -70,6 +71,8 @@ void TabMonHoc::setupUI() {
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table->setAlternatingRowColors(true);
     table->verticalHeader()->setVisible(false);
+    table->installEventFilter(this);
+    connect(table, &QTableWidget::cellDoubleClicked, this, &TabMonHoc::onSuaMonHoc);
 
     mainLayout->addWidget(table);
 
@@ -77,6 +80,17 @@ void TabMonHoc::setupUI() {
     statusLabel = new QLabel(this);
     statusLabel->setStyleSheet("color: #64748b; font-size: 13px; font-weight: 500;");
     mainLayout->addWidget(statusLabel);
+}
+
+bool TabMonHoc::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == table && event->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+        if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter) {
+            onSuaMonHoc();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 }
 
 void TabMonHoc::loadData() {

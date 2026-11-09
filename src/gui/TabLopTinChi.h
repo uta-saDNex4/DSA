@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QEvent>
 #include "AppData.h"
 
 class TabLopTinChi : public QWidget {
@@ -14,6 +15,9 @@ class TabLopTinChi : public QWidget {
 public:
     explicit TabLopTinChi(QWidget *parent = nullptr);
     void loadData();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void onFilterChanged();

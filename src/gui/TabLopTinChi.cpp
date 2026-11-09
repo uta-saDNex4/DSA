@@ -9,6 +9,8 @@
 #include <QDialogButtonBox>
 #include <QShortcut>
 #include <QKeySequence>
+#include <QKeyEvent>
+#include <QFrame>
 #include <cstring>
 #include "monhoc.h"
 #include "lop.h"
@@ -68,9 +70,10 @@ void TabLopTinChi::setupUI() {
     btnHuyThieuSiSo->setStyleSheet("background-color: #d97706; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
     connect(btnHuyThieuSiSo, &QPushButton::clicked, this, &TabLopTinChi::onHuyLopThieuSiSo);
 
-    QPushButton *btnXemDSSV = new QPushButton("👥 [F6] Xem DSSV", this);
+    QPushButton *btnXemDSSV = new QPushButton("👥 Chi Tiết & DSSV", this);
     btnXemDSSV->setMinimumHeight(34);
     btnXemDSSV->setStyleSheet("background-color: #059669; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
+    btnXemDSSV->setToolTip("Xem chi tiết thông tin lớp tín chỉ và danh sách sinh viên đăng ký [Enter / F6]");
     connect(btnXemDSSV, &QPushButton::clicked, this, &TabLopTinChi::onXemDSSVDangKy);
 
     QPushButton *btnReload = new QPushButton("🔄 [F5]", this);
@@ -116,6 +119,7 @@ void TabLopTinChi::setupUI() {
     tableLTC->setAlternatingRowColors(true);
     tableLTC->verticalHeader()->setVisible(false);
 
+    tableLTC->installEventFilter(this);
     connect(tableLTC, &QTableWidget::cellDoubleClicked, this, &TabLopTinChi::onXemDSSVDangKy);
 
     mainLayout->addWidget(tableLTC);
@@ -127,7 +131,7 @@ void TabLopTinChi::setupUI() {
     bottomLayout->addWidget(statusLabel);
 
     bottomLayout->addStretch();
-    QLabel *hintLabel = new QLabel("Phím tắt: [F1] Mở lớp | [F3] Sửa | [Del] Xóa | [F4] Hủy lớp < Min | [F6] DSSV | [F5] Tải lại", this);
+    QLabel *hintLabel = new QLabel("Phím tắt: [Enter / F6] Xem chi tiết & DSSV | [F1] Mở lớp | [F3] Sửa | [Del] Xóa | [F4] Hủy lớp < Min | [F5] Tải lại", this);
     hintLabel->setStyleSheet("color: #94a3b8; font-size: 12px; font-style: italic;");
     bottomLayout->addWidget(hintLabel);
 
@@ -140,6 +144,17 @@ void TabLopTinChi::setupUI() {
     new QShortcut(QKeySequence(Qt::Key_F4), this, SLOT(onHuyLopThieuSiSo()));
     new QShortcut(QKeySequence(Qt::Key_F5), this, SLOT(loadData()));
     new QShortcut(QKeySequence(Qt::Key_F6), this, SLOT(onXemDSSVDangKy()));
+}
+
+bool TabLopTinChi::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == tableLTC && event->type() == QEvent::KeyPress) {
+        QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+        if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter) {
+            onXemDSSVDangKy();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(obj, event);
 }
 
 void TabLopTinChi::capNhatDanhSachNienKhoa() {
@@ -263,6 +278,9 @@ void TabLopTinChi::onFilterChanged() {
     }
 
     statusLabel->setText(QString("Hiển thị %1 / %2 lớp tín chỉ").arg(row).arg(dsltc.n));
+    if (tableLTC->rowCount() > 0 && tableLTC->currentRow() < 0) {
+        tableLTC->selectRow(0);
+    }
 }
 
 void TabLopTinChi::onMoLopTC() {
@@ -623,8 +641,13 @@ void TabLopTinChi::onHuyLopThieuSiSo() {
 void TabLopTinChi::onXemDSSVDangKy() {
     int curRow = tableLTC->currentRow();
     if (curRow < 0) {
-        QMessageBox::warning(this, "Thông báo", "Vui lòng chọn một lớp tín chỉ để xem danh sách sinh viên!");
-        return;
+        if (tableLTC->rowCount() > 0) {
+            curRow = 0;
+            tableLTC->selectRow(0);
+        } else {
+            QMessageBox::warning(this, "Thông báo", "Vui lòng chọn một lớp tín chỉ để xem chi tiết!");
+            return;
+        }
     }
 
     int maLTC = tableLTC->item(curRow, 0)->data(Qt::UserRole).toInt();
@@ -639,31 +662,74 @@ void TabLopTinChi::onXemDSSVDangKy() {
     TreeMonHoc mhNode = TimMonHoc(dsMH.root, ltc->MAMH);
     QString tenMH = mhNode ? QString::fromUtf8(mhNode->mh.TENMH) : "(Không tìm thấy)";
 
+    int soDk = DemSVDangKyHopLe(ltc->FirstDK);
+    int conTrong = ltc->SoSVMax - soDk;
+    if (conTrong < 0) conTrong = 0;
+
+    QString trangThaiText;
+    QString trangThaiColor;
+    if (ltc->HuyLop) {
+        trangThaiText = "❌ ĐÃ HỦY";
+        trangThaiColor = "#dc2626";
+    } else if (soDk >= ltc->SoSVMax) {
+        trangThaiText = "🔴 HẾT CHỖ";
+        trangThaiColor = "#ea580c";
+    } else if (soDk < ltc->SoSVMin) {
+        trangThaiText = QString("⚠️ THIẾU SĨ SỐ (%1 / Min: %2)").arg(soDk).arg(ltc->SoSVMin);
+        trangThaiColor = "#d97706";
+    } else {
+        trangThaiText = "🟢 ĐANG MỞ";
+        trangThaiColor = "#16a34a";
+    }
+
     QDialog dlg(this);
-    dlg.setWindowTitle(QString("📋 DANH SÁCH SINH VIÊN ĐĂNG KÝ LỚP TÍN CHỈ #%1").arg(maLTC));
-    dlg.resize(750, 480);
+    dlg.setWindowTitle(QString("📋 Chi Tiết Lớp Tín Chỉ #%1 — %2").arg(maLTC).arg(tenMH));
+    dlg.resize(800, 520);
 
     QVBoxLayout *layout = new QVBoxLayout(&dlg);
     layout->setContentsMargins(16, 16, 16, 16);
     layout->setSpacing(12);
 
-    // Tiêu đề thông tin lớp
+    // Header Card thông tin chi tiết lớp
+    QFrame *infoCard = new QFrame(&dlg);
+    infoCard->setStyleSheet("background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;");
+    QVBoxLayout *cardLayout = new QVBoxLayout(infoCard);
+    cardLayout->setContentsMargins(14, 12, 14, 12);
+    cardLayout->setSpacing(6);
+
     QLabel *lblTitle = new QLabel(
-        QString("<h3 style='color: #740d18; margin: 0;'>DANH SÁCH SINH VIÊN ĐĂNG KÝ LỚP TÍN CHỈ</h3>"
-                "<b>Mã lớp TC:</b> %1 &nbsp;&nbsp;|&nbsp;&nbsp; <b>Môn:</b> %2 - %3<br>"
-                "<b>Niên khóa:</b> %4 &nbsp;&nbsp;|&nbsp;&nbsp; <b>Học kỳ:</b> %5 &nbsp;&nbsp;|&nbsp;&nbsp; <b>Nhóm:</b> %6")
+        QString("<div style='font-size: 15px; font-weight: bold; color: #740d18; margin-bottom: 4px;'>"
+                "📋 LỚP TÍN CHỈ #%1: %2 (%3)</div>"
+                "<div style='font-size: 13px; line-height: 1.6; color: #1e293b;'>"
+                "📅 <b>Niên khóa:</b> %4 &nbsp;&nbsp;|&nbsp;&nbsp; 📚 <b>Học kỳ:</b> %5 &nbsp;&nbsp;|&nbsp;&nbsp; 👥 <b>Nhóm lớp:</b> %6<br>"
+                "🎯 <b>Sĩ số Min:</b> %7 &nbsp;&nbsp;|&nbsp;&nbsp; <b>Sĩ số Max:</b> %8 &nbsp;&nbsp;|&nbsp;&nbsp; "
+                "✅ <b>Đã đăng ký:</b> <b style='color: #0369a1;'>%9</b> &nbsp;&nbsp;|&nbsp;&nbsp; "
+                "🪑 <b>Còn trống:</b> <b style='color: #059669;'>%10</b> chỗ<br>"
+                "⚡ <b>Trạng thái:</b> <span style='color: %11; font-weight: bold;'>%12</span>"
+                "</div>")
             .arg(ltc->MALOPTC)
-            .arg(ltc->MAMH)
             .arg(tenMH)
-            .arg(ltc->NienKhoa)
+            .arg(QString::fromUtf8(ltc->MAMH))
+            .arg(QString::fromUtf8(ltc->NienKhoa))
             .arg(ltc->HocKy)
-            .arg(ltc->Nhom),
-        &dlg);
-    layout->addWidget(lblTitle);
+            .arg(ltc->Nhom)
+            .arg(ltc->SoSVMin)
+            .arg(ltc->SoSVMax)
+            .arg(soDk)
+            .arg(conTrong)
+            .arg(trangThaiColor)
+            .arg(trangThaiText),
+        infoCard);
+    cardLayout->addWidget(lblTitle);
+    layout->addWidget(infoCard);
+
+    QLabel *lblTableTitle = new QLabel("<b>👥 DANH SÁCH SINH VIÊN ĐĂNG KÝ:</b>", &dlg);
+    lblTableTitle->setStyleSheet("color: #334155; font-size: 13px; margin-top: 4px;");
+    layout->addWidget(lblTableTitle);
 
     QTableWidget *tblSV = new QTableWidget(&dlg);
     tblSV->setColumnCount(7);
-    tblSV->setHorizontalHeaderLabels({"STT", "Mã SV", "Họ", "Tên", "Phái", "Số ĐT", "Mã Lớp"});
+    tblSV->setHorizontalHeaderLabels({"STT", "Mã SV", "Họ & Tên Đệm", "Tên", "Phái", "Số ĐT", "Lớp"});
     tblSV->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     tblSV->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     tblSV->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
@@ -671,6 +737,7 @@ void TabLopTinChi::onXemDSSVDangKy() {
     tblSV->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
     tblSV->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
     tblSV->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+    tblSV->setSelectionBehavior(QAbstractItemView::SelectRows);
     tblSV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tblSV->setAlternatingRowColors(true);
     tblSV->verticalHeader()->setVisible(false);
@@ -706,7 +773,7 @@ void TabLopTinChi::onXemDSSVDangKy() {
         p = p->next;
     }
 
-    // QuickSort theo MASV theo đúng Câu B
+    // QuickSort theo MASV theo đúng quy định
     for (int i = 0; i < count - 1; ++i) {
         for (int j = i + 1; j < count; ++j) {
             if (strcmp(listSV[i].MASV, listSV[j].MASV) > 0) {
@@ -748,14 +815,33 @@ void TabLopTinChi::onXemDSSVDangKy() {
 
     layout->addWidget(tblSV);
 
+    if (count == 0) {
+        tblSV->setVisible(false);
+        QLabel *lblEmpty = new QLabel("💡 Lớp tín chỉ này hiện chưa có sinh viên nào đăng ký.", &dlg);
+        lblEmpty->setStyleSheet("color: #64748b; font-size: 13px; font-style: italic; padding: 24px; background-color: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 6px;");
+        lblEmpty->setAlignment(Qt::AlignCenter);
+        layout->addWidget(lblEmpty);
+    }
+
     QHBoxLayout *btnLayout = new QHBoxLayout();
     QLabel *lblCount = new QLabel(QString("Tổng cộng: <b>%1</b> sinh viên đăng ký").arg(count), &dlg);
-    QPushButton *btnClose = new QPushButton("Đóng", &dlg);
+    lblCount->setStyleSheet("font-size: 13px; color: #475569;");
+
+    QPushButton *btnHieuChinh = new QPushButton("✏️ Hiệu Chỉnh Lớp Này", &dlg);
+    btnHieuChinh->setStyleSheet("background-color: #0284c7; color: white; padding: 6px 14px; font-weight: bold; border-radius: 4px;");
+    connect(btnHieuChinh, &QPushButton::clicked, [&]() {
+        dlg.accept();
+        onHieuChinhLopTC();
+    });
+
+    QPushButton *btnClose = new QPushButton("Đóng [Esc]", &dlg);
     btnClose->setStyleSheet("background-color: #64748b; color: white; padding: 6px 18px; font-weight: bold; border-radius: 4px;");
+    btnClose->setDefault(true);
     connect(btnClose, &QPushButton::clicked, &dlg, &QDialog::accept);
 
     btnLayout->addWidget(lblCount);
     btnLayout->addStretch();
+    btnLayout->addWidget(btnHieuChinh);
     btnLayout->addWidget(btnClose);
     layout->addLayout(btnLayout);
 

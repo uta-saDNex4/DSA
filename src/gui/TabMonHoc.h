@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
+#include <QEvent>
 #include "AppData.h"
 
 class TabMonHoc : public QWidget {
@@ -13,6 +14,9 @@ class TabMonHoc : public QWidget {
 public:
     explicit TabMonHoc(QWidget *parent = nullptr);
     void loadData();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
     void onSearchChanged(const QString &text);
