@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "Toast.h"
+#include <QDateTime>
 #include <QApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -297,9 +298,22 @@ void MainWindow::onSaveAllData() {
 }
 
 void MainWindow::onReloadData() {
+    // Chống spam F5 hoặc spam click nút Tải Lại gây chớp nháy toàn trang
+    static qint64 lastReloadTime = 0;
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    if (now - lastReloadTime < 600) {
+        return; // Bỏ qua các lần kích hoạt quá nhanh liên tiếp trong 600ms
+    }
+    lastReloadTime = now;
+
+    // Khóa vẽ lại giao diện tạm thời để cập nhật mượt mà không chớp nháy
+    tabWidget->setUpdatesEnabled(false);
     AppData::instance().loadAll();
     onTabChanged(tabWidget->currentIndex());
-    statusMsgLabel->setText("🔄 Đã nạp lại toàn bộ dữ liệu từ ổ đĩa!");
+    tabWidget->setUpdatesEnabled(true);
+
+    Toast::showSuccess(this, "Đã nạp lại toàn bộ dữ liệu từ ổ đĩa!");
+    statusMsgLabel->setText("🔄 Đã nạp lại dữ liệu từ ổ đĩa.");
     updateStatusBarStats();
 }
 

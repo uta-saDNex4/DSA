@@ -285,39 +285,56 @@ void TabLopSinhVien::loadSinhVienCuaLop(int classIdx) {
         QuickSortSVMa(arr, 0, count - 1);
     }
 
+    // Chống chớp nháy cho bảng sinh viên
+    tableSV->setUpdatesEnabled(false);
+    tableSV->blockSignals(true);
+
     QString keyword = searchSVEdit->text().trimmed().toLower();
-    int stt = 1;
+    int* matching = new int[count > 0 ? count : 1];
+    int totalMatch = 0;
 
     for (int i = 0; i < count; i++) {
         QString ma = QString::fromUtf8(arr[i].sv.MASV);
         QString ho = QString::fromUtf8(arr[i].sv.HO);
         QString ten = QString::fromUtf8(arr[i].sv.TEN);
         QString hoTen = ho + " " + ten;
+
+        if (keyword.isEmpty() || ma.toLower().contains(keyword) || hoTen.toLower().contains(keyword)) {
+            matching[totalMatch++] = i;
+        }
+    }
+
+    tableSV->clearContents();
+    tableSV->setRowCount(totalMatch);
+
+    for (int r = 0; r < totalMatch; r++) {
+        int i = matching[r];
+        QString ma = QString::fromUtf8(arr[i].sv.MASV);
+        QString ho = QString::fromUtf8(arr[i].sv.HO);
+        QString ten = QString::fromUtf8(arr[i].sv.TEN);
         QString phai = QString::fromUtf8(arr[i].sv.PHAI);
         QString sdt = QString::fromUtf8(arr[i].sv.SODT);
 
-        if (!keyword.isEmpty() && !ma.toLower().contains(keyword) && !hoTen.toLower().contains(keyword)) {
-            continue;
-        }
+        tableSV->setItem(r, 0, new QTableWidgetItem(QString::number(r + 1)));
+        tableSV->setItem(r, 1, new QTableWidgetItem(ma));
+        tableSV->setItem(r, 2, new QTableWidgetItem(ho));
+        tableSV->setItem(r, 3, new QTableWidgetItem(ten));
+        tableSV->setItem(r, 4, new QTableWidgetItem(phai));
+        tableSV->setItem(r, 5, new QTableWidgetItem(sdt));
 
-        int row = tableSV->rowCount();
-        tableSV->insertRow(row);
-
-        tableSV->setItem(row, 0, new QTableWidgetItem(QString::number(stt++)));
-        tableSV->setItem(row, 1, new QTableWidgetItem(ma));
-        tableSV->setItem(row, 2, new QTableWidgetItem(ho));
-        tableSV->setItem(row, 3, new QTableWidgetItem(ten));
-        tableSV->setItem(row, 4, new QTableWidgetItem(phai));
-        tableSV->setItem(row, 5, new QTableWidgetItem(sdt));
-
-        tableSV->item(row, 0)->setTextAlignment(Qt::AlignCenter);
-        tableSV->item(row, 1)->setTextAlignment(Qt::AlignCenter);
-        tableSV->item(row, 4)->setTextAlignment(Qt::AlignCenter);
-        tableSV->item(row, 5)->setTextAlignment(Qt::AlignCenter);
+        tableSV->item(r, 0)->setTextAlignment(Qt::AlignCenter);
+        tableSV->item(r, 1)->setTextAlignment(Qt::AlignCenter);
+        tableSV->item(r, 4)->setTextAlignment(Qt::AlignCenter);
+        tableSV->item(r, 5)->setTextAlignment(Qt::AlignCenter);
     }
 
+    delete[] matching;
     delete[] arr;
-    statusSVLabel->setText(QString("Hiển thị %1 / %2 sinh viên").arg(tableSV->rowCount()).arg(count));
+
+    tableSV->blockSignals(false);
+    tableSV->setUpdatesEnabled(true);
+
+    statusSVLabel->setText(QString("Hiển thị %1 / %2 sinh viên").arg(totalMatch).arg(count));
 }
 
 void TabLopSinhVien::onThemLop() {

@@ -45,15 +45,10 @@ void TabMonHoc::setupUI() {
     btnXoa->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 6px; padding: 0 16px;");
     connect(btnXoa, &QPushButton::clicked, this, &TabMonHoc::onXoaMonHoc);
 
-    QPushButton *btnReload = new QPushButton("🔄 Làm Mới", this);
-    btnReload->setMinimumHeight(36);
-    connect(btnReload, &QPushButton::clicked, this, &TabMonHoc::loadData);
-
     toolLayout->addWidget(searchEdit, 2);
     toolLayout->addWidget(btnThem);
     toolLayout->addWidget(btnSua);
     toolLayout->addWidget(btnXoa);
-    toolLayout->addWidget(btnReload);
 
     mainLayout->addLayout(toolLayout);
 
@@ -119,36 +114,55 @@ void TabMonHoc::loadData() {
 }
 
 void TabMonHoc::hienThiDanhSach(TreeMonHoc* arr, int count, const QString &keyword) {
-    table->setRowCount(0);
-    int stt = 1;
+    // Chống chớp nháy: tạm dừng vẽ lại và chặn signal trong lúc nạp dữ liệu
+    table->setUpdatesEnabled(false);
+    table->blockSignals(true);
+
     QString key = keyword.toLower();
+
+    // 1. Lọc trước các phần tử phù hợp mà không dùng STL vector
+    int* matching = new int[count > 0 ? count : 1];
+    int totalMatch = 0;
 
     for (int i = 0; i < count; i++) {
         QString ma = QString::fromUtf8(arr[i]->mh.MAMH);
         QString ten = QString::fromUtf8(arr[i]->mh.TENMH);
 
-        if (!key.isEmpty() && !ma.toLower().contains(key) && !ten.toLower().contains(key)) {
-            continue;
+        if (key.isEmpty() || ma.toLower().contains(key) || ten.toLower().contains(key)) {
+            matching[totalMatch++] = i;
         }
-
-        int row = table->rowCount();
-        table->insertRow(row);
-
-        table->setItem(row, 0, new QTableWidgetItem(QString::number(stt++)));
-        table->setItem(row, 1, new QTableWidgetItem(ma));
-        table->setItem(row, 2, new QTableWidgetItem(ten));
-        table->setItem(row, 3, new QTableWidgetItem(QString::number(arr[i]->mh.STCLT)));
-        table->setItem(row, 4, new QTableWidgetItem(QString::number(arr[i]->mh.STCTH)));
-        table->setItem(row, 5, new QTableWidgetItem(QString::number(arr[i]->mh.STCLT + arr[i]->mh.STCTH)));
-
-        table->item(row, 0)->setTextAlignment(Qt::AlignCenter);
-        table->item(row, 1)->setTextAlignment(Qt::AlignCenter);
-        table->item(row, 3)->setTextAlignment(Qt::AlignCenter);
-        table->item(row, 4)->setTextAlignment(Qt::AlignCenter);
-        table->item(row, 5)->setTextAlignment(Qt::AlignCenter);
     }
 
-    statusLabel->setText(QString("Hiển thị %1 / %2 môn học (sắp xếp tăng dần theo tên)").arg(table->rowCount()).arg(count));
+    // 2. Thiết lập trước chính xác số dòng (tránh gọi insertRow liên tục gây giật lag)
+    table->clearContents();
+    table->setRowCount(totalMatch);
+
+    for (int r = 0; r < totalMatch; r++) {
+        int i = matching[r];
+        QString ma = QString::fromUtf8(arr[i]->mh.MAMH);
+        QString ten = QString::fromUtf8(arr[i]->mh.TENMH);
+
+        table->setItem(r, 0, new QTableWidgetItem(QString::number(r + 1)));
+        table->setItem(r, 1, new QTableWidgetItem(ma));
+        table->setItem(r, 2, new QTableWidgetItem(ten));
+        table->setItem(r, 3, new QTableWidgetItem(QString::number(arr[i]->mh.STCLT)));
+        table->setItem(r, 4, new QTableWidgetItem(QString::number(arr[i]->mh.STCTH)));
+        table->setItem(r, 5, new QTableWidgetItem(QString::number(arr[i]->mh.STCLT + arr[i]->mh.STCTH)));
+
+        table->item(r, 0)->setTextAlignment(Qt::AlignCenter);
+        table->item(r, 1)->setTextAlignment(Qt::AlignCenter);
+        table->item(r, 3)->setTextAlignment(Qt::AlignCenter);
+        table->item(r, 4)->setTextAlignment(Qt::AlignCenter);
+        table->item(r, 5)->setTextAlignment(Qt::AlignCenter);
+    }
+
+    delete[] matching;
+
+    // Kích hoạt lại vẽ và signal trong 1 chu kỳ duy nhất (Zero Flicker)
+    table->blockSignals(false);
+    table->setUpdatesEnabled(true);
+
+    statusLabel->setText(QString("Hiển thị %1 / %2 môn học (sắp xếp tăng dần theo tên)").arg(totalMatch).arg(count));
 }
 
 void TabMonHoc::onSearchChanged(const QString &text) {
