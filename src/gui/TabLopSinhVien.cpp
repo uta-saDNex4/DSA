@@ -142,6 +142,11 @@ void TabLopSinhVien::setupUI() {
     tableSV->setSelectionMode(QAbstractItemView::SingleSelection);
     tableSV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableSV->setAlternatingRowColors(true);
+    tableSV->setStyleSheet(
+        "QTableWidget { background-color: #ffffff; alternate-background-color: #f8fafc; color: #1e293b; } "
+        "QTableWidget::item { color: #1e293b; } "
+        "QTableWidget::item:selected { background-color: #fee2e2; color: #740d18; font-weight: 600; }"
+    );
     tableSV->verticalHeader()->setVisible(false);
     tableSV->installEventFilter(this);
     connect(tableSV, &QTableWidget::cellDoubleClicked, this, &TabLopSinhVien::onSuaSV);

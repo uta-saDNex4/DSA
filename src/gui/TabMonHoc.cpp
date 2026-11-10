@@ -70,6 +70,11 @@ void TabMonHoc::setupUI() {
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table->setAlternatingRowColors(true);
+    table->setStyleSheet(
+        "QTableWidget { background-color: #ffffff; alternate-background-color: #f8fafc; color: #1e293b; } "
+        "QTableWidget::item { color: #1e293b; } "
+        "QTableWidget::item:selected { background-color: #fee2e2; color: #740d18; font-weight: 600; }"
+    );
     table->verticalHeader()->setVisible(false);
     table->installEventFilter(this);
     connect(table, &QTableWidget::cellDoubleClicked, this, &TabMonHoc::onSuaMonHoc);

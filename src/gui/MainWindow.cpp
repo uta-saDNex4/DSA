@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include <QApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QStatusBar>
@@ -182,12 +183,25 @@ void MainWindow::applyTheme() {
 
         QTableWidget {
             background-color: #ffffff;
-            gridline-color: #f1f5f9;
+            alternate-background-color: #f8fafc;
+            color: #1e293b;
+            gridline-color: #e2e8f0;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 13px;
             selection-background-color: #fee2e2;
             selection-color: #740d18;
+        }
+
+        QTableWidget::item {
+            color: #1e293b;
+            padding: 4px;
+        }
+
+        QTableWidget::item:selected {
+            background-color: #fee2e2;
+            color: #740d18;
+            font-weight: 600;
         }
 
         QHeaderView::section {
@@ -201,6 +215,43 @@ void MainWindow::applyTheme() {
             border-right: 1px solid #e2e8f0;
         }
 
+        QListWidget {
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        QListWidget::item {
+            color: #1e293b;
+            padding: 8px;
+        }
+
+        QListWidget::item:selected {
+            background-color: #fee2e2;
+            color: #740d18;
+            font-weight: bold;
+        }
+
+        QLineEdit, QComboBox, QSpinBox {
+            background-color: #ffffff;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+
+        QLineEdit:focus, QComboBox:focus, QSpinBox:focus {
+            border: 1.5px solid #be3142;
+        }
+
+        QDialog {
+            background-color: #ffffff;
+            color: #1e293b;
+        }
+
         QStatusBar {
             background-color: #ffffff;
             border-top: 1px solid #e2e8f0;
@@ -209,6 +260,7 @@ void MainWindow::applyTheme() {
         }
     )";
 
+    if (qobject_cast<QApplication*>(QApplication::instance())) qobject_cast<QApplication*>(QApplication::instance())->setStyleSheet(qss);
     setStyleSheet(qss);
 }
 
