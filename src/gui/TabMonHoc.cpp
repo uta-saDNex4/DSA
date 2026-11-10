@@ -1,5 +1,6 @@
 #include "TabMonHoc.h"
 #include "Toast.h"
+#include "UndoRedo.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -249,6 +250,13 @@ void TabMonHoc::onThemMonHoc() {
 
         ThemMonHoc(ds.root, mh, ds.n);
         AppData::instance().save();
+
+        UndoAction act;
+        act.type = ACTION_THEM_MON_HOC;
+        snprintf(act.description, sizeof(act.description), "Thêm môn học '%s'", mh.MAMH);
+        act.mhData = mh;
+        UndoRedoManager::instance().recordAction(act);
+
         dlg.accept();
     });
 
@@ -320,11 +328,20 @@ void TabMonHoc::onSuaMonHoc() {
             return;
         }
 
+        MonHoc mhOld = node->mh;
+
         strncpy(node->mh.TENMH, ten.toUtf8().constData(), sizeof(node->mh.TENMH) - 1);
         node->mh.TENMH[sizeof(node->mh.TENMH) - 1] = '\0';
         ChuanHoaTen(node->mh.TENMH);
         node->mh.STCLT = spnLT->value();
         node->mh.STCTH = spnTH->value();
+
+        UndoAction act;
+        act.type = ACTION_SUA_MON_HOC;
+        snprintf(act.description, sizeof(act.description), "Hiệu chỉnh môn '%s'", node->mh.MAMH);
+        act.mhData = node->mh;
+        act.mhOldData = mhOld;
+        UndoRedoManager::instance().recordAction(act);
 
         AppData::instance().save();
         dlg.accept();
@@ -367,7 +384,17 @@ void TabMonHoc::onXoaMonHoc() {
 
     if (ret == QMessageBox::Yes) {
         DS_MonHoc &dsMH = AppData::instance().dsMH;
+        TreeMonHoc pDel = TimMonHoc(dsMH.root, cMa);
+        MonHoc mhOld;
+        if (pDel) mhOld = pDel->mh;
+
         if (XoaMonHocNoiB(dsMH.root, cMa, dsMH.n)) {
+            UndoAction act;
+            act.type = ACTION_XOA_MON_HOC;
+            snprintf(act.description, sizeof(act.description), "Xóa môn học '%s'", cMa);
+            act.mhOldData = mhOld;
+            UndoRedoManager::instance().recordAction(act);
+
             AppData::instance().save();
             loadData();
             Toast::showSuccess(this, QString("Đã xóa môn học '%1'! (Tự động lưu)").arg(maHienTai));

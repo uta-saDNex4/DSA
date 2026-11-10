@@ -21,6 +21,8 @@ private slots:
     void onReloadData();
     void onAboutDialog();
     void onTabChanged(int index);
+    void onUndo();
+    void onRedo();
 
 protected:
     void closeEvent(QCloseEvent *event) override;

@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "Toast.h"
+#include "UndoRedo.h"
 #include <QDateTime>
 #include <QApplication>
 #include <QVBoxLayout>
@@ -63,6 +64,18 @@ void MainWindow::setupUI() {
     btnAbout->setMinimumHeight(38);
     connect(btnAbout, &QPushButton::clicked, this, &MainWindow::onAboutDialog);
 
+    QPushButton *btnUndo = new QPushButton("↩️ [Ctrl+Z] Hoàn Tác", headerWidget);
+    btnUndo->setObjectName("btnHeaderAction");
+    btnUndo->setMinimumHeight(38);
+    connect(btnUndo, &QPushButton::clicked, this, &MainWindow::onUndo);
+
+    QPushButton *btnRedo = new QPushButton("↪️ [Ctrl+Y] Làm Lại", headerWidget);
+    btnRedo->setObjectName("btnHeaderAction");
+    btnRedo->setMinimumHeight(38);
+    connect(btnRedo, &QPushButton::clicked, this, &MainWindow::onRedo);
+
+    headerLayout->addWidget(btnUndo);
+    headerLayout->addWidget(btnRedo);
     headerLayout->addWidget(btnReload);
     headerLayout->addWidget(btnAbout);
 
@@ -265,6 +278,9 @@ void MainWindow::applyTheme() {
 void MainWindow::setupShortcuts() {
     new QShortcut(QKeySequence(Qt::Key_F2), this, SLOT(onSaveAllData()));
     new QShortcut(QKeySequence(Qt::Key_F5), this, SLOT(onReloadData()));
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Z), this, SLOT(onUndo()));
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Y), this, SLOT(onRedo()));
+    new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z), this, SLOT(onRedo()));
     new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this, SLOT(close()));
 }
 
@@ -343,5 +359,29 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         event->accept();
     } else {
         event->ignore();
+    }
+}
+
+void MainWindow::onUndo() {
+    QString desc;
+    if (UndoRedoManager::instance().undo(desc)) {
+        onTabChanged(tabWidget->currentIndex());
+        Toast::showSuccess(this, "↩️ Đã hoàn tác: " + desc);
+        statusMsgLabel->setText("↩️ Đã hoàn tác: " + desc);
+        updateStatusBarStats();
+    } else {
+        Toast::showInfo(this, "Không còn thao tác nào để hoàn tác!");
+    }
+}
+
+void MainWindow::onRedo() {
+    QString desc;
+    if (UndoRedoManager::instance().redo(desc)) {
+        onTabChanged(tabWidget->currentIndex());
+        Toast::showSuccess(this, "↪️ Đã làm lại: " + desc);
+        statusMsgLabel->setText("↪️ Đã làm lại: " + desc);
+        updateStatusBarStats();
+    } else {
+        Toast::showInfo(this, "Không còn thao tác nào để làm lại!");
     }
 }

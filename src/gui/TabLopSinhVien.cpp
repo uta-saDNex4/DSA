@@ -1,5 +1,6 @@
 #include "TabLopSinhVien.h"
 #include "Toast.h"
+#include "UndoRedo.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -634,6 +635,14 @@ void TabLopSinhVien::onThemSV() {
         InsertOrderSV(lop.FirstSV, sv);
         AppData::instance().save();
 
+        UndoAction act;
+        act.type = ACTION_THEM_SINH_VIEN;
+        strncpy(act.maLop, lop.MALOP, sizeof(act.maLop) - 1);
+        act.maLop[sizeof(act.maLop) - 1] = 0;
+        snprintf(act.description, sizeof(act.description), "Thêm sinh viên '%s'", sv.MASV);
+        act.svData = sv;
+        UndoRedoManager::instance().recordAction(act);
+
         soLuongDaThem++;
 
         // Nút thêm kèm refresh ngay lập tức danh sách sinh viên đằng sau dialog để dễ theo dõi
@@ -801,9 +810,20 @@ void TabLopSinhVien::onSuaSV() {
         svMoi.SODT[sizeof(svMoi.SODT) - 1] = '\0';
         ChuanHoaMa(svMoi.SODT);
 
+        SinhVien svCu = p->sv;
+
         // Nếu họ tên thay đổi, xóa node cũ và InsertOrderSV để đảm bảo thứ tự
         XoaSVNoiB(lop.FirstSV, cMa);
         InsertOrderSV(lop.FirstSV, svMoi);
+
+        UndoAction act;
+        act.type = ACTION_SUA_SINH_VIEN;
+        strncpy(act.maLop, lop.MALOP, sizeof(act.maLop) - 1);
+        act.maLop[sizeof(act.maLop) - 1] = 0;
+        snprintf(act.description, sizeof(act.description), "Hiệu chỉnh SV '%s'", svMoi.MASV);
+        act.svData = svMoi;
+        act.svOldData = svCu;
+        UndoRedoManager::instance().recordAction(act);
 
         AppData::instance().save();
         dlg.accept();
@@ -854,7 +874,20 @@ void TabLopSinhVien::onXoaSV() {
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
     if (ret == QMessageBox::Yes) {
+        PTRSV pOld = TimSV(lop.FirstSV, cMa);
+        SinhVien svCu;
+        if (pOld) svCu = pOld->sv;
+
         XoaSVNoiB(lop.FirstSV, cMa);
+
+        UndoAction act;
+        act.type = ACTION_XOA_SINH_VIEN;
+        strncpy(act.maLop, lop.MALOP, sizeof(act.maLop) - 1);
+        act.maLop[sizeof(act.maLop) - 1] = 0;
+        snprintf(act.description, sizeof(act.description), "Xóa sinh viên '%s'", cMa);
+        act.svOldData = svCu;
+        UndoRedoManager::instance().recordAction(act);
+
         AppData::instance().save();
         loadSinhVienCuaLop(currentClassIdx);
         listLop->item(listLop->currentRow())->setText(
