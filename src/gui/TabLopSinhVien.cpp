@@ -505,7 +505,7 @@ void TabLopSinhVien::onThemSV() {
 
     QDialog dlg(this);
     dlg.setWindowTitle(QString("➕ Nhập Danh Sách Sinh Viên - Lớp %1").arg(QString::fromUtf8(lop.MALOP)));
-    dlg.resize(640, 520);
+    dlg.resize(480, 310);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(&dlg);
     mainLayout->setContentsMargins(16, 14, 16, 14);
@@ -572,23 +572,7 @@ void TabLopSinhVien::onThemSV() {
     btnLayout->addWidget(btnDung);
     mainLayout->addLayout(btnLayout);
 
-    // Bảng danh sách các sinh viên vừa thêm trong đợt này
-    QLabel *lblTblTitle = new QLabel("📋 Danh sách sinh viên vừa thêm trong đợt này (0 SV):", &dlg);
-    lblTblTitle->setStyleSheet("font-weight: bold; margin-top: 4px; color: #1e293b;");
-    mainLayout->addWidget(lblTblTitle);
 
-    QTableWidget *tblDotNay = new QTableWidget(&dlg);
-    tblDotNay->setColumnCount(5);
-    tblDotNay->setHorizontalHeaderLabels({"STT", "Mã SV", "Họ & Tên Đệm", "Tên", "Phái"});
-    tblDotNay->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    tblDotNay->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    tblDotNay->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    tblDotNay->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-    tblDotNay->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-    tblDotNay->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tblDotNay->setAlternatingRowColors(true);
-    tblDotNay->verticalHeader()->setVisible(false);
-    mainLayout->addWidget(tblDotNay, 1);
 
     int soLuongDaThem = 0;
 
@@ -652,28 +636,31 @@ void TabLopSinhVien::onThemSV() {
 
         soLuongDaThem++;
 
-        int row = tblDotNay->rowCount();
-        tblDotNay->insertRow(row);
-        tblDotNay->setItem(row, 0, new QTableWidgetItem(QString::number(soLuongDaThem)));
-        tblDotNay->setItem(row, 1, new QTableWidgetItem(QString::fromUtf8(sv.MASV)));
-        tblDotNay->setItem(row, 2, new QTableWidgetItem(QString::fromUtf8(sv.HO)));
-        tblDotNay->setItem(row, 3, new QTableWidgetItem(QString::fromUtf8(sv.TEN)));
-        tblDotNay->setItem(row, 4, new QTableWidgetItem(QString::fromUtf8(sv.PHAI)));
-        tblDotNay->item(row, 0)->setTextAlignment(Qt::AlignCenter);
-        tblDotNay->item(row, 1)->setTextAlignment(Qt::AlignCenter);
-        tblDotNay->item(row, 4)->setTextAlignment(Qt::AlignCenter);
-        tblDotNay->scrollToBottom();
-
-        lblTblTitle->setText(QString("📋 Danh sách sinh viên vừa thêm trong đợt này (%1 SV):").arg(soLuongDaThem));
-        lblStatus->setText(QString("✅ Đã thêm SV <b>%1</b> (%2 %3) thành công! Mời nhập tiếp (hoặc để trống Mã SV và bấm Enter để dừng).")
-                               .arg(sv.MASV).arg(sv.HO).arg(sv.TEN));
-        lblStatus->setStyleSheet("color: #166534; font-size: 12px; font-weight: bold;");
-
+        // Nút thêm kèm refresh ngay lập tức danh sách sinh viên đằng sau dialog để dễ theo dõi
         loadSinhVienCuaLop(currentClassIdx);
         if (listLop->currentItem()) {
             listLop->currentItem()->setText(
-                QString("%1 - %2 (%3 SV)").arg(lop.MALOP).arg(lop.TENLOP).arg(DemSV(lop.FirstSV)));
+                QString("%1 - %2 (%3 SV)").arg(QString::fromUtf8(lop.MALOP))
+                                         .arg(QString::fromUtf8(lop.TENLOP))
+                                         .arg(DemSV(lop.FirstSV)));
         }
+        lblHeader->setText(
+            QString("🎓 <b>LỚP: %1 - %2</b> (Sĩ số hiện tại: <b>%3</b> SV)<br>"
+                    "<span style='color: #475569; font-size: 12px;'>"
+                    "💡 <b>Chế độ nhập liên tục:</b> Nhập thông tin và bấm <b>[➕ Lưu & Nhập Tiếp (Enter)]</b> để thêm liên tục nhiều SV.<br>"
+                    "Quá trình nhập sẽ <b>DỪNG</b> khi để trống <b>Mã SV</b> và bấm Enter (hoặc bấm nút [⏹️ Dừng Nhập / Hoàn Tất]).</span>")
+                .arg(QString::fromUtf8(lop.MALOP))
+                .arg(QString::fromUtf8(lop.TENLOP))
+                .arg(DemSV(lop.FirstSV)));
+
+        lblStatus->setText(QString("✅ Đã thêm SV <b>%1</b> (%2 %3) thành công! Danh sách lớp đằng sau đã cập nhật.")
+                               .arg(QString::fromUtf8(sv.MASV))
+                               .arg(QString::fromUtf8(sv.HO))
+                               .arg(QString::fromUtf8(sv.TEN)));
+        lblStatus->setStyleSheet("color: #166534; font-size: 12px; font-weight: bold;");
+
+        // Ép Qt cập nhật lại ngay tức thì giao diện trang đằng sau
+        qApp->processEvents();
 
         edtMa->clear();
         edtHo->clear();
@@ -720,9 +707,8 @@ void TabLopSinhVien::onThemSV() {
             QString("%1 - %2 (%3 SV)").arg(lop.MALOP).arg(lop.TENLOP).arg(DemSV(lop.FirstSV)));
     }
     if (soLuongDaThem > 0) {
-        QMessageBox::information(this, "Hoàn tất nhập liệu",
-            QString("Quá trình nhập hoàn tất!\nĐã thêm thành công %1 sinh viên vào lớp %2.")
-                .arg(soLuongDaThem).arg(QString::fromUtf8(lop.MALOP)));
+        Toast::showSuccess(this, QString("Đã thêm thành công %1 sinh viên vào lớp %2! (Đã tự động lưu)")
+                                     .arg(soLuongDaThem).arg(QString::fromUtf8(lop.MALOP)));
     }
 }
 
