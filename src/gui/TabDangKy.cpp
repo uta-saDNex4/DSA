@@ -6,6 +6,7 @@
 #include <QSplitter>
 #include <QShortcut>
 #include <cstring>
+#include "Toast.h"
 #include "lop.h"
 #include "sinhvien.h"
 #include "monhoc.h"
@@ -76,14 +77,14 @@ void TabDangKy::setupUI() {
     grpLayout->addLayout(searchRow);
 
     // Student Info Display Card
-    lblThongTinSV = new QLabel("Vui lòng nhập Mã Sinh Viên và nhấn 'Tìm Sinh Viên' để bắt đầu đăng ký tín chỉ.", grpTop);
+    lblThongTinSV = new QLabel("💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.", grpTop);
     lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #475569;");
     grpLayout->addWidget(lblThongTinSV);
 
     mainLayout->addWidget(grpTop);
 
     // ==========================================
-    // CENTER SPLIT: LỚP ĐANG MỞ & LỚP ĐÃ ĐĂNG KÝ
+    // CENTER SPLIT: LỚP ĐANG MỞ & BẢNG BÊN DƯỚI
     // ==========================================
     QSplitter *splitter = new QSplitter(Qt::Vertical, this);
 
@@ -136,8 +137,74 @@ void TabDangKy::setupUI() {
     layoutLopMo->addWidget(tableLopMo);
     splitter->addWidget(pnlLopMo);
 
-    // BOTTOM TABLE: Lớp SV đã đăng ký
-    QWidget *pnlDaDK = new QWidget(this);
+    // ==========================================
+    // BOTTOM STACK: PAGE 0 = CHỌN SV | PAGE 1 = LỚP ĐÃ ĐĂNG KÝ
+    // ==========================================
+    stackBottom = new QStackedWidget(this);
+
+    // PAGE 0: BẢNG GỢI Ý CHỌN SINH VIÊN KHI CHƯA TRA CỨU
+    pnlChonSV = new QWidget(this);
+    QVBoxLayout *layoutChonSV = new QVBoxLayout(pnlChonSV);
+    layoutChonSV->setContentsMargins(0, 0, 0, 0);
+    layoutChonSV->setSpacing(6);
+
+    QHBoxLayout *hdrChonSV = new QHBoxLayout();
+    QLabel *lblTitleChonSV = new QLabel("👥 DANH SÁCH SINH VIÊN (Nhấp đúp hoặc chọn dòng để bắt đầu đăng ký)", pnlChonSV);
+    lblTitleChonSV->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
+
+    txtFilterSV = new QLineEdit(pnlChonSV);
+    txtFilterSV->setPlaceholderText("🔍 Lọc nhanh theo Mã SV, Họ Tên, Lớp...");
+    txtFilterSV->setMinimumHeight(32);
+    txtFilterSV->setMaximumWidth(280);
+    connect(txtFilterSV, &QLineEdit::textChanged, this, &TabDangKy::onFilterSVChanged);
+
+    btnChonSVSubmit = new QPushButton("👉 Chọn Sinh Viên Này", pnlChonSV);
+    btnChonSVSubmit->setMinimumHeight(32);
+    btnChonSVSubmit->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
+    btnChonSVSubmit->setToolTip("Chọn sinh viên đang bôi đen để bắt đầu đăng ký tín chỉ");
+    connect(btnChonSVSubmit, &QPushButton::clicked, this, [this]() {
+        onSVSelectedFromTable(tableChonSV->currentRow(), 0);
+    });
+
+    hdrChonSV->addWidget(lblTitleChonSV);
+    hdrChonSV->addStretch();
+    hdrChonSV->addWidget(txtFilterSV);
+    hdrChonSV->addWidget(btnChonSVSubmit);
+    layoutChonSV->addLayout(hdrChonSV);
+
+    tableChonSV = new QTableWidget(pnlChonSV);
+    tableChonSV->setColumnCount(7);
+    tableChonSV->setHorizontalHeaderLabels({
+        "STT", "Mã SV", "Họ & Tên Đệm", "Tên", "Phái", "Lớp", "Số Điện Thoại"
+    });
+    tableChonSV->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    tableChonSV->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tableChonSV->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    tableChonSV->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    tableChonSV->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+    tableChonSV->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    tableChonSV->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+    tableChonSV->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tableChonSV->setSelectionMode(QAbstractItemView::SingleSelection);
+    tableChonSV->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tableChonSV->setAlternatingRowColors(true);
+    tableChonSV->verticalHeader()->setVisible(false);
+    connect(tableChonSV, &QTableWidget::cellDoubleClicked, this, &TabDangKy::onSVSelectedFromTable);
+
+    QShortcut *scEnterSV1 = new QShortcut(QKeySequence(Qt::Key_Return), tableChonSV);
+    connect(scEnterSV1, &QShortcut::activated, this, [this]() {
+        onSVSelectedFromTable(tableChonSV->currentRow(), 0);
+    });
+    QShortcut *scEnterSV2 = new QShortcut(QKeySequence(Qt::Key_Enter), tableChonSV);
+    connect(scEnterSV2, &QShortcut::activated, this, [this]() {
+        onSVSelectedFromTable(tableChonSV->currentRow(), 0);
+    });
+
+    layoutChonSV->addWidget(tableChonSV);
+    stackBottom->addWidget(pnlChonSV);
+
+    // PAGE 1: BẢNG LỚP SINH VIÊN ĐÃ ĐĂNG KÝ
+    pnlDaDK = new QWidget(this);
     QVBoxLayout *layoutDaDK = new QVBoxLayout(pnlDaDK);
     layoutDaDK->setContentsMargins(0, 0, 0, 0);
     layoutDaDK->setSpacing(6);
@@ -149,7 +216,13 @@ void TabDangKy::setupUI() {
     lblTongTinChi = new QLabel("Tổng tín chỉ: <b>0</b>", pnlDaDK);
     lblTongTinChi->setStyleSheet("background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 4px 10px; font-size: 13px;");
 
-    QPushButton *btnHuyDK = new QPushButton("🗑️ Hủy Đăng Ký Môn Này", pnlDaDK);
+    btnChonSVKhac = new QPushButton("🔄 Chọn SV Khác", pnlDaDK);
+    btnChonSVKhac->setMinimumHeight(32);
+    btnChonSVKhac->setStyleSheet("background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: bold; border-radius: 5px; padding: 0 14px;");
+    btnChonSVKhac->setToolTip("Quay lại danh sách sinh viên để chọn sinh viên khác");
+    connect(btnChonSVKhac, &QPushButton::clicked, this, &TabDangKy::onChonSVKhac);
+
+    btnHuyDK = new QPushButton("🗑️ Hủy Đăng Ký Môn Này", pnlDaDK);
     btnHuyDK->setMinimumHeight(32);
     btnHuyDK->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
     btnHuyDK->setToolTip("Nhấn nút này, hoặc nhấn phím Delete / Nhấp đúp chuột vào môn để hủy đăng ký");
@@ -159,6 +232,7 @@ void TabDangKy::setupUI() {
     hdrDaDK->addSpacing(16);
     hdrDaDK->addWidget(lblTongTinChi);
     hdrDaDK->addStretch();
+    hdrDaDK->addWidget(btnChonSVKhac);
     hdrDaDK->addWidget(btnHuyDK);
     layoutDaDK->addLayout(hdrDaDK);
 
@@ -185,9 +259,110 @@ void TabDangKy::setupUI() {
     connect(scDel, &QShortcut::activated, this, &TabDangKy::onHuyDangKyLTC);
 
     layoutDaDK->addWidget(tableLopDaDK);
-    splitter->addWidget(pnlDaDK);
+    stackBottom->addWidget(pnlDaDK);
+
+    stackBottom->setCurrentIndex(0); // Mặc định hiển thị Bảng Chọn SV
+    splitter->addWidget(stackBottom);
 
     mainLayout->addWidget(splitter, 1);
+}
+
+void TabDangKy::capNhatDanhSachSinhVienChon() {
+    if (!tableChonSV) return;
+    tableChonSV->setUpdatesEnabled(false);
+    tableChonSV->setRowCount(0);
+
+    DS_LOPSV &dsLop = AppData::instance().dsLop;
+    QString filter = txtFilterSV ? txtFilterSV->text().trimmed().toLower() : "";
+
+    int row = 0;
+    int stt = 1;
+
+    for (int i = 0; i < dsLop.n; ++i) {
+        const char *malop = dsLop.nodes[i].MALOP;
+        for (PTRSV p = dsLop.nodes[i].FirstSV; p != nullptr; p = p->next) {
+            QString masv = QString::fromUtf8(p->sv.MASV);
+            QString ho = QString::fromUtf8(p->sv.HO);
+            QString ten = QString::fromUtf8(p->sv.TEN);
+            QString phai = QString::fromUtf8(p->sv.PHAI);
+            QString lop = QString::fromUtf8(malop);
+            QString sodt = QString::fromUtf8(p->sv.SODT);
+
+            if (!filter.isEmpty()) {
+                QString fullSearch = masv + " " + ho + " " + ten + " " + lop + " " + sodt;
+                if (!fullSearch.toLower().contains(filter)) {
+                    continue;
+                }
+            }
+
+            tableChonSV->insertRow(row);
+
+            QTableWidgetItem *itemSTT = new QTableWidgetItem(QString::number(stt++));
+            itemSTT->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *itemMa = new QTableWidgetItem(masv);
+            itemMa->setTextAlignment(Qt::AlignCenter);
+            itemMa->setData(Qt::UserRole, masv);
+
+            QTableWidgetItem *itemHo = new QTableWidgetItem(ho);
+            QTableWidgetItem *itemTen = new QTableWidgetItem(ten);
+            itemTen->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *itemPhai = new QTableWidgetItem(phai);
+            itemPhai->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *itemLop = new QTableWidgetItem(lop);
+            itemLop->setTextAlignment(Qt::AlignCenter);
+
+            QTableWidgetItem *itemSDT = new QTableWidgetItem(sodt);
+            itemSDT->setTextAlignment(Qt::AlignCenter);
+
+            tableChonSV->setItem(row, 0, itemSTT);
+            tableChonSV->setItem(row, 1, itemMa);
+            tableChonSV->setItem(row, 2, itemHo);
+            tableChonSV->setItem(row, 3, itemTen);
+            tableChonSV->setItem(row, 4, itemPhai);
+            tableChonSV->setItem(row, 5, itemLop);
+            tableChonSV->setItem(row, 6, itemSDT);
+
+            row++;
+        }
+    }
+    tableChonSV->setUpdatesEnabled(true);
+}
+
+void TabDangKy::onSVSelectedFromTable(int row, int /*col*/) {
+    if (row < 0) {
+        row = tableChonSV->currentRow();
+    }
+    if (row < 0 || row >= tableChonSV->rowCount()) {
+        QMessageBox::warning(this, "Thông báo", "Vui lòng chọn một sinh viên từ danh sách!");
+        return;
+    }
+    QTableWidgetItem *itemMa = tableChonSV->item(row, 1);
+    if (!itemMa) return;
+    QString masv = itemMa->data(Qt::UserRole).toString();
+    txtMaSV->setText(masv);
+    onSearchSinhVien();
+}
+
+void TabDangKy::onChonSVKhac() {
+    svFound = false;
+    std::memset(currentMaSV, 0, sizeof(currentMaSV));
+    txtMaSV->clear();
+    lblThongTinSV->setText("💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.");
+    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #475569;");
+    stackBottom->setCurrentIndex(0);
+    capNhatDanhSachSinhVienChon();
+    capNhatDanhSachDaDangKy();
+    if (txtFilterSV) {
+        txtFilterSV->clear();
+        txtFilterSV->setFocus();
+    }
+}
+
+void TabDangKy::onFilterSVChanged(const QString &/*text*/) {
+    capNhatDanhSachSinhVienChon();
 }
 
 void TabDangKy::capNhatDanhSachNienKhoa() {
@@ -218,8 +393,15 @@ void TabDangKy::capNhatDanhSachNienKhoa() {
 
 void TabDangKy::loadData() {
     capNhatDanhSachNienKhoa();
+    capNhatDanhSachSinhVienChon();
     capNhatDanhSachLopMo();
     capNhatDanhSachDaDangKy();
+
+    if (svFound) {
+        stackBottom->setCurrentIndex(1);
+    } else {
+        stackBottom->setCurrentIndex(0);
+    }
 
     if (svFound && tableLopMo->rowCount() > 0) {
         tableLopMo->selectRow(0);
@@ -243,6 +425,7 @@ void TabDangKy::onSearchSinhVien() {
 
     if (masvInput.isEmpty()) {
         QMessageBox::warning(this, "Thông báo", "Vui lòng nhập Mã Sinh Viên!");
+        stackBottom->setCurrentIndex(0);
         return;
     }
 
@@ -267,11 +450,13 @@ void TabDangKy::onSearchSinhVien() {
                 .arg(pSV->sv.SODT)
         );
         lblThongTinSV->setStyleSheet("background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #166534;");
+        stackBottom->setCurrentIndex(1); // Chuyển sang bảng môn đã đăng ký
     } else {
         svFound = false;
         std::memset(currentMaSV, 0, sizeof(currentMaSV));
         lblThongTinSV->setText(QString("❌ Không tìm thấy sinh viên có mã: <b>%1</b> trong hệ thống!").arg(masvInput));
         lblThongTinSV->setStyleSheet("background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #991b1b;");
+        stackBottom->setCurrentIndex(0); // Trở lại bảng chọn sinh viên
     }
 
     capNhatDanhSachLopMo();
@@ -442,7 +627,7 @@ void TabDangKy::capNhatDanhSachDaDangKy() {
 
 void TabDangKy::onDangKyLTC() {
     if (!svFound || std::strlen(currentMaSV) == 0) {
-        QMessageBox::warning(this, "Thông báo", "Vui lòng tra cứu sinh viên trước khi thực hiện đăng ký!");
+        QMessageBox::warning(this, "Thông báo", "Vui lòng tra cứu hoặc chọn sinh viên trước khi thực hiện đăng ký!");
         txtMaSV->setFocus();
         return;
     }
@@ -504,9 +689,7 @@ void TabDangKy::onDangKyLTC() {
         AppData::instance().saveAll();
         capNhatDanhSachLopMo();
         capNhatDanhSachDaDangKy();
-        QMessageBox::information(this, "Đăng ký thành công",
-                                 QString("Sinh viên %1 đã đăng ký thành công vào Lớp Tín Chỉ mã: %2!")
-                                     .arg(currentMaSV).arg(maLTC));
+        Toast::showSuccess(this, QString("Sinh viên %1 đã đăng ký thành công lớp %2! (Đã tự động lưu)").arg(currentMaSV).arg(maLTC));
     } else {
         QMessageBox::critical(this, "Lỗi", "Đăng ký thất bại!");
     }
@@ -547,7 +730,7 @@ void TabDangKy::onHuyDangKyLTC() {
             AppData::instance().saveAll();
             capNhatDanhSachLopMo();
             capNhatDanhSachDaDangKy();
-            QMessageBox::information(this, "Thành công", "Đã hủy đăng ký môn học thành công!");
+            Toast::showSuccess(this, "Đã hủy đăng ký môn học thành công! (Đã tự động lưu)");
         } else {
             QMessageBox::critical(this, "Lỗi", "Không thể hủy đăng ký môn học này!");
         }
