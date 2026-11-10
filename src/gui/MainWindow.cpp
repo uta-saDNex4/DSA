@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "Toast.h"
 #include <QApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -49,10 +50,7 @@ void MainWindow::setupUI() {
 
     headerLayout->addStretch();
 
-    QPushButton *btnSave = new QPushButton("💾 [F2] Lưu Toàn Bộ", headerWidget);
-    btnSave->setObjectName("btnSave");
-    btnSave->setMinimumHeight(38);
-    connect(btnSave, &QPushButton::clicked, this, &MainWindow::onSaveAllData);
+
 
     QPushButton *btnReload = new QPushButton("🔄 [F5] Tải Lại", headerWidget);
     btnReload->setObjectName("btnHeaderAction");
@@ -64,7 +62,6 @@ void MainWindow::setupUI() {
     btnAbout->setMinimumHeight(38);
     connect(btnAbout, &QPushButton::clicked, this, &MainWindow::onAboutDialog);
 
-    headerLayout->addWidget(btnSave);
     headerLayout->addWidget(btnReload);
     headerLayout->addWidget(btnAbout);
 
@@ -100,7 +97,7 @@ void MainWindow::setupUI() {
     QStatusBar *bar = statusBar();
     bar->setObjectName("statusBar");
 
-    statusMsgLabel = new QLabel("Sẵn sàng.", this);
+    statusMsgLabel = new QLabel("Sẵn sàng. (Dữ liệu tự động lưu an toàn sau mỗi thao tác)", this);
     statusStatsLabel = new QLabel(this);
     statusStatsLabel->setStyleSheet("color: #475569; font-weight: 500; padding-right: 12px;");
 

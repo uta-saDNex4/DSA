@@ -1,4 +1,5 @@
 #include "TabLopSinhVien.h"
+#include "Toast.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -381,13 +382,13 @@ void TabLopSinhVien::onThemLop() {
 
     if (dlg.exec() == QDialog::Accepted) {
         loadData();
-        QMessageBox::information(this, "Thành công", "Đã thêm lớp học mới thành công!");
+        Toast::showSuccess(this, "Đã thêm lớp học mới! (Tự động lưu)");
     }
 }
 
 void TabLopSinhVien::onSuaLop() {
     if (currentClassIdx < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn lớp cần đổi tên!");
+        Toast::showInfo(this, "Vui lòng chọn lớp cần đổi tên!");
         return;
     }
 
@@ -432,13 +433,13 @@ void TabLopSinhVien::onSuaLop() {
 
     if (dlg.exec() == QDialog::Accepted) {
         loadData();
-        QMessageBox::information(this, "Thành công", "Đã cập nhật tên lớp thành công!");
+        Toast::showSuccess(this, "Đã cập nhật tên lớp! (Tự động lưu)");
     }
 }
 
 void TabLopSinhVien::onXoaLop() {
     if (currentClassIdx < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn lớp cần xóa!");
+        Toast::showInfo(this, "Vui lòng chọn lớp cần xóa!");
         return;
     }
 
@@ -472,13 +473,13 @@ void TabLopSinhVien::onXoaLop() {
         AppData::instance().save();
         currentClassIdx = -1;
         loadData();
-        QMessageBox::information(this, "Thành công", "Đã xóa lớp thành công!");
+        Toast::showSuccess(this, "Đã xóa lớp thành công! (Tự động lưu)");
     }
 }
 
 void TabLopSinhVien::onThemSV() {
     if (currentClassIdx < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn một lớp học trước khi thêm sinh viên!");
+        Toast::showInfo(this, "Vui lòng chọn một lớp học trước khi thêm sinh viên!");
         return;
     }
 
@@ -711,7 +712,7 @@ void TabLopSinhVien::onThemSV() {
 void TabLopSinhVien::onSuaSV() {
     int row = tableSV->currentRow();
     if (row < 0 || currentClassIdx < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn một sinh viên trên bảng để sửa!");
+        Toast::showInfo(this, "Vui lòng chọn một sinh viên trên bảng để sửa!");
         return;
     }
 
@@ -809,14 +810,14 @@ void TabLopSinhVien::onSuaSV() {
 
     if (dlg.exec() == QDialog::Accepted) {
         loadSinhVienCuaLop(currentClassIdx);
-        QMessageBox::information(this, "Thành công", "Đã cập nhật thông tin sinh viên thành công!");
+        Toast::showSuccess(this, "Đã cập nhật thông tin sinh viên! (Tự động lưu)");
     }
 }
 
 void TabLopSinhVien::onXoaSV() {
     int row = tableSV->currentRow();
     if (row < 0 || currentClassIdx < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn sinh viên cần xóa!");
+        Toast::showInfo(this, "Vui lòng chọn sinh viên cần xóa!");
         return;
     }
 
@@ -855,6 +856,6 @@ void TabLopSinhVien::onXoaSV() {
         loadSinhVienCuaLop(currentClassIdx);
         listLop->item(listLop->currentRow())->setText(
             QString("%1 - %2 (%3 SV)").arg(lop.MALOP).arg(lop.TENLOP).arg(DemSV(lop.FirstSV)));
-        QMessageBox::information(this, "Thành công", QString("Đã xóa sinh viên '%1' thành công!").arg(maSV));
+        Toast::showSuccess(this, QString("Đã xóa sinh viên '%1'! (Tự động lưu)").arg(maSV));
     }
 }

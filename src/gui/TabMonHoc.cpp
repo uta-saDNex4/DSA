@@ -1,4 +1,5 @@
 #include "TabMonHoc.h"
+#include "Toast.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -241,14 +242,14 @@ void TabMonHoc::onThemMonHoc() {
 
     if (dlg.exec() == QDialog::Accepted) {
         loadData();
-        QMessageBox::information(this, "Thành công", "Đã thêm môn học mới thành công!");
+        Toast::showSuccess(this, "Đã thêm môn học mới! (Tự động lưu)");
     }
 }
 
 void TabMonHoc::onSuaMonHoc() {
     int row = table->currentRow();
     if (row < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn một môn học trên bảng để hiệu chỉnh!");
+        Toast::showInfo(this, "Vui lòng chọn một môn học trên bảng để hiệu chỉnh!");
         return;
     }
 
@@ -319,14 +320,14 @@ void TabMonHoc::onSuaMonHoc() {
 
     if (dlg.exec() == QDialog::Accepted) {
         loadData();
-        QMessageBox::information(this, "Thành công", "Đã cập nhật thông tin môn học thành công!");
+        Toast::showSuccess(this, "Đã cập nhật môn học! (Tự động lưu)");
     }
 }
 
 void TabMonHoc::onXoaMonHoc() {
     int row = table->currentRow();
     if (row < 0) {
-        QMessageBox::information(this, "Thông báo", "Vui lòng chọn môn học cần xóa trên bảng!");
+        Toast::showInfo(this, "Vui lòng chọn môn học cần xóa trên bảng!");
         return;
     }
 
@@ -355,7 +356,7 @@ void TabMonHoc::onXoaMonHoc() {
         if (XoaMonHocNoiB(dsMH.root, cMa, dsMH.n)) {
             AppData::instance().save();
             loadData();
-            QMessageBox::information(this, "Thành công", QString("Đã xóa môn học '%1' thành công!").arg(maHienTai));
+            Toast::showSuccess(this, QString("Đã xóa môn học '%1'! (Tự động lưu)").arg(maHienTai));
         } else {
             QMessageBox::warning(this, "Lỗi", "Không tìm thấy môn học để xóa!");
         }
