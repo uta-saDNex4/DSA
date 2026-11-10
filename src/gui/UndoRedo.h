@@ -141,15 +141,11 @@ public:
                 break;
             }
             case ACTION_SUA_SINH_VIEN: {
-                // Nghịch đảo của Sửa là khôi phục thông tin cũ
+                // Nghịch đảo của Sửa: Xóa và chèn lại svOldData để bảo toàn thứ tự Tên + Họ
                 int idxLop = TimLop(dsLop, act.maLop);
                 if (idxLop >= 0) {
-                    for (PTRSV p = dsLop.nodes[idxLop].FirstSV; p != nullptr; p = p->next) {
-                        if (strcmp(p->sv.MASV, act.svData.MASV) == 0) {
-                            p->sv = act.svOldData;
-                            break;
-                        }
-                    }
+                    XoaSVNoiB(dsLop.nodes[idxLop].FirstSV, act.svData.MASV);
+                    InsertOrderSV(dsLop.nodes[idxLop].FirstSV, act.svOldData);
                 }
                 break;
             }
@@ -213,15 +209,11 @@ public:
                 break;
             }
             case ACTION_SUA_SINH_VIEN: {
-                // Làm lại: Áp dụng thông tin SV mới
+                // Làm lại: Xóa và chèn lại svData để bảo toàn thứ tự Tên + Họ
                 int idxLop = TimLop(dsLop, act.maLop);
                 if (idxLop >= 0) {
-                    for (PTRSV p = dsLop.nodes[idxLop].FirstSV; p != nullptr; p = p->next) {
-                        if (strcmp(p->sv.MASV, act.svData.MASV) == 0) {
-                            p->sv = act.svData;
-                            break;
-                        }
-                    }
+                    XoaSVNoiB(dsLop.nodes[idxLop].FirstSV, act.svData.MASV);
+                    InsertOrderSV(dsLop.nodes[idxLop].FirstSV, act.svData);
                 }
                 break;
             }
