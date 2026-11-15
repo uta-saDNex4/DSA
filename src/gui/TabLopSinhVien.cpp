@@ -50,9 +50,9 @@ void TabLopSinhVien::setupUI() {
     QPushButton *btnSuaLop = new QPushButton("✏️ Sửa Tên", leftPanel);
     QPushButton *btnXoaLop = new QPushButton("🗑️ Xóa Lớp", leftPanel);
 
-    btnThemLop->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 6px;");
-    btnSuaLop->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 6px;");
-    btnXoaLop->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 4px; padding: 6px;");
+    btnThemLop->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 6px; border: 1px solid #991b1b;");
+    btnSuaLop->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 4px; padding: 6px; border: 1px solid #334155;");
+    btnXoaLop->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 4px; padding: 6px; border: 1.5px solid #be3142;");
 
     connect(btnThemLop, &QPushButton::clicked, this, &TabLopSinhVien::onThemLop);
     connect(btnSuaLop, &QPushButton::clicked, this, &TabLopSinhVien::onSuaLop);
@@ -64,8 +64,6 @@ void TabLopSinhVien::setupUI() {
     leftLayout->addLayout(lopBtnLayout);
 
     listLop = new QListWidget(leftPanel);
-    listLop->setStyleSheet("QListWidget::item { padding: 8px; border-bottom: 1px solid #e2e8f0; } "
-                           "QListWidget::item:selected { background-color: #fbe6e8; color: #740d18; font-weight: bold; }");
     connect(listLop, &QListWidget::currentRowChanged, this, &TabLopSinhVien::onClassSelected);
     connect(listLop, &QListWidget::itemDoubleClicked, this, &TabLopSinhVien::onSuaLop);
     leftLayout->addWidget(listLop, 1);
@@ -82,8 +80,8 @@ void TabLopSinhVien::setupUI() {
     rightLayout->setSpacing(10);
 
     // Header info
-    classHeaderLabel = new QLabel("Vui lòng chọn một lớp để xem danh sách sinh viên", rightPanel);
-    classHeaderLabel->setStyleSheet("font-size: 15px; font-weight: bold; color: #1e293b; padding: 4px 0;");
+    classHeaderLabel = new QLabel("<div style='font-size: 15px; font-weight: bold; color: #475569;'>👉 Vui lòng chọn một lớp từ danh sách bên trái để xem sinh viên</div>", rightPanel);
+    classHeaderLabel->setStyleSheet("background-color: #f1f5f9; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #cbd5e1;");
     rightLayout->addWidget(classHeaderLabel);
 
     // Filter, Sort and Actions Bar (ALL ON TOP)
@@ -114,11 +112,11 @@ void TabLopSinhVien::setupUI() {
     QPushButton *btnXoaSV = new QPushButton("🗑️ Xóa", rightPanel);
 
     btnThemSV->setMinimumHeight(34);
-    btnThemSV->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+    btnThemSV->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px; border: 1px solid #991b1b;");
     btnSuaSV->setMinimumHeight(34);
-    btnSuaSV->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+    btnSuaSV->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px; border: 1px solid #334155;");
     btnXoaSV->setMinimumHeight(34);
-    btnXoaSV->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+    btnXoaSV->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 6px; padding: 0 14px; border: 1.5px solid #be3142;");
 
     connect(btnThemSV, &QPushButton::clicked, this, &TabLopSinhVien::onThemSV);
     connect(btnSuaSV, &QPushButton::clicked, this, &TabLopSinhVien::onSuaSV);
@@ -150,6 +148,7 @@ void TabLopSinhVien::setupUI() {
         "QTableWidget::item:selected { background-color: #fee2e2; color: #740d18; font-weight: 600; }"
     );
     tableSV->verticalHeader()->setVisible(false);
+    tableSV->verticalHeader()->setDefaultSectionSize(34);
     tableSV->installEventFilter(this);
     connect(tableSV, &QTableWidget::cellDoubleClicked, this, &TabLopSinhVien::onSuaSV);
     rightLayout->addWidget(tableSV, 1);
@@ -264,10 +263,14 @@ void TabLopSinhVien::loadSinhVienCuaLop(int classIdx) {
 
     LOPSV &lop = dsLop.nodes[classIdx];
     int count = DemSV(lop.FirstSV);
-    classHeaderLabel->setText(QString("LỚP: %1 - %2  (Sĩ số: %3 sinh viên)")
+    classHeaderLabel->setText(QString("<div style='font-size: 15px;'>"
+                                      "🏫 <b>LỚP:</b> <span style='color:#be3142; font-size:16px; font-weight:900;'>%1</span> - <b>%2</b> &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; "
+                                      "👥 <b>Sĩ số:</b> <span style='color:#0369a1; font-size:16px; font-weight:900;'>%3</span> sinh viên"
+                                      "</div>")
         .arg(QString::fromUtf8(lop.MALOP))
         .arg(QString::fromUtf8(lop.TENLOP))
         .arg(count));
+    classHeaderLabel->setStyleSheet("background-color: #f1f5f9; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #be3142;");
 
     tableSV->setRowCount(0);
     if (count == 0) {
@@ -506,7 +509,7 @@ void TabLopSinhVien::onThemSV() {
 
     QDialog dlg(this);
     dlg.setWindowTitle(QString("➕ Nhập Danh Sách Sinh Viên - Lớp %1").arg(QString::fromUtf8(lop.MALOP)));
-    dlg.resize(480, 310);
+    dlg.resize(920, 560);
 
     QVBoxLayout *mainLayout = new QVBoxLayout(&dlg);
     mainLayout->setContentsMargins(16, 14, 16, 14);
@@ -516,21 +519,29 @@ void TabLopSinhVien::onThemSV() {
     QLabel *lblHeader = new QLabel(
         QString("🎓 <b>LỚP: %1 - %2</b> (Sĩ số hiện tại: <b>%3</b> SV)<br>"
                 "<span style='color: #475569; font-size: 12px;'>"
-                "💡 <b>Chế độ nhập liên tục:</b> Nhập thông tin và bấm <b>[➕ Lưu & Nhập Tiếp (Enter)]</b> để thêm liên tục nhiều SV.<br>"
-                "Quá trình nhập sẽ <b>DỪNG</b> khi để trống <b>Mã SV</b> và bấm Enter (hoặc bấm nút [⏹️ Dừng Nhập / Hoàn Tất]).</span>")
+                "💡 <b>Chế độ nhập nhanh:</b> Bạn có thể chọn nhanh từ <b>Bảng sinh viên mẫu gợi ý bên phải</b> hoặc tự gõ vào form.<br>"
+                "Bấm <b>[➕ Lưu & Nhập Tiếp (Enter)]</b> để thêm liên tục nhiều SV. Quá trình nhập dừng khi để trống Mã SV và bấm Enter.</span>")
             .arg(QString::fromUtf8(lop.MALOP))
             .arg(QString::fromUtf8(lop.TENLOP))
             .arg(DemSV(lop.FirstSV)), &dlg);
     lblHeader->setStyleSheet("background-color: #f1f5f9; padding: 10px; border-radius: 6px; border-left: 4px solid #be3142;");
     mainLayout->addWidget(lblHeader);
 
-    // Form nhập liệu
+    QHBoxLayout *bodyLayout = new QHBoxLayout();
+    bodyLayout->setSpacing(14);
+
+    // --- CỘT TRÁI: FORM NHẬP & BẢNG ĐÃ THÊM ---
+    QWidget *pnlLeft = new QWidget(&dlg);
+    QVBoxLayout *layoutLeft = new QVBoxLayout(pnlLeft);
+    layoutLeft->setContentsMargins(0, 0, 0, 0);
+    layoutLeft->setSpacing(8);
+
     QFormLayout *form = new QFormLayout();
     form->setSpacing(8);
 
     QLineEdit *edtMa = new QLineEdit(&dlg);
     edtMa->setMaxLength(15);
-    edtMa->setPlaceholderText("VD: N24DCCN001 (để trống & bấm Enter để dừng)");
+    edtMa->setPlaceholderText("VD: N24DCCN005 (để trống & bấm Enter để dừng)");
 
     QLineEdit *edtHo = new QLineEdit(&dlg);
     edtHo->setMaxLength(50);
@@ -552,28 +563,129 @@ void TabLopSinhVien::onThemSV() {
     form->addRow("Tên sinh viên (*):", edtTen);
     form->addRow("Phái:", cboPhai);
     form->addRow("Số điện thoại (*):", edtSDT);
-    mainLayout->addLayout(form);
+    layoutLeft->addLayout(form);
 
     // Status label
     QLabel *lblStatus = new QLabel("Sẵn sàng nhập sinh viên...", &dlg);
     lblStatus->setStyleSheet("color: #64748b; font-size: 12px; font-weight: 500;");
-    mainLayout->addWidget(lblStatus);
+    layoutLeft->addWidget(lblStatus);
 
     // Hàng nút bấm
     QHBoxLayout *btnLayout = new QHBoxLayout();
     QPushButton *btnLuuTiep = new QPushButton("➕ Lưu & Nhập Tiếp (Enter)", &dlg);
-    btnLuuTiep->setMinimumHeight(32);
-    btnLuuTiep->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+    btnLuuTiep->setMinimumHeight(34);
+    btnLuuTiep->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1px solid #991b1b;");
 
     QPushButton *btnDung = new QPushButton("⏹️ Dừng Nhập / Hoàn Tất", &dlg);
-    btnDung->setMinimumHeight(32);
-    btnDung->setStyleSheet("background-color: #64748b; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+    btnDung->setMinimumHeight(34);
+    btnDung->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1px solid #334155;");
 
     btnLayout->addWidget(btnLuuTiep);
     btnLayout->addWidget(btnDung);
-    mainLayout->addLayout(btnLayout);
+    layoutLeft->addLayout(btnLayout);
 
+    // Bảng danh sách các sinh viên vừa thêm trong đợt này
+    QLabel *lblTblTitle = new QLabel("📋 Danh sách sinh viên vừa thêm trong đợt này (0 SV):", &dlg);
+    lblTblTitle->setStyleSheet("font-weight: bold; margin-top: 4px; color: #1e293b;");
+    layoutLeft->addWidget(lblTblTitle);
 
+    QTableWidget *tblDotNay = new QTableWidget(&dlg);
+    tblDotNay->setColumnCount(5);
+    tblDotNay->setHorizontalHeaderLabels({"STT", "Mã SV", "Họ & Tên Đệm", "Tên", "Phái"});
+    tblDotNay->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    tblDotNay->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
+    tblDotNay->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tblDotNay->setAlternatingRowColors(true);
+    tblDotNay->verticalHeader()->setVisible(false);
+    tblDotNay->verticalHeader()->setDefaultSectionSize(32);
+    layoutLeft->addWidget(tblDotNay, 1);
+
+    bodyLayout->addWidget(pnlLeft, 1);
+
+    // --- CỘT PHẢI: BẢNG SINH VIÊN MẪU GỢI Ý ---
+    QGroupBox *grpMau = new QGroupBox("💡 DANH SÁCH SINH VIÊN MẪU (CLICK ĐIỀN NHANH)", &dlg);
+    grpMau->setStyleSheet("QGroupBox { font-weight: bold; color: #740d18; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 6px; padding-top: 10px; }");
+    QVBoxLayout *layoutMau = new QVBoxLayout(grpMau);
+    layoutMau->setContentsMargins(10, 10, 10, 10);
+    layoutMau->setSpacing(6);
+
+    QLabel *lblHintMau = new QLabel("Nhấp vào dòng để tự điền form:", grpMau);
+    lblHintMau->setStyleSheet("font-size: 11px; color: #64748b; font-style: italic;");
+    layoutMau->addWidget(lblHintMau);
+
+    QTableWidget *tblMau = new QTableWidget(grpMau);
+    tblMau->setColumnCount(5);
+    tblMau->setHorizontalHeaderLabels({"Mã Gợi Ý", "Họ", "Tên", "Phái", "SĐT"});
+    tblMau->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    tblMau->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    tblMau->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    tblMau->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    tblMau->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
+    tblMau->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tblMau->setSelectionMode(QAbstractItemView::SingleSelection);
+    tblMau->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tblMau->setAlternatingRowColors(true);
+    tblMau->verticalHeader()->setVisible(false);
+    tblMau->verticalHeader()->setDefaultSectionSize(32);
+
+    struct MauSV {
+        const char* ma;
+        const char* ho;
+        const char* ten;
+        const char* phai;
+        const char* sdt;
+    };
+
+    MauSV danhSachMau[] = {
+        {"N24DCVT001", "Pham Minh", "Khoa", "NAM", "0918112233"},
+        {"N24DCVT002", "Dang Thu", "Trang", "NU", "0928223344"},
+        {"N24DCVT003", "Vu Hoang", "Nam", "NAM", "0938334455"},
+        {"N24DCCN005", "Nguyen Thi", "Mai", "NU", "0948445566"},
+        {"N24DCCN006", "Dinh Quang", "Huy", "NAM", "0958556677"},
+        {"N24DCCN007", "Doan Bao", "Ngoc", "NU", "0968667788"},
+        {"N24DCCN008", "Hoang Van", "Son", "NAM", "0978778899"},
+        {"N24DCCN009", "Bui Thi", "Linh", "NU", "0988889900"}
+    };
+
+    for (const auto &m : danhSachMau) {
+        int r = tblMau->rowCount();
+        tblMau->insertRow(r);
+        tblMau->setItem(r, 0, new QTableWidgetItem(m.ma));
+        tblMau->setItem(r, 1, new QTableWidgetItem(m.ho));
+        tblMau->setItem(r, 2, new QTableWidgetItem(m.ten));
+        tblMau->setItem(r, 3, new QTableWidgetItem(m.phai));
+        tblMau->setItem(r, 4, new QTableWidgetItem(m.sdt));
+        tblMau->item(r, 0)->setTextAlignment(Qt::AlignCenter);
+        tblMau->item(r, 3)->setTextAlignment(Qt::AlignCenter);
+        tblMau->item(r, 4)->setTextAlignment(Qt::AlignCenter);
+    }
+
+    auto onMauSelected = [&](int r, int /*c*/) {
+        if (r < 0 || r >= tblMau->rowCount()) return;
+        edtMa->setText(tblMau->item(r, 0)->text());
+        edtHo->setText(tblMau->item(r, 1)->text());
+        edtTen->setText(tblMau->item(r, 2)->text());
+        cboPhai->setCurrentText(tblMau->item(r, 3)->text());
+        edtSDT->setText(tblMau->item(r, 4)->text());
+        lblStatus->setText(QString("💡 Đã chọn mẫu: <b>%1 %2</b>. Bấm Enter để lưu.")
+                               .arg(tblMau->item(r, 1)->text())
+                               .arg(tblMau->item(r, 2)->text()));
+        lblStatus->setStyleSheet("color: #740d18; font-size: 12px; font-weight: 500;");
+        edtMa->setFocus();
+    };
+
+    connect(tblMau, &QTableWidget::cellClicked, onMauSelected);
+    connect(tblMau, &QTableWidget::cellDoubleClicked, [&](int r, int c) {
+        onMauSelected(r, c);
+        btnLuuTiep->click();
+    });
+
+    layoutMau->addWidget(tblMau, 1);
+    bodyLayout->addWidget(grpMau, 1);
+    mainLayout->addLayout(bodyLayout);
 
     int soLuongDaThem = 0;
 

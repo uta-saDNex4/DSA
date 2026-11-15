@@ -1,6 +1,12 @@
+AI|Tri Tue Nhan Tao|3|1
 ANTT|An Toan Thong Tin|3|1
+CNPM|Cong Nghe Phan Mem|3|0
 CSDL|Co So Du Lieu|3|1
-CTDL|Cau Truc Du Lieu|3|1
-INT1143|Oop|3|1
+CTDL|Cau Truc Du Lieu & Giai Thuat|3|1
+HDH|Nguyen Ly He Dieu Hanh|3|1
+KTMT|Kien Truc May Tinh|3|0
+MMT|Mang May Tinh|3|1
+OPPJ|Lap Trinh Huong Doi Tuong|3|1
 TRR|Toan Roi Rac|3|0
-TRR1|Toán Rời Rạc|3|1
+WEB|Lap Trinh Ung Dung Web|2|2
+XSTK|Xac Suat Thong Ke|3|0

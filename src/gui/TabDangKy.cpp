@@ -44,7 +44,7 @@ void TabDangKy::setupUI() {
 
     btnTimSV = new QPushButton("🔍 Tìm Sinh Viên", grpTop);
     btnTimSV->setMinimumHeight(34);
-    btnTimSV->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
+    btnTimSV->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1px solid #991b1b;");
     connect(btnTimSV, &QPushButton::clicked, this, &TabDangKy::onSearchSinhVien);
 
     QLabel *lblNK = new QLabel("Niên khóa:", grpTop);
@@ -77,8 +77,8 @@ void TabDangKy::setupUI() {
     grpLayout->addLayout(searchRow);
 
     // Student Info Display Card
-    lblThongTinSV = new QLabel("💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.", grpTop);
-    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #475569;");
+    lblThongTinSV = new QLabel("<div style='font-size: 14px; color: #475569;'>💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.</div>", grpTop);
+    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 10px 16px;");
     grpLayout->addWidget(lblThongTinSV);
 
     mainLayout->addWidget(grpTop);
@@ -97,9 +97,9 @@ void TabDangKy::setupUI() {
     QHBoxLayout *hdrMo = new QHBoxLayout();
     QLabel *lblTitleMo = new QLabel("📋 DANH SÁCH CÁC LỚP TÍN CHỈ ĐANG MỞ TRONG HỌC KỲ", pnlLopMo);
     lblTitleMo->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
-    QPushButton *btnDK = new QPushButton("✅ Đăng Ký Lớp Đã Chọn", pnlLopMo);
+    QPushButton *btnDK = new QPushButton("➕ Đăng Ký Lớp Đã Chọn", pnlLopMo);
     btnDK->setMinimumHeight(32);
-    btnDK->setStyleSheet("background-color: #059669; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
+    btnDK->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1px solid #991b1b;");
     btnDK->setToolTip("Nhấn nút này, hoặc nhấn phím Enter / Nhấp đúp chuột vào lớp để đăng ký");
     connect(btnDK, &QPushButton::clicked, this, &TabDangKy::onDangKyLTC);
 
@@ -127,6 +127,7 @@ void TabDangKy::setupUI() {
     tableLopMo->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableLopMo->setAlternatingRowColors(true);
     tableLopMo->verticalHeader()->setVisible(false);
+    tableLopMo->verticalHeader()->setDefaultSectionSize(34);
     connect(tableLopMo, &QTableWidget::cellDoubleClicked, this, &TabDangKy::onDangKyLTC);
 
     QShortcut *scEnter1 = new QShortcut(QKeySequence(Qt::Key_Return), tableLopMo);
@@ -214,7 +215,7 @@ void TabDangKy::setupUI() {
     lblTitleDaDK->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
     
     lblTongTinChi = new QLabel("Tổng tín chỉ: <b>0</b>", pnlDaDK);
-    lblTongTinChi->setStyleSheet("background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 4px; padding: 4px 10px; font-size: 13px;");
+    lblTongTinChi->setStyleSheet("background-color: #f1f5f9; color: #740d18; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; font-size: 13px; font-weight: bold;");
 
     btnChonSVKhac = new QPushButton("🔄 Chọn SV Khác", pnlDaDK);
     btnChonSVKhac->setMinimumHeight(32);
@@ -224,7 +225,7 @@ void TabDangKy::setupUI() {
 
     btnHuyDK = new QPushButton("🗑️ Hủy Đăng Ký Môn Này", pnlDaDK);
     btnHuyDK->setMinimumHeight(32);
-    btnHuyDK->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px;");
+    btnHuyDK->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1.5px solid #be3142;");
     btnHuyDK->setToolTip("Nhấn nút này, hoặc nhấn phím Delete / Nhấp đúp chuột vào môn để hủy đăng ký");
     connect(btnHuyDK, &QPushButton::clicked, this, &TabDangKy::onHuyDangKyLTC);
 
@@ -253,6 +254,7 @@ void TabDangKy::setupUI() {
     tableLopDaDK->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableLopDaDK->setAlternatingRowColors(true);
     tableLopDaDK->verticalHeader()->setVisible(false);
+    tableLopDaDK->verticalHeader()->setDefaultSectionSize(34);
     connect(tableLopDaDK, &QTableWidget::cellDoubleClicked, this, &TabDangKy::onHuyDangKyLTC);
 
     QShortcut *scDel = new QShortcut(QKeySequence(Qt::Key_Delete), tableLopDaDK);
@@ -437,11 +439,13 @@ void TabDangKy::onSearchSinhVien() {
         std::strcpy(currentMaSV, pSV->sv.MASV);
         svFound = true;
         lblThongTinSV->setText(
-            QString("👤 <b>Mã SV:</b> <span style='color:#be3142; font-size:14px;'>%1</span> &nbsp;&nbsp;|&nbsp;&nbsp; "
-                    "<b>Họ Tên:</b> %2 %3 &nbsp;&nbsp;|&nbsp;&nbsp; "
-                    "<b>Phái:</b> %4 &nbsp;&nbsp;|&nbsp;&nbsp; "
-                    "<b>Lớp:</b> %5 &nbsp;&nbsp;|&nbsp;&nbsp; "
-                    "<b>SĐT:</b> %6")
+            QString("<div style='font-size: 15px; line-height: 1.8;'>"
+                    "👤 <b>Họ và Tên:</b> <span style='color: #740d18; font-size: 17px; font-weight: 900;'>%2 %3</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "🏷️ <b>Mã SV:</b> <span style='background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 15px;'>%1</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "🏫 <b>Lớp:</b> <span style='color: #1e293b; font-weight: bold; font-size: 15px;'>%5</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "⚧️ <b>Phái:</b> <span style='font-weight: bold;'>%4</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "📞 <b>SĐT:</b> <span style='font-weight: bold;'>%6</span>"
+                    "</div>")
                 .arg(pSV->sv.MASV)
                 .arg(QString::fromUtf8(pSV->sv.HO))
                 .arg(QString::fromUtf8(pSV->sv.TEN))
@@ -449,13 +453,13 @@ void TabDangKy::onSearchSinhVien() {
                 .arg(QString::fromUtf8(lopChuaSV->MALOP))
                 .arg(pSV->sv.SODT)
         );
-        lblThongTinSV->setStyleSheet("background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #166534;");
+        lblThongTinSV->setStyleSheet("background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 10px 16px; color: #166534;");
         stackBottom->setCurrentIndex(1); // Chuyển sang bảng môn đã đăng ký
     } else {
         svFound = false;
         std::memset(currentMaSV, 0, sizeof(currentMaSV));
-        lblThongTinSV->setText(QString("❌ Không tìm thấy sinh viên có mã: <b>%1</b> trong hệ thống!").arg(masvInput));
-        lblThongTinSV->setStyleSheet("background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #991b1b;");
+        lblThongTinSV->setText(QString("<div style='font-size: 14px;'>❌ Không tìm thấy sinh viên có mã: <b>%1</b> trong hệ thống!</div>").arg(masvInput));
+        lblThongTinSV->setStyleSheet("background-color: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 10px 16px; color: #991b1b;");
         stackBottom->setCurrentIndex(0); // Trở lại bảng chọn sinh viên
     }
 
@@ -735,4 +739,23 @@ void TabDangKy::onHuyDangKyLTC() {
             QMessageBox::critical(this, "Lỗi", "Không thể hủy đăng ký môn học này!");
         }
     }
+}
+
+void TabDangKy::setStudentMode(const QString &maSV) {
+    txtMaSV->setText(maSV);
+    txtMaSV->setEnabled(false);
+    btnTimSV->setVisible(false);
+    onSearchSinhVien();
+}
+
+void TabDangKy::setAdminMode() {
+    txtMaSV->setEnabled(true);
+    btnTimSV->setVisible(true);
+    txtMaSV->clear();
+    svFound = false;
+    std::memset(currentMaSV, 0, sizeof(currentMaSV));
+    lblThongTinSV->setText("<div style='font-size: 14px; color: #475569;'>💡 Vui lòng nhập Mã Sinh Viên và nhấn <b>[Tìm Sinh Viên]</b> để bắt đầu đăng ký tín chỉ.</div>");
+    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 10px 16px;");
+    capNhatDanhSachLopMo();
+    capNhatDanhSachDaDangKy();
 }

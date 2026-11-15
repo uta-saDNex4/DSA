@@ -52,32 +52,33 @@ void TabLopTinChi::setupUI() {
 
     QPushButton *btnMoLop = new QPushButton("➕ [F1] Mở Lớp TC", this);
     btnMoLop->setMinimumHeight(34);
-    btnMoLop->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
+    btnMoLop->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px; border: 1px solid #991b1b;");
     connect(btnMoLop, &QPushButton::clicked, this, &TabLopTinChi::onMoLopTC);
 
     QPushButton *btnSua = new QPushButton("✏️ [F3] Hiệu Chỉnh", this);
     btnSua->setMinimumHeight(34);
-    btnSua->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
+    btnSua->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px; border: 1px solid #334155;");
     connect(btnSua, &QPushButton::clicked, this, &TabLopTinChi::onHieuChinhLopTC);
 
     QPushButton *btnXoa = new QPushButton("🗑️ [Del] Xóa Lớp", this);
     btnXoa->setMinimumHeight(34);
-    btnXoa->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
+    btnXoa->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 5px; padding: 0 12px; border: 1.5px solid #be3142;");
     connect(btnXoa, &QPushButton::clicked, this, &TabLopTinChi::onXoaLopTC);
 
     QPushButton *btnHuyThieuSiSo = new QPushButton("⚠️ [F4] Hủy Lớp < Min", this);
     btnHuyThieuSiSo->setMinimumHeight(34);
-    btnHuyThieuSiSo->setStyleSheet("background-color: #d97706; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
+    btnHuyThieuSiSo->setStyleSheet("background-color: #ffffff; color: #b45309; font-weight: bold; border-radius: 5px; padding: 0 12px; border: 1.5px solid #d97706;");
     connect(btnHuyThieuSiSo, &QPushButton::clicked, this, &TabLopTinChi::onHuyLopThieuSiSo);
 
     QPushButton *btnXemDSSV = new QPushButton("👥 Chi Tiết & DSSV", this);
     btnXemDSSV->setMinimumHeight(34);
-    btnXemDSSV->setStyleSheet("background-color: #059669; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px;");
+    btnXemDSSV->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 5px; padding: 0 12px; border: 1px solid #334155;");
     btnXemDSSV->setToolTip("Xem chi tiết thông tin lớp tín chỉ và danh sách sinh viên đăng ký [Enter / F6]");
     connect(btnXemDSSV, &QPushButton::clicked, this, &TabLopTinChi::onXemDSSVDangKy);
 
     QPushButton *btnReload = new QPushButton("🔄 [F5]", this);
     btnReload->setMinimumHeight(34);
+    btnReload->setStyleSheet("background-color: #f1f5f9; color: #1e293b; font-weight: bold; border-radius: 5px; padding: 0 10px; border: 1px solid #cbd5e1;");
     btnReload->setToolTip("Làm mới danh sách");
     connect(btnReload, &QPushButton::clicked, this, &TabLopTinChi::loadData);
 
@@ -118,6 +119,7 @@ void TabLopTinChi::setupUI() {
     tableLTC->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tableLTC->setAlternatingRowColors(true);
     tableLTC->verticalHeader()->setVisible(false);
+    tableLTC->verticalHeader()->setDefaultSectionSize(34);
 
     tableLTC->installEventFilter(this);
     connect(tableLTC, &QTableWidget::cellDoubleClicked, this, &TabLopTinChi::onXemDSSVDangKy);
@@ -741,6 +743,7 @@ void TabLopTinChi::onXemDSSVDangKy() {
     tblSV->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tblSV->setAlternatingRowColors(true);
     tblSV->verticalHeader()->setVisible(false);
+    tblSV->verticalHeader()->setDefaultSectionSize(34);
 
     // Thu thập danh sách sinh viên hợp lệ và sắp xếp theo Mã SV
     struct TempSVDK {

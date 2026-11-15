@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-set "PATH=C:\msys64\mingw64\bin;%PATH%"
+set "PATH=C:\msys64\ucrt64\bin;C:\msys64\mingw64\bin;%PATH%"
 
 if not exist "build\DSA_QtApp.exe" (
     echo [!] Chua tim thay build\DSA_QtApp.exe. Dang bien dich...

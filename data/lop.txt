@@ -1,1 +1,6 @@
 D24CQCN01|Cong Nghe Thong Tin 1
+D24CQCN02|Cong Nghe Thong Tin 2
+D24CQAT01|An Toan Thong Tin 1
+D24CQCE01-N|Cong Nghe Da Phuong Tien 1
+D24CQVT01|Ky Thuat Dien Tu Vien Thong 1
+D24CQKT01|Khoa Hoc Du Lieu 1 (lop Rong Test)

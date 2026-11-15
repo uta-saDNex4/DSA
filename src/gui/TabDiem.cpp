@@ -71,12 +71,12 @@ QWidget* TabDiem::createSubTabNhapDiem() {
 
     QPushButton *btnTai = new QPushButton("🔍 Tải Lớp & DSSV", tab);
     btnTai->setMinimumHeight(32);
-    btnTai->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 0 14px;");
+    btnTai->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 4px; padding: 0 14px; border: 1px solid #334155;");
     connect(btnTai, &QPushButton::clicked, this, &TabDiem::onTaiDanhSachNhapDiem);
 
     QPushButton *btnLuu = new QPushButton("💾 [F2] Lưu Điểm Thi", tab);
     btnLuu->setMinimumHeight(32);
-    btnLuu->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+    btnLuu->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px; border: 1px solid #991b1b;");
     connect(btnLuu, &QPushButton::clicked, this, &TabDiem::onLuuDiemThi);
 
     filterLayout->addWidget(lblMH);
@@ -112,6 +112,7 @@ QWidget* TabDiem::createSubTabNhapDiem() {
     tblNhapDiem->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
     tblNhapDiem->setAlternatingRowColors(true);
     tblNhapDiem->verticalHeader()->setVisible(false);
+    tblNhapDiem->verticalHeader()->setDefaultSectionSize(34);
 
     layout->addWidget(tblNhapDiem);
 
@@ -438,7 +439,7 @@ QWidget* TabDiem::createSubTabBangDiemMH() {
 
     QPushButton *btnXem = new QPushButton("📊 Xem Bảng Điểm", tab);
     btnXem->setMinimumHeight(32);
-    btnXem->setStyleSheet("background-color: #059669; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+    btnXem->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px; border: 1px solid #991b1b;");
     connect(btnXem, &QPushButton::clicked, this, &TabDiem::onXemBangDiemMonHoc);
 
     filterLayout->addWidget(lblMH);
@@ -475,6 +476,7 @@ QWidget* TabDiem::createSubTabBangDiemMH() {
     tblBangDiemMH->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tblBangDiemMH->setAlternatingRowColors(true);
     tblBangDiemMH->verticalHeader()->setVisible(false);
+    tblBangDiemMH->verticalHeader()->setDefaultSectionSize(34);
 
     layout->addWidget(tblBangDiemMH);
 
@@ -779,6 +781,7 @@ QWidget* TabDiem::createSubTabDTBKhoaHoc() {
     tblDTB->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tblDTB->setAlternatingRowColors(true);
     tblDTB->verticalHeader()->setVisible(false);
+    tblDTB->verticalHeader()->setDefaultSectionSize(34);
 
     layout->addWidget(tblDTB);
 
@@ -865,7 +868,7 @@ QWidget* TabDiem::createSubTabTongKet() {
 
     QPushButton *btnXem = new QPushButton("📊 Trích Xuất Bảng Điểm", tab);
     btnXem->setMinimumHeight(32);
-    btnXem->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px;");
+    btnXem->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 4px; padding: 0 16px; border: 1px solid #991b1b;");
     connect(btnXem, &QPushButton::clicked, this, &TabDiem::onXemBangDiemTongKet);
 
     filterLayout->addWidget(lblLop);
@@ -883,6 +886,7 @@ QWidget* TabDiem::createSubTabTongKet() {
     tblTongKet->setEditTriggers(QAbstractItemView::NoEditTriggers);
     tblTongKet->setAlternatingRowColors(true);
     tblTongKet->verticalHeader()->setVisible(false);
+    tblTongKet->verticalHeader()->setDefaultSectionSize(34);
 
     layout->addWidget(tblTongKet);
 

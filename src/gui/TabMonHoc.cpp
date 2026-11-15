@@ -33,17 +33,17 @@ void TabMonHoc::setupUI() {
 
     QPushButton *btnThem = new QPushButton("➕ Thêm Môn Học", this);
     btnThem->setMinimumHeight(36);
-    btnThem->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 6px; padding: 0 16px;");
+    btnThem->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 6px; padding: 0 16px; border: 1px solid #991b1b;");
     connect(btnThem, &QPushButton::clicked, this, &TabMonHoc::onThemMonHoc);
 
     QPushButton *btnSua = new QPushButton("✏️ Hiệu Chỉnh", this);
     btnSua->setMinimumHeight(36);
-    btnSua->setStyleSheet("background-color: #0284c7; color: white; font-weight: bold; border-radius: 6px; padding: 0 16px;");
+    btnSua->setStyleSheet("background-color: #475569; color: white; font-weight: bold; border-radius: 6px; padding: 0 16px; border: 1px solid #334155;");
     connect(btnSua, &QPushButton::clicked, this, &TabMonHoc::onSuaMonHoc);
 
     QPushButton *btnXoa = new QPushButton("🗑️ Xóa Môn", this);
     btnXoa->setMinimumHeight(36);
-    btnXoa->setStyleSheet("background-color: #dc2626; color: white; font-weight: bold; border-radius: 6px; padding: 0 16px;");
+    btnXoa->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 6px; padding: 0 16px; border: 1.5px solid #be3142;");
     connect(btnXoa, &QPushButton::clicked, this, &TabMonHoc::onXoaMonHoc);
 
     toolLayout->addWidget(searchEdit, 2);
@@ -73,6 +73,7 @@ void TabMonHoc::setupUI() {
         "QTableWidget::item:selected { background-color: #fee2e2; color: #740d18; font-weight: 600; }"
     );
     table->verticalHeader()->setVisible(false);
+    table->verticalHeader()->setDefaultSectionSize(34);
     table->installEventFilter(this);
     connect(table, &QTableWidget::cellDoubleClicked, this, &TabMonHoc::onSuaMonHoc);
 

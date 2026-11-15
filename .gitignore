@@ -11,4 +11,7 @@ cmake-build-*/
 
 ~$*
 *.tmp
+*.log
+*.layout
+Makefile.win
 

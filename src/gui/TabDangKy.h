@@ -16,6 +16,8 @@ class TabDangKy : public QWidget {
 public:
     explicit TabDangKy(QWidget *parent = nullptr);
     void loadData();
+    void setStudentMode(const QString &maSV);
+    void setAdminMode();
 
 private slots:
     void onSearchSinhVien();
