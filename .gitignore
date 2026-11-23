@@ -17,3 +17,7 @@ cmake-build-*/
 *.layout
 Makefile.win
 
+# Tai lieu van dap (khong day len repo theo yeu cau)
+TAI_LIEU_VAN_DAP*
+
+
