@@ -21,17 +21,18 @@ TabDangKy::TabDangKy(QWidget *parent) : QWidget(parent), svFound(false), m_isStu
 
 void TabDangKy::setupUI() {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(16, 16, 16, 16);
-    mainLayout->setSpacing(12);
+    mainLayout->setContentsMargins(16, 12, 16, 12);
+    mainLayout->setSpacing(10);
 
     // ==========================================
     // TOP CARD: TRA CỨU SINH VIÊN & HỌC KỲ
     // ==========================================
     grpTop = new QGroupBox("🔍 TRA CỨU SINH VIÊN & CHỌN HỌC KỲ ĐĂNG KÝ", this);
-    grpTop->setStyleSheet("QGroupBox { font-weight: bold; color: #740d18; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; padding-top: 14px; } "
+    grpTop->setStyleSheet("QGroupBox { font-weight: bold; color: #740d18; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 6px; padding-top: 12px; } "
                           "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }");
     QVBoxLayout *grpLayout = new QVBoxLayout(grpTop);
-    grpLayout->setSpacing(10);
+    grpLayout->setContentsMargins(14, 10, 14, 10);
+    grpLayout->setSpacing(8);
 
     QHBoxLayout *searchRow = new QHBoxLayout();
     lblMa = new QLabel("Mã Sinh Viên:", grpTop);
@@ -58,7 +59,7 @@ void TabDangKy::setupUI() {
     lblHK->setStyleSheet("font-weight: bold; color: #1e293b;");
     cboHocKy = new QComboBox(grpTop);
     cboHocKy->setMinimumHeight(34);
-    cboHocKy->setMinimumWidth(90);
+    cboHocKy->setMinimumWidth(100);
     cboHocKy->addItem("Học kỳ 1", 1);
     cboHocKy->addItem("Học kỳ 2", 2);
     cboHocKy->addItem("Học kỳ 3", 3);
@@ -67,16 +68,17 @@ void TabDangKy::setupUI() {
     searchRow->addWidget(lblMa);
     searchRow->addWidget(txtMaSV);
     searchRow->addWidget(btnTimSV);
-    searchRow->addSpacing(20);
+    searchRow->addSpacing(16);
     searchRow->addWidget(lblNK);
     searchRow->addWidget(cboNienKhoa);
+    searchRow->addSpacing(10);
     searchRow->addWidget(lblHK);
     searchRow->addWidget(cboHocKy);
     searchRow->addStretch();
 
     grpLayout->addLayout(searchRow);
 
-    // Student Info Display Card
+    // Student Info Display Card (Dành cho role Giáo Viên, role Sinh Viên sẽ ẩn đi vì đã có banner ở trên)
     lblThongTinSV = new QLabel("<div style='font-size: 14px; color: #475569;'>💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.</div>", grpTop);
     lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 10px 16px;");
     grpLayout->addWidget(lblThongTinSV);
@@ -87,19 +89,26 @@ void TabDangKy::setupUI() {
     // CENTER SPLIT: LỚP ĐANG MỞ & BẢNG BÊN DƯỚI
     // ==========================================
     QSplitter *splitter = new QSplitter(Qt::Vertical, this);
+    splitter->setChildrenCollapsible(false);
+    splitter->setHandleWidth(8);
+    splitter->setStyleSheet(
+        "QSplitter::handle { background-color: #e2e8f0; height: 8px; margin: 2px 0; border-radius: 4px; } "
+        "QSplitter::handle:hover { background-color: #cbd5e1; }"
+    );
 
     // TOP TABLE: Lớp tín chỉ đang mở
     QWidget *pnlLopMo = new QWidget(this);
     QVBoxLayout *layoutLopMo = new QVBoxLayout(pnlLopMo);
-    layoutLopMo->setContentsMargins(0, 0, 0, 0);
-    layoutLopMo->setSpacing(6);
+    layoutLopMo->setContentsMargins(0, 4, 0, 0);
+    layoutLopMo->setSpacing(8);
 
     QHBoxLayout *hdrMo = new QHBoxLayout();
-    QLabel *lblTitleMo = new QLabel("📋 DANH SÁCH CÁC LỚP TÍN CHỈ ĐANG MỞ TRONG HỌC KỲ", pnlLopMo);
-    lblTitleMo->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
+    QLabel *lblTitleMo = new QLabel("📋 DANH SÁCH LỚP TÍN CHỈ ĐANG MỞ (HỌC KỲ ĐÃ CHỌN)", pnlLopMo);
+    lblTitleMo->setStyleSheet("font-weight: 800; font-size: 13px; color: #1e293b;");
     QPushButton *btnDK = new QPushButton("➕ Đăng Ký Lớp Đã Chọn", pnlLopMo);
-    btnDK->setMinimumHeight(32);
-    btnDK->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1px solid #991b1b;");
+    btnDK->setMinimumHeight(34);
+    btnDK->setStyleSheet("background-color: #be3142; color: white; font-weight: bold; border-radius: 6px; padding: 0 18px; border: 1px solid #991b1b;");
+    btnDK->setCursor(Qt::PointingHandCursor);
     btnDK->setToolTip("Nhấn nút này, hoặc nhấn phím Enter / Nhấp đúp chuột vào lớp để đăng ký");
     connect(btnDK, &QPushButton::clicked, this, &TabDangKy::onDangKyLTC);
 
@@ -111,7 +120,7 @@ void TabDangKy::setupUI() {
     tableLopMo = new QTableWidget(pnlLopMo);
     tableLopMo->setColumnCount(9);
     tableLopMo->setHorizontalHeaderLabels({
-        "Mã LTC", "Mã MH", "Tên Môn Học", "STCLT", "STCTH", "Nhóm", "SV Max", "Đã ĐK", "Còn Trống"
+        "Mã LTC", "Mã MH", "Tên Môn Học", "STC LT", "STC TH", "Nhóm", "Sĩ Số Max", "Đã ĐK", "Còn Trống"
     });
     tableLopMo->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     tableLopMo->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -122,6 +131,7 @@ void TabDangKy::setupUI() {
     tableLopMo->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
     tableLopMo->horizontalHeader()->setSectionResizeMode(7, QHeaderView::ResizeToContents);
     tableLopMo->horizontalHeader()->setSectionResizeMode(8, QHeaderView::ResizeToContents);
+    tableLopMo->horizontalHeader()->setMinimumSectionSize(65);
     tableLopMo->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableLopMo->setSelectionMode(QAbstractItemView::SingleSelection);
     tableLopMo->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -207,25 +217,27 @@ void TabDangKy::setupUI() {
     // PAGE 1: BẢNG LỚP SINH VIÊN ĐÃ ĐĂNG KÝ
     pnlDaDK = new QWidget(this);
     QVBoxLayout *layoutDaDK = new QVBoxLayout(pnlDaDK);
-    layoutDaDK->setContentsMargins(0, 0, 0, 0);
-    layoutDaDK->setSpacing(6);
+    layoutDaDK->setContentsMargins(0, 4, 0, 0);
+    layoutDaDK->setSpacing(8);
 
     QHBoxLayout *hdrDaDK = new QHBoxLayout();
     lblTitleDaDK = new QLabel("🎓 DANH SÁCH CÁC MÔN SINH VIÊN ĐÃ ĐĂNG KÝ TRONG KỲ NÀY", pnlDaDK);
-    lblTitleDaDK->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
+    lblTitleDaDK->setStyleSheet("font-weight: 800; font-size: 13px; color: #1e293b;");
     
     lblTongTinChi = new QLabel("Tổng tín chỉ: <b>0</b>", pnlDaDK);
-    lblTongTinChi->setStyleSheet("background-color: #f1f5f9; color: #740d18; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; font-size: 13px; font-weight: bold;");
+    lblTongTinChi->setStyleSheet("background-color: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 12px; font-size: 13px; font-weight: bold;");
 
     btnChonSVKhac = new QPushButton("🔄 Chọn SV Khác", pnlDaDK);
-    btnChonSVKhac->setMinimumHeight(32);
-    btnChonSVKhac->setStyleSheet("background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: bold; border-radius: 5px; padding: 0 14px;");
+    btnChonSVKhac->setMinimumHeight(34);
+    btnChonSVKhac->setStyleSheet("background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: bold; border-radius: 6px; padding: 0 14px;");
+    btnChonSVKhac->setCursor(Qt::PointingHandCursor);
     btnChonSVKhac->setToolTip("Quay lại danh sách sinh viên để chọn sinh viên khác");
     connect(btnChonSVKhac, &QPushButton::clicked, this, &TabDangKy::onChonSVKhac);
 
     btnHuyDK = new QPushButton("🗑️ Hủy Đăng Ký Môn Này", pnlDaDK);
-    btnHuyDK->setMinimumHeight(32);
-    btnHuyDK->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 5px; padding: 0 16px; border: 1.5px solid #be3142;");
+    btnHuyDK->setMinimumHeight(34);
+    btnHuyDK->setStyleSheet("background-color: #ffffff; color: #be3142; font-weight: bold; border-radius: 6px; padding: 0 16px; border: 1.5px solid #be3142;");
+    btnHuyDK->setCursor(Qt::PointingHandCursor);
     btnHuyDK->setToolTip("Nhấn nút này, hoặc nhấn phím Delete / Nhấp đúp chuột vào môn để hủy đăng ký");
     connect(btnHuyDK, &QPushButton::clicked, this, &TabDangKy::onHuyDangKyLTC);
 
@@ -249,6 +261,7 @@ void TabDangKy::setupUI() {
     tableLopDaDK->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
     tableLopDaDK->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
     tableLopDaDK->horizontalHeader()->setSectionResizeMode(6, QHeaderView::ResizeToContents);
+    tableLopDaDK->horizontalHeader()->setMinimumSectionSize(65);
     tableLopDaDK->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableLopDaDK->setSelectionMode(QAbstractItemView::SingleSelection);
     tableLopDaDK->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -265,6 +278,10 @@ void TabDangKy::setupUI() {
 
     stackBottom->setCurrentIndex(0); // Mặc định hiển thị Bảng Chọn SV
     splitter->addWidget(stackBottom);
+
+    splitter->setStretchFactor(0, 5);
+    splitter->setStretchFactor(1, 4);
+    splitter->setSizes({360, 260});
 
     mainLayout->addWidget(splitter, 1);
 }
@@ -470,6 +487,11 @@ void TabDangKy::onSearchSinhVien() {
                 .arg(pSV->sv.SODT)
         );
         lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 16px; color: #0f172a;");
+        if (m_isStudentMode) {
+            lblThongTinSV->setVisible(false); // Ẩn thông tin ở dưới vì đã có banner ở trên đầu trang
+        } else {
+            lblThongTinSV->setVisible(true);
+        }
         stackBottom->setCurrentIndex(1); // Chuyển sang bảng môn đã đăng ký
     } else {
         svFound = false;
@@ -477,7 +499,10 @@ void TabDangKy::onSearchSinhVien() {
         lblThongTinSV->setText(QString("<div style='font-size: 14px; color: #991b1b;'>❌ Không tìm thấy sinh viên có mã: <b>%1</b> trong hệ thống!</div>").arg(masvInput));
         lblThongTinSV->setStyleSheet("background-color: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 10px 16px; color: #991b1b;");
         if (!m_isStudentMode) {
+            lblThongTinSV->setVisible(true);
             stackBottom->setCurrentIndex(0); // Trở lại bảng chọn sinh viên
+        } else {
+            lblThongTinSV->setVisible(false);
         }
     }
 
@@ -527,6 +552,7 @@ void TabDangKy::capNhatDanhSachLopMo() {
         itemMaMH->setTextAlignment(Qt::AlignCenter);
 
         QTableWidgetItem *itemTenMH = new QTableWidgetItem(tenMH);
+        itemTenMH->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
         QTableWidgetItem *itemSTCLT = new QTableWidgetItem(QString::number(stclt));
         itemSTCLT->setTextAlignment(Qt::AlignCenter);
@@ -612,6 +638,7 @@ void TabDangKy::capNhatDanhSachDaDangKy() {
             itemMaMH->setTextAlignment(Qt::AlignCenter);
 
             QTableWidgetItem *itemTenMH = new QTableWidgetItem(tenMH);
+        itemTenMH->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
             QTableWidgetItem *itemSTCLT = new QTableWidgetItem(QString::number(stclt));
             itemSTCLT->setTextAlignment(Qt::AlignCenter);
@@ -772,10 +799,13 @@ void TabDangKy::setStudentMode(const QString &maSV) {
     }
     if (btnTimSV) btnTimSV->setVisible(false);
 
+    // XÓA / ẨN PHẦN THÔNG TIN SINH VIÊN Ở DƯỚI (vì đã có banner to rõ ở trên đầu trang)
+    if (lblThongTinSV) lblThongTinSV->setVisible(false);
+
     // XÓA / ẨN MỤC ĐỔI SINH VIÊN KHÁC (mỗi sinh viên chỉ có thể đăng ký cho bản thân)
     if (btnChonSVKhac) btnChonSVKhac->setVisible(false);
     if (lblTitleDaDK) lblTitleDaDK->setText("🎓 DANH SÁCH CÁC MÔN BẠN ĐÃ ĐĂNG KÝ TRONG HỌC KỲ NÀY");
-    if (grpTop) grpTop->setTitle("📝 ĐĂNG KÝ TÍN CHỈ (HỌC KỲ & NIÊN KHÓA)");
+    if (grpTop) grpTop->setTitle("📅 CHỌN HỌC KỲ ĐĂNG KÝ TÍN CHỈ");
 
     onSearchSinhVien();
     stackBottom->setCurrentIndex(1); // Cố định ở bảng môn đã đăng ký của bản thân, không mở bảng chọn SV khác
@@ -793,6 +823,9 @@ void TabDangKy::setAdminMode() {
         txtMaSV->clear();
     }
     if (btnTimSV) btnTimSV->setVisible(true);
+
+    // Khôi phục hiển thị thông tin sinh viên cho Giáo viên
+    if (lblThongTinSV) lblThongTinSV->setVisible(true);
 
     // Ở role Giáo viên mới được chọn / đổi sinh viên khác để đăng ký
     if (btnChonSVKhac) btnChonSVKhac->setVisible(true);
