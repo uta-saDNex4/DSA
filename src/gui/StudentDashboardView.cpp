@@ -226,10 +226,10 @@ void StudentDashboardView::setStudentInfo(const QString &maSV, const QString &ho
     m_soDT = soDT;
 
     lblProfileName->setText(m_hoTen.toUpper());
-    lblBadgeMaSV->setText(QString("🏷️ <b>Mã SV:</b> <span style='color:#fde047; font-size:16px;'>%1</span>").arg(m_maSV));
-    lblBadgeLop->setText(QString("🏫 <b>Lớp:</b> <span style='color:#ffffff; font-size:15px;'>%1</span>").arg(m_maLop));
-    lblBadgePhai->setText(QString("⚧️ <b>Phái:</b> <span style='color:#ffffff; font-size:15px;'>%1</span>").arg(m_phai));
-    lblBadgeSDT->setText(QString("📞 <b>SĐT:</b> <span style='color:#ffffff; font-size:15px;'>%1</span>").arg(m_soDT));
+    lblBadgeMaSV->setText(QString("🏷️ <b>Mã SV:</b> <span style='color:#ffffff; font-size:14px; font-weight:bold;'>%1</span>").arg(m_maSV));
+    lblBadgeLop->setText(QString("🏫 <b>Lớp:</b> <span style='color:#ffffff; font-size:14px; font-weight:bold;'>%1</span>").arg(m_maLop));
+    lblBadgePhai->setText(QString("⚧️ <b>Phái:</b> <span style='color:#ffffff; font-size:14px; font-weight:bold;'>%1</span>").arg(m_phai));
+    lblBadgeSDT->setText(QString("📞 <b>SĐT:</b> <span style='color:#ffffff; font-size:14px; font-weight:bold;'>%1</span>").arg(m_soDT));
 
     // Khóa mã SV ở tab đăng ký tín chỉ
     tabDangKy->setStudentMode(m_maSV);

@@ -29,6 +29,8 @@ private slots:
     void onFilterSVChanged(const QString &text);
 
 private:
+    QGroupBox *grpTop;
+    QLabel *lblMa;
     QLineEdit *txtMaSV;
     QPushButton *btnTimSV;
     QLabel *lblThongTinSV;
@@ -50,12 +52,15 @@ private:
 
     // Components of Page 1 (Môn đã ĐK)
     QTableWidget *tableLopDaDK;
+    QLabel *lblTitleDaDK;
     QLabel *lblTongTinChi;
     QPushButton *btnChonSVKhac;
     QPushButton *btnHuyDK;
 
     char currentMaSV[16];
     bool svFound;
+    bool m_isStudentMode;
+    QString m_studentMaSV;
 
     void setupUI();
     void capNhatDanhSachLopMo();

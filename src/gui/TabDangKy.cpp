@@ -13,7 +13,7 @@
 #include "loptc.h"
 #include "dangky.h"
 
-TabDangKy::TabDangKy(QWidget *parent) : QWidget(parent), svFound(false) {
+TabDangKy::TabDangKy(QWidget *parent) : QWidget(parent), svFound(false), m_isStudentMode(false) {
     std::memset(currentMaSV, 0, sizeof(currentMaSV));
     setupUI();
     loadData();
@@ -27,14 +27,14 @@ void TabDangKy::setupUI() {
     // ==========================================
     // TOP CARD: TRA CỨU SINH VIÊN & HỌC KỲ
     // ==========================================
-    QGroupBox *grpTop = new QGroupBox("🔍 TRA CỨU SINH VIÊN & CHỌN HỌC KỲ ĐĂNG KÝ", this);
+    grpTop = new QGroupBox("🔍 TRA CỨU SINH VIÊN & CHỌN HỌC KỲ ĐĂNG KÝ", this);
     grpTop->setStyleSheet("QGroupBox { font-weight: bold; color: #740d18; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 8px; padding-top: 14px; } "
                           "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }");
     QVBoxLayout *grpLayout = new QVBoxLayout(grpTop);
     grpLayout->setSpacing(10);
 
     QHBoxLayout *searchRow = new QHBoxLayout();
-    QLabel *lblMa = new QLabel("Mã Sinh Viên:", grpTop);
+    lblMa = new QLabel("Mã Sinh Viên:", grpTop);
     lblMa->setStyleSheet("font-weight: bold; color: #1e293b;");
     txtMaSV = new QLineEdit(grpTop);
     txtMaSV->setPlaceholderText("Nhập mã SV (VD: N21DCCN001)...");
@@ -211,7 +211,7 @@ void TabDangKy::setupUI() {
     layoutDaDK->setSpacing(6);
 
     QHBoxLayout *hdrDaDK = new QHBoxLayout();
-    QLabel *lblTitleDaDK = new QLabel("🎓 DANH SÁCH CÁC MÔN SINH VIÊN ĐÃ ĐĂNG KÝ TRONG KỲ NÀY", pnlDaDK);
+    lblTitleDaDK = new QLabel("🎓 DANH SÁCH CÁC MÔN SINH VIÊN ĐÃ ĐĂNG KÝ TRONG KỲ NÀY", pnlDaDK);
     lblTitleDaDK->setStyleSheet("font-weight: bold; font-size: 13px; color: #1e293b;");
     
     lblTongTinChi = new QLabel("Tổng tín chỉ: <b>0</b>", pnlDaDK);
@@ -334,6 +334,7 @@ void TabDangKy::capNhatDanhSachSinhVienChon() {
 }
 
 void TabDangKy::onSVSelectedFromTable(int row, int /*col*/) {
+    if (m_isStudentMode) return;
     if (row < 0) {
         row = tableChonSV->currentRow();
     }
@@ -349,11 +350,12 @@ void TabDangKy::onSVSelectedFromTable(int row, int /*col*/) {
 }
 
 void TabDangKy::onChonSVKhac() {
+    if (m_isStudentMode) return;
     svFound = false;
     std::memset(currentMaSV, 0, sizeof(currentMaSV));
     txtMaSV->clear();
-    lblThongTinSV->setText("💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.");
-    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 14px; font-size: 13px; color: #475569;");
+    lblThongTinSV->setText("<div style='font-size: 14px; color: #475569;'>💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.</div>");
+    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 10px 16px; color: #475569;");
     stackBottom->setCurrentIndex(0);
     capNhatDanhSachSinhVienChon();
     capNhatDanhSachDaDangKy();
@@ -402,11 +404,15 @@ void TabDangKy::capNhatDanhSachNienKhoa() {
 
 void TabDangKy::loadData() {
     capNhatDanhSachNienKhoa();
-    capNhatDanhSachSinhVienChon();
+    if (!m_isStudentMode) {
+        capNhatDanhSachSinhVienChon();
+    }
     capNhatDanhSachLopMo();
     capNhatDanhSachDaDangKy();
 
-    if (svFound) {
+    if (m_isStudentMode) {
+        stackBottom->setCurrentIndex(1);
+    } else if (svFound) {
         stackBottom->setCurrentIndex(1);
     } else {
         stackBottom->setCurrentIndex(0);
@@ -429,12 +435,14 @@ void TabDangKy::onFilterChanged() {
 }
 
 void TabDangKy::onSearchSinhVien() {
-    QString masvInput = txtMaSV->text().trimmed().toUpper();
+    QString masvInput = m_isStudentMode ? m_studentMaSV : txtMaSV->text().trimmed().toUpper();
     txtMaSV->setText(masvInput);
 
     if (masvInput.isEmpty()) {
-        QMessageBox::warning(this, "Thông báo", "Vui lòng nhập Mã Sinh Viên!");
-        stackBottom->setCurrentIndex(0);
+        if (!m_isStudentMode) {
+            QMessageBox::warning(this, "Thông báo", "Vui lòng nhập Mã Sinh Viên!");
+            stackBottom->setCurrentIndex(0);
+        }
         return;
     }
 
@@ -445,13 +453,14 @@ void TabDangKy::onSearchSinhVien() {
     if (pSV != nullptr && lopChuaSV != nullptr) {
         std::strcpy(currentMaSV, pSV->sv.MASV);
         svFound = true;
+        // ĐỒNG NHẤT MÀU SẮC CHO TẤT CẢ VĂN BẢN (KHÔNG ĐỂ MỖI CÁI MỖI MÀU)
         lblThongTinSV->setText(
-            QString("<div style='font-size: 15px; line-height: 1.8;'>"
-                    "👤 <b>Họ và Tên:</b> <span style='color: #740d18; font-size: 17px; font-weight: 900;'>%2 %3</span> &nbsp;&nbsp;&nbsp;&nbsp; "
-                    "🏷️ <b>Mã SV:</b> <span style='background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 15px;'>%1</span> &nbsp;&nbsp;&nbsp;&nbsp; "
-                    "🏫 <b>Lớp:</b> <span style='color: #1e293b; font-weight: bold; font-size: 15px;'>%5</span> &nbsp;&nbsp;&nbsp;&nbsp; "
-                    "⚧️ <b>Phái:</b> <span style='font-weight: bold;'>%4</span> &nbsp;&nbsp;&nbsp;&nbsp; "
-                    "📞 <b>SĐT:</b> <span style='font-weight: bold;'>%6</span>"
+            QString("<div style='font-size: 14px; line-height: 1.8; color: #0f172a;'>"
+                    "👤 <b>Họ và Tên:</b> <span style='font-weight: bold; color: #0f172a;'>%2 %3</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "🏷️ <b>Mã SV:</b> <span style='font-weight: bold; color: #0f172a;'>%1</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "🏫 <b>Lớp:</b> <span style='font-weight: bold; color: #0f172a;'>%5</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "⚧️ <b>Phái:</b> <span style='font-weight: bold; color: #0f172a;'>%4</span> &nbsp;&nbsp;&nbsp;&nbsp; "
+                    "📞 <b>SĐT:</b> <span style='font-weight: bold; color: #0f172a;'>%6</span>"
                     "</div>")
                 .arg(pSV->sv.MASV)
                 .arg(QString::fromUtf8(pSV->sv.HO))
@@ -460,14 +469,16 @@ void TabDangKy::onSearchSinhVien() {
                 .arg(QString::fromUtf8(lopChuaSV->MALOP))
                 .arg(pSV->sv.SODT)
         );
-        lblThongTinSV->setStyleSheet("background-color: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 10px 16px; color: #166534;");
+        lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 16px; color: #0f172a;");
         stackBottom->setCurrentIndex(1); // Chuyển sang bảng môn đã đăng ký
     } else {
         svFound = false;
         std::memset(currentMaSV, 0, sizeof(currentMaSV));
-        lblThongTinSV->setText(QString("<div style='font-size: 14px;'>❌ Không tìm thấy sinh viên có mã: <b>%1</b> trong hệ thống!</div>").arg(masvInput));
+        lblThongTinSV->setText(QString("<div style='font-size: 14px; color: #991b1b;'>❌ Không tìm thấy sinh viên có mã: <b>%1</b> trong hệ thống!</div>").arg(masvInput));
         lblThongTinSV->setStyleSheet("background-color: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 10px 16px; color: #991b1b;");
-        stackBottom->setCurrentIndex(0); // Trở lại bảng chọn sinh viên
+        if (!m_isStudentMode) {
+            stackBottom->setCurrentIndex(0); // Trở lại bảng chọn sinh viên
+        }
     }
 
     capNhatDanhSachLopMo();
@@ -749,20 +760,52 @@ void TabDangKy::onHuyDangKyLTC() {
 }
 
 void TabDangKy::setStudentMode(const QString &maSV) {
-    txtMaSV->setText(maSV);
-    txtMaSV->setEnabled(false);
-    btnTimSV->setVisible(false);
+    m_isStudentMode = true;
+    m_studentMaSV = maSV;
+
+    // Ẩn hoàn toàn ô nhập mã SV và nút tìm kiếm (vì đã đăng nhập bằng tài khoản sinh viên này)
+    if (lblMa) lblMa->setVisible(false);
+    if (txtMaSV) {
+        txtMaSV->setText(maSV);
+        txtMaSV->setEnabled(false);
+        txtMaSV->setVisible(false);
+    }
+    if (btnTimSV) btnTimSV->setVisible(false);
+
+    // XÓA / ẨN MỤC ĐỔI SINH VIÊN KHÁC (mỗi sinh viên chỉ có thể đăng ký cho bản thân)
+    if (btnChonSVKhac) btnChonSVKhac->setVisible(false);
+    if (lblTitleDaDK) lblTitleDaDK->setText("🎓 DANH SÁCH CÁC MÔN BẠN ĐÃ ĐĂNG KÝ TRONG HỌC KỲ NÀY");
+    if (grpTop) grpTop->setTitle("📝 ĐĂNG KÝ TÍN CHỈ (HỌC KỲ & NIÊN KHÓA)");
+
     onSearchSinhVien();
+    stackBottom->setCurrentIndex(1); // Cố định ở bảng môn đã đăng ký của bản thân, không mở bảng chọn SV khác
 }
 
 void TabDangKy::setAdminMode() {
-    txtMaSV->setEnabled(true);
-    btnTimSV->setVisible(true);
-    txtMaSV->clear();
+    m_isStudentMode = false;
+    m_studentMaSV.clear();
+
+    // Khôi phục hiển thị ô nhập mã SV và nút tìm kiếm cho Giáo viên
+    if (lblMa) lblMa->setVisible(true);
+    if (txtMaSV) {
+        txtMaSV->setEnabled(true);
+        txtMaSV->setVisible(true);
+        txtMaSV->clear();
+    }
+    if (btnTimSV) btnTimSV->setVisible(true);
+
+    // Ở role Giáo viên mới được chọn / đổi sinh viên khác để đăng ký
+    if (btnChonSVKhac) btnChonSVKhac->setVisible(true);
+    if (lblTitleDaDK) lblTitleDaDK->setText("🎓 DANH SÁCH CÁC MÔN SINH VIÊN ĐÃ ĐĂNG KÝ TRONG KỲ NÀY");
+    if (grpTop) grpTop->setTitle("🔍 TRA CỨU SINH VIÊN & CHỌN HỌC KỲ ĐĂNG KÝ");
+
     svFound = false;
     std::memset(currentMaSV, 0, sizeof(currentMaSV));
-    lblThongTinSV->setText("<div style='font-size: 14px; color: #475569;'>💡 Vui lòng nhập Mã Sinh Viên và nhấn <b>[Tìm Sinh Viên]</b> để bắt đầu đăng ký tín chỉ.</div>");
-    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 10px 16px;");
+    lblThongTinSV->setText("<div style='font-size: 14px; color: #475569;'>💡 Vui lòng nhập Mã Sinh Viên hoặc nhấp chọn sinh viên từ danh sách bên dưới để bắt đầu đăng ký tín chỉ.</div>");
+    lblThongTinSV->setStyleSheet("background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 10px 16px; color: #475569;");
+
+    stackBottom->setCurrentIndex(0);
+    capNhatDanhSachSinhVienChon();
     capNhatDanhSachLopMo();
     capNhatDanhSachDaDangKy();
 }
