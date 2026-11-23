@@ -131,12 +131,19 @@ void MainWindow::setupTeacherUI() {
     btnLogout->setCursor(Qt::PointingHandCursor);
     connect(btnLogout, &QPushButton::clicked, this, &MainWindow::onLogout);
 
+    QPushButton *btnExit = new QPushButton("❌ [Esc] Thoát", headerWidget);
+    btnExit->setObjectName("btnHeaderAction");
+    btnExit->setMinimumHeight(38);
+    btnExit->setCursor(Qt::PointingHandCursor);
+    connect(btnExit, &QPushButton::clicked, this, &MainWindow::close);
+
     headerLayout->addWidget(btnUndo);
     headerLayout->addWidget(btnRedo);
     headerLayout->addWidget(btnSave);
     headerLayout->addWidget(btnReload);
     headerLayout->addWidget(btnAbout);
     headerLayout->addWidget(btnLogout);
+    headerLayout->addWidget(btnExit);
 
     rootLayout->addWidget(headerWidget);
 
@@ -397,6 +404,7 @@ void MainWindow::setupShortcuts() {
     new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Y), this, SLOT(onRedo()));
     new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z), this, SLOT(onRedo()));
     new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Q), this, SLOT(close()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), this, SLOT(close()));
 }
 
 void MainWindow::updateStatusBarStats() {

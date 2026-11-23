@@ -154,6 +154,7 @@ void TabDiem::onMHNhapChanged() {
             }
         }
     }
+    std::sort(listNK.begin(), listNK.end());
 
     cboNK_Nhap->blockSignals(true);
     cboNK_Nhap->clear();
@@ -517,6 +518,7 @@ void TabDiem::onMHBdChanged() {
             }
         }
     }
+    std::sort(listNK.begin(), listNK.end());
 
     cboNK_BD->blockSignals(true);
     cboNK_BD->clear();

@@ -166,13 +166,18 @@ void TabLopTinChi::capNhatDanhSachNienKhoa() {
     cboNienKhoa->addItem("-- Tất cả --");
 
     DS_LopTC &dsltc = AppData::instance().dsLTC;
+    QStringList listNK;
     for (int i = 0; i < dsltc.n; ++i) {
         if (dsltc.nodes[i] != nullptr) {
-            QString nk = QString::fromUtf8(dsltc.nodes[i]->NienKhoa);
-            if (cboNienKhoa->findText(nk) == -1) {
-                cboNienKhoa->addItem(nk);
+            QString nk = QString::fromUtf8(dsltc.nodes[i]->NienKhoa).trimmed();
+            if (!nk.isEmpty() && !listNK.contains(nk)) {
+                listNK.append(nk);
             }
         }
+    }
+    listNK.sort();
+    for (const QString &nk : listNK) {
+        cboNienKhoa->addItem(nk);
     }
 
     int idx = cboNienKhoa->findText(current);
